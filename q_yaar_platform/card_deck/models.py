@@ -20,7 +20,9 @@ class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
         indexes = [models.Index(fields=["title"]), models.Index(fields=["tags"])]
 
     @classmethod
-    def create(cls, title: str, description: str, image: str, reward: int = None, metadata: dict = {}) -> "Card":
-        card = cls(title=title, description=description, image=image, reward=reward, metadata=metadata)
+    def create(
+        cls, title: str, description: str, image: str, reward: int = None, tags: list[str] = [], metadata: dict = {}
+    ) -> "Card":
+        card = cls(title=title, description=description, image=image, reward=reward, tags=tags, metadata=metadata)
         card.save()
         return card
