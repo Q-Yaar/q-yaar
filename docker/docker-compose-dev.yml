@@ -3,57 +3,53 @@ version: '3'
 services:
   q_yaar_core:
     restart: always
-    build: 
+    build:
       context: ./../q_yaar_platform
-      dockerfile: ./docker/Dockerfile-dev
-    env_file: ./../q_yaar_platform/.env
+      dockerfile: ./../q_yaar_platform/Dockerfile-dev
+    extra_hosts:
+      # For ubuntu docker to access host machine services
+      - "host.docker.internal:host-gateway"
+    env_file: ./../q_yaar_platform/.env_docker
     ports:
       - "8000:8000"
-    depends_on:
-      - q_yaar_redisearch
-      - q_yaar_db
     networks:
       - backend
     command: >
       bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
 
-  q_yaar_fast_worker:
-    build: 
+  fast_worker:
+    build:
       context: ./../q_yaar_platform
-      dockerfile: ./docker/Dockerfile-dev
+      dockerfile: ./../q_yaar_platform/Dockerfile-dev
     command: celery -A q_yaar worker -E -l info --concurrency=8 --pool=prefork -n fast_worker@qyaar.com  -Q example
-    env_file: ./../q_yaar_platform/.env
-    depends_on:
-      - q_yaar_redisearch
+    env_file: ./../q_yaar_platform/.env_docker
     networks:
       - backend
 
-  q_yaar_slow_worker:
-    build: 
+  slow_worker:
+    build:
       context: ./../q_yaar_platform
-      dockerfile: ./docker/Dockerfile-dev
+      dockerfile: ./../q_yaar_platform/Dockerfile-dev
     command: celery -A q_yaar worker -E -l info --concurrency=8 --pool=prefork -n slow_worker@qyaar.com  -Q default
-    env_file: ./../q_yaar_platform/.env
-    depends_on:
-      - q_yaar_redisearch
+    env_file: ./../q_yaar_platform/.env_docker
     networks:
       - backend
 
-  q_yaar_celery_beat:
-    build: 
+  celery_beat:
+    build:
       context: ./../q_yaar_platform
-      dockerfile: ./docker/Dockerfile-dev
+      dockerfile: ./../q_yaar_platform/Dockerfile-dev
+    extra_hosts:
+      # For ubuntu docker to access host machine services
+      - "host.docker.internal:host-gateway"
     command: celery -A q_yaar beat -l debug
-    env_file: ./../q_yaar_platform/.env
-    depends_on:
-      - q_yaar_redisearch
-      - q_yaar_db
+    env_file: ./../q_yaar_platform/.env_docker
     networks:
       - backend
 
-  q_yaar_db:
+  db:
     image: postgres
-    env_file: ./../q_yaar_platform/.env
+    env_file: ./../q_yaar_platform/.env_docker
     ports:
       - "5434:5432"
     expose:
@@ -63,7 +59,7 @@ services:
     networks:
       - backend
 
-  q_yaar_redisearch:
+  redisearch:
     image: redislabs/redisearch:latest
     ports:
       - "6380:6380"
@@ -71,18 +67,7 @@ services:
       - "6380"
     volumes:
       - ./redis:/data
-    command:
-      [
-        "redis-server",
-        "--port",
-        "6380",
-        "--loadmodule",
-        "/usr/lib/redis/modules/redisearch.so",
-        "--appendonly",
-        "yes",
-        "--aof-use-rdb-preamble",
-        "yes"
-      ]
+    command: [ "redis-server", "--port", "6380", "--loadmodule", "/usr/lib/redis/modules/redisearch.so", "--appendonly", "yes", "--aof-use-rdb-preamble", "yes" ]
     networks:
       - backend
 

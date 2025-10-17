@@ -1,4 +1,6 @@
-FROM python:3.11.9
+FROM python:3.11-slim-bullseye
+
+ENV PYTHONBUFFERED 1
 
 WORKDIR /q_yaar_platform/
 
@@ -12,7 +14,6 @@ RUN apt-get --allow-releaseinfo-change update && \
 RUN python -m pip install --upgrade pip
 
 COPY requirements-dev.txt /q_yaar_platform/
-
 RUN pip install -r requirements-dev.txt
 
 COPY . /q_yaar_platform/
