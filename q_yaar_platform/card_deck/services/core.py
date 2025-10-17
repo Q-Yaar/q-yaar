@@ -5,6 +5,7 @@ from card_deck.services.error_codes import ErrorCode
 from card_deck.services.helper import (
     svc_card_deck_helper_bulk_create_cards,
     svc_card_deck_helper_get_cards_by_tag,
+    svc_card_deck_helper_get_list_of_tags,
     svc_card_deck_helper_validate_and_get_request_data,
     svc_card_deck_helper_validate_input_for_bulk_create,
 )
@@ -37,3 +38,14 @@ def svc_card_deck_bulk_create_cards(request_data: list[dict]):
     cards = svc_card_deck_helper_bulk_create_cards(cards_data=cards_data)
 
     return ErrorCode(ErrorCode.SUCCESS), cards
+
+
+def svc_card_deck_get_list_of_tags(serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    tags = svc_card_deck_helper_get_list_of_tags()
+
+    if serialized:
+        tags = {"tags": tags}
+
+    return ErrorCode(ErrorCode.SUCCESS), tags

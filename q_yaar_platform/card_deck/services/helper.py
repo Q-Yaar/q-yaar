@@ -70,3 +70,15 @@ def svc_card_deck_helper_bulk_create_cards(cards_data: list[dict]):
         cards = [Card.create(**card_data) for card_data in cards_data]
 
     return cards
+
+
+def svc_card_deck_helper_get_list_of_tags() -> list[str]:
+    logger.debug(f">> ARGS: {locals()}")
+
+    tags_set = set()
+    cards = Card.objects.all().values_list("tags", flat=True)
+    for tag_list in cards:
+        if tag_list:
+            tags_set.update(tag_list)
+
+    return list(tags_set)
