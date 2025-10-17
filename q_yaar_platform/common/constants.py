@@ -38,6 +38,7 @@ class ModuleErrorPrefix:
     JWT_AUTH = "AUTH"
     ACCOUNT = "ACC"
     PROFILE_PLAYER = "PLYR"
+    CARD_DECK = "CRD"
 
 
 class UserRolesType(BaseIntEnum):

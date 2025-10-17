@@ -62,7 +62,12 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",  # Django Simple JWT
 ]
 
-PROJECT_APPS = ["account.apps.AccountConfig", "profile_player.apps.ProfilePlayerConfig", "jwt_auth.apps.JwtAuthConfig"]
+PROJECT_APPS = [
+    "account.apps.AccountConfig",
+    "profile_player.apps.ProfilePlayerConfig",
+    "jwt_auth.apps.JwtAuthConfig",
+    "card_deck.apps.CardDeckConfig",
+]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
