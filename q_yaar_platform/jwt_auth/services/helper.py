@@ -1,11 +1,7 @@
-from django.conf import settings
-import jwt
 import logging
 import uuid
 
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
-
+import jwt
 from account.models import PlatformUser
 from account.services.interfacer import (
     svc_account_check_if_user_with_email_exists,
@@ -16,7 +12,17 @@ from account.services.interfacer import (
 )
 from common.constants import UserRolesType
 from common.phonenumber import is_valid_indian_number
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from jwt_auth.authentication import JWTRefreshToken
+from profile_game_master.services.interfacer import (
+    svc_game_master_check_if_game_master_with_email_exists,
+    svc_game_master_create_game_master_for_platform_user,
+    svc_game_master_get_game_master_for_platform_user,
+    svc_game_master_get_serialized_game_master_profile,
+    svc_game_master_update_game_master,
+)
 from profile_player.models import PlayerProfile
 from profile_player.services.interfacer import (
     svc_player_check_if_player_with_email_exists,
@@ -27,7 +33,6 @@ from profile_player.services.interfacer import (
 )
 
 from .error_codes import ErrorCode
-
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +101,17 @@ def _svc_get_all_serialized_roles_for_user(platform_user: PlatformUser):
         )
         profiles[UserRolesType.get_string_for_type(UserRolesType.PLAYER)] = {
             "data": _svc_get_serialized_player_profile(player=player),
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        }
+
+    error, game_master = svc_game_master_get_game_master_for_platform_user(platform_user=platform_user)
+    if game_master:
+        access_token, refresh_token = _svc_get_auth_tokens_for_profile(
+            platform_user=platform_user, role=UserRolesType.GAME_MASTER
+        )
+        profiles[UserRolesType.get_string_for_type(UserRolesType.GAME_MASTER)] = {
+            "data": svc_game_master_get_serialized_game_master_profile(game_master=game_master),
             "access_token": access_token,
             "refresh_token": refresh_token,
         }
@@ -260,7 +276,10 @@ def svc_auth_helper_check_user_exists(email: str):
 def svc_auth_helper_check_profile_exists(email: str, role: UserRolesType):
     logger.debug(f">> ARGS: {locals()}")
 
-    PROFILE_CHECK_MAP = {UserRolesType.PLAYER: svc_player_check_if_player_with_email_exists}
+    PROFILE_CHECK_MAP = {
+        UserRolesType.PLAYER: svc_player_check_if_player_with_email_exists,
+        UserRolesType.GAME_MASTER: svc_game_master_check_if_game_master_with_email_exists,
+    }
 
     return PROFILE_CHECK_MAP[role](email=email)
 
@@ -311,7 +330,10 @@ def svc_auth_helper_create_profile_for_user(
 ):
     logger.debug(f">> ARGS: {locals()}")
 
-    ROLE_CREATE_MAP = {UserRolesType.PLAYER: svc_player_create_player_for_platform_user}
+    ROLE_CREATE_MAP = {
+        UserRolesType.PLAYER: svc_player_create_player_for_platform_user,
+        UserRolesType.GAME_MASTER: svc_game_master_create_game_master_for_platform_user,
+    }
 
     return ROLE_CREATE_MAP[role](
         platform_user=platform_user, profile_name=profile_name, profile_pic=profile_pic, serialized=serialized
@@ -324,7 +346,10 @@ def svc_auth_helper_get_profile_for_user_and_role(platform_user: PlatformUser, r
     if not role:
         return None, None
 
-    ROLE_GET_MAP = {UserRolesType.PLAYER: svc_player_get_player_for_platform_user}
+    ROLE_GET_MAP = {
+        UserRolesType.PLAYER: svc_player_get_player_for_platform_user,
+        UserRolesType.GAME_MASTER: svc_game_master_get_game_master_for_platform_user,
+    }
 
     return ROLE_GET_MAP[role](platform_user=platform_user)
 
@@ -334,7 +359,10 @@ def svc_auth_helper_update_profile(
 ):
     logger.debug(f">> ARGS: {locals()}")
 
-    ROLE_UPDATE_TYPE_MAP = {UserRolesType.PLAYER: svc_player_update_player}
+    ROLE_UPDATE_TYPE_MAP = {
+        UserRolesType.PLAYER: svc_player_update_player,
+        UserRolesType.GAME_MASTER: svc_game_master_update_game_master,
+    }
 
     return ROLE_UPDATE_TYPE_MAP[role](profile=profile, request_data=request_data, serialized=serialized)
 

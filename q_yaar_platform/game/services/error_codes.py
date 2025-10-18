@@ -1,0 +1,90 @@
+import logging
+
+from common.base_error_codes import BaseErrorCode
+from common.constants import ModuleErrorPrefix
+from rest_framework import status
+
+logger = logging.getLogger(__name__)
+
+
+class ErrorCode(BaseErrorCode):
+    # Value Errors - 0 Series
+    MISSING_GAME_TYPE = "001"
+    MISSING_NAME = "002"
+    MISSING_DESCRIPTION = "003"
+    MISSING_PLAYER_IDS = "004"
+    MISSING_TEAMS_INFO = "005"
+
+    # Permission Errors - 1 Series
+
+    # Key Errors - 2 Series
+    INVALID_GAME_TYPE = "201"
+    INVALID_TEAMS_INFO_FORMAT = "202"
+
+    # Object Does Not Exist Errors - 3 series
+    PLAYER_IDS_DO_NOT_EXIST = "301"
+
+    # Integrity Errors - 4 Series
+
+    ERROR_CODE_HTTP_MAP = {
+        MISSING_GAME_TYPE: status.HTTP_400_BAD_REQUEST,
+        MISSING_NAME: status.HTTP_400_BAD_REQUEST,
+        MISSING_DESCRIPTION: status.HTTP_400_BAD_REQUEST,
+        MISSING_PLAYER_IDS: status.HTTP_400_BAD_REQUEST,
+        MISSING_TEAMS_INFO: status.HTTP_400_BAD_REQUEST,
+        INVALID_GAME_TYPE: status.HTTP_400_BAD_REQUEST,
+        INVALID_TEAMS_INFO_FORMAT: status.HTTP_400_BAD_REQUEST,
+        PLAYER_IDS_DO_NOT_EXIST: status.HTTP_400_BAD_REQUEST,
+    }
+
+    def get_string_for_missing_game_type(kwargs: dict):
+        return "Missing game_type"
+
+    def get_string_for_missing_name(kwargs: dict):
+        return "Missing name"
+
+    def get_string_for_missing_description(kwargs: dict):
+        return "Missing description"
+
+    def get_string_for_missing_player_ids(kwargs: dict):
+        return "Missing player_ids"
+
+    def get_string_for_missing_teams_info(kwargs: dict):
+        return "Missing teams_info"
+
+    def get_string_for_invalid_game_type(kwargs: dict):
+        return f"Invalid game_type: {kwargs.get('game_type')}"
+
+    def get_string_for_invalid_teams_info_format(kwargs: dict):
+        return "Invalid teams_info format"
+
+    def get_string_for_player_ids_do_not_exist(kwargs: dict):
+        return f"Player IDs do not exist: {', '.join(kwargs.get('player_ids'))}"
+
+    CODE_MESSAGE_MAP = {
+        MISSING_GAME_TYPE: get_string_for_missing_game_type,
+        MISSING_NAME: get_string_for_missing_name,
+        MISSING_DESCRIPTION: get_string_for_missing_description,
+        MISSING_PLAYER_IDS: get_string_for_missing_player_ids,
+        MISSING_TEAMS_INFO: get_string_for_missing_teams_info,
+        INVALID_GAME_TYPE: get_string_for_invalid_game_type,
+        INVALID_TEAMS_INFO_FORMAT: get_string_for_invalid_teams_info_format,
+        PLAYER_IDS_DO_NOT_EXIST: get_string_for_player_ids_do_not_exist,
+    }
+
+    def __init__(self, code, **kwargs) -> None:
+        self.ERROR_CODE_HTTP_MAP.update(super(ErrorCode, self).ERROR_CODE_HTTP_MAP)
+        self.CODE_MESSAGE_MAP.update(super(ErrorCode, self).CODE_MESSAGE_MAP)
+
+        (
+            logger.debug(f">> ARGS: {locals()}")
+            if code in [self.SUCCESS, self.CREATED, self.NO_CONTENT]
+            else logger.warning(f"{self.CODE_MESSAGE_MAP[code](kwargs)} - {locals()}")
+        )
+
+        super(ErrorCode, self).__init__(
+            code,
+            self.ERROR_CODE_HTTP_MAP[code],
+            self.CODE_MESSAGE_MAP[code](kwargs) if code not in [self.SUCCESS, self.CREATED, self.NO_CONTENT] else None,
+            ModuleErrorPrefix.GAME,
+        )

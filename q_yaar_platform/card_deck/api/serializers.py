@@ -9,5 +9,5 @@ class CardSerializer(serializers.ModelSerializer):
         model = Card
         fields = ("card_id", "title", "description", "image", "reward", "tags", "metadata", "created", "modified")
 
-    def get_card_id(self, obj: Card):
+    def get_card_id(self, obj: Card) -> str:
         return str(obj.get_external_id())

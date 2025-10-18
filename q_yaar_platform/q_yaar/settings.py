@@ -65,7 +65,9 @@ THIRD_PARTY_APPS = [
 PROJECT_APPS = [
     "account.apps.AccountConfig",
     "profile_player.apps.ProfilePlayerConfig",
+    "profile_game_master.apps.ProfileGameMasterConfig",
     "jwt_auth.apps.JwtAuthConfig",
+    "game.apps.GameConfig",
     "card_deck.apps.CardDeckConfig",
 ]
 

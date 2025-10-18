@@ -32,14 +32,35 @@ class BaseIntEnum(enum.IntEnum):
 class Length:
     USER_NAME = 32
     PHONE_NUMBER = 14
+    GAME_CODE = 8
+    GAME_NAME = 255
 
 
 class ModuleErrorPrefix:
     JWT_AUTH = "AUTH"
     ACCOUNT = "ACC"
     PROFILE_PLAYER = "PLYR"
+    PROFILE_GAME_MASTER = "GMST"
     CARD_DECK = "CRD"
+    GAME = "GAM"
 
 
 class UserRolesType(BaseIntEnum):
     PLAYER = 1
+    GAME_MASTER = 2
+
+
+class GameType(BaseIntEnum):
+    HIDE_N_SEEK = 1
+
+
+class GameStatus(BaseIntEnum):
+    PENDING = 1
+    IN_PROGRESS = 2
+    COMPLETED = 3
+
+
+class CardPile(BaseIntEnum):
+    DECK = 1
+    HAND = 2
+    DISCARD = 3
