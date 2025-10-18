@@ -1,16 +1,20 @@
 import logging
+import uuid
 
 from common.constants import UserRolesType
 from game.api.serializers import GameSerializer
 from game.services.error_codes import ErrorCode
 from game.services.helper import (
     svc_game_helper_create_game,
+    svc_game_helper_end_game,
+    svc_game_helper_get_game_by_id,
     svc_game_helper_get_game_for_player,
     svc_game_helper_get_game_type_from_request_data,
     svc_game_helper_get_games_for_game_master,
     svc_game_helper_get_players_from_request_data,
     svc_game_helper_get_teams_info_from_request_data,
     svc_game_helper_run_validations_for_game_creation,
+    svc_game_helper_start_game,
 )
 from profile_game_master.models import GameMasterProfile
 
@@ -52,3 +56,37 @@ def svc_game_get_games(request_data: dict, role: UserRolesType, profile: GameMas
         games = svc_game_helper_get_game_for_player(player=profile)
 
     return ErrorCode(ErrorCode.SUCCESS), games
+
+
+def svc_game_start_game(game_id: uuid.UUID, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    error, game = svc_game_helper_start_game(game=game)
+    if error:
+        return error, None
+
+    if serialized:
+        game = GameSerializer(game, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), game
+
+
+def svc_game_end_game(game_id: uuid.UUID, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    error, game = svc_game_helper_end_game(game=game)
+    if error:
+        return error, None
+
+    if serialized:
+        game = GameSerializer(game, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), game

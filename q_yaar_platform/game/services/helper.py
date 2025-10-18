@@ -1,6 +1,6 @@
 import logging
 
-from common.constants import GameType
+from common.constants import GameStatus, GameType
 from django.db import IntegrityError
 from game.models import Game
 from game.popo.teams_info import TeamInfoListConfig
@@ -117,3 +117,47 @@ def svc_game_helper_get_game_for_player(player: PlayerProfile):
     games = Game.objects.filter(players=player).order_by("-created")
 
     return games
+
+
+def svc_game_helper_get_game_by_id(game_id: str):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        game = Game.objects.get(external_id=game_id)
+        return None, game
+    except Game.DoesNotExist:
+        return ErrorCode(ErrorCode.INVALID_GAME_ID, game_id=game_id), None
+
+
+def svc_game_helper_start_game(game: Game):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if game.game_status != GameStatus.PENDING.value:
+        return (
+            ErrorCode(
+                ErrorCode.INVALID_GAME_STATE, game_state=GameStatus.get_string_for_type(GameStatus(game.game_status))
+            ),
+            None,
+        )
+
+    game.game_status = GameStatus.IN_PROGRESS.value
+    game.save()
+
+    return None, game
+
+
+def svc_game_helper_end_game(game: Game):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if game.game_status != GameStatus.IN_PROGRESS.value:
+        return (
+            ErrorCode(
+                ErrorCode.INVALID_GAME_STATE, game_state=GameStatus.get_string_for_type(GameStatus(game.game_status))
+            ),
+            None,
+        )
+
+    game.game_status = GameStatus.COMPLETED.value
+    game.save()
+
+    return None, game

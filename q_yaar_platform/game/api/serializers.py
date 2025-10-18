@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 
 class GameSerializer(serializers.ModelSerializer):
+    game_id = serializers.SerializerMethodField()
     game_type = serializers.SerializerMethodField()
     game_status = serializers.SerializerMethodField()
     game_master = serializers.SerializerMethodField()
@@ -14,6 +15,7 @@ class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = (
+            "game_id",
             "game_code",
             "game_type",
             "name",
@@ -25,6 +27,9 @@ class GameSerializer(serializers.ModelSerializer):
             "created",
             "modified",
         )
+
+    def get_game_id(self, obj: Game) -> str:
+        return str(obj.get_external_id())
 
     def get_game_type(self, obj: Game) -> str:
         return GameType.get_string_for_type(GameType(obj.game_type))

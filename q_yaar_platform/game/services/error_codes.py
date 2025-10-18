@@ -16,6 +16,7 @@ class ErrorCode(BaseErrorCode):
     MISSING_TEAMS_INFO = "005"
 
     # Permission Errors - 1 Series
+    INVALID_GAME_STATE = "101"
 
     # Key Errors - 2 Series
     INVALID_GAME_TYPE = "201"
@@ -23,6 +24,7 @@ class ErrorCode(BaseErrorCode):
 
     # Object Does Not Exist Errors - 3 series
     PLAYER_IDS_DO_NOT_EXIST = "301"
+    INVALID_GAME_ID = "302"
 
     # Integrity Errors - 4 Series
 
@@ -32,9 +34,11 @@ class ErrorCode(BaseErrorCode):
         MISSING_DESCRIPTION: status.HTTP_400_BAD_REQUEST,
         MISSING_PLAYER_IDS: status.HTTP_400_BAD_REQUEST,
         MISSING_TEAMS_INFO: status.HTTP_400_BAD_REQUEST,
+        INVALID_GAME_STATE: status.HTTP_403_FORBIDDEN,
         INVALID_GAME_TYPE: status.HTTP_400_BAD_REQUEST,
         INVALID_TEAMS_INFO_FORMAT: status.HTTP_400_BAD_REQUEST,
         PLAYER_IDS_DO_NOT_EXIST: status.HTTP_400_BAD_REQUEST,
+        INVALID_GAME_ID: status.HTTP_400_BAD_REQUEST,
     }
 
     def get_string_for_missing_game_type(kwargs: dict):
@@ -52,6 +56,9 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_missing_teams_info(kwargs: dict):
         return "Missing teams_info"
 
+    def get_string_for_invalid_game_state(kwargs: dict):
+        return f"Invalid game state for operation: {kwargs.get('game_state')}"
+
     def get_string_for_invalid_game_type(kwargs: dict):
         return f"Invalid game_type: {kwargs.get('game_type')}"
 
@@ -61,12 +68,16 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_player_ids_do_not_exist(kwargs: dict):
         return f"Player IDs do not exist: {', '.join(kwargs.get('player_ids'))}"
 
+    def get_string_for_invalid_game_id(kwargs: dict):
+        return f"Invalid game ID: {kwargs.get('game_id')}"
+
     CODE_MESSAGE_MAP = {
         MISSING_GAME_TYPE: get_string_for_missing_game_type,
         MISSING_NAME: get_string_for_missing_name,
         MISSING_DESCRIPTION: get_string_for_missing_description,
         MISSING_PLAYER_IDS: get_string_for_missing_player_ids,
         MISSING_TEAMS_INFO: get_string_for_missing_teams_info,
+        INVALID_GAME_STATE: get_string_for_invalid_game_state,
         INVALID_GAME_TYPE: get_string_for_invalid_game_type,
         INVALID_TEAMS_INFO_FORMAT: get_string_for_invalid_teams_info_format,
         PLAYER_IDS_DO_NOT_EXIST: get_string_for_player_ids_do_not_exist,
