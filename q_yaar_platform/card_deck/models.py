@@ -1,9 +1,9 @@
 import pghistory
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
 from common.constants import CardPile, Length
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import JSONField
+from game.models import Game
 from profile_player.models import PlayerProfile
 
 
@@ -48,14 +48,11 @@ class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
         return card
 
 
-# class CardDeck(AbstractTimeStamped):
-#     players = models.ManyToManyField(PlayerProfile, related_name="player_deck")
-#     cards = models.ManyToManyField(Card, related_name="decks")
-
-
 # class CardInstance(AbstractTimeStamped):
+#     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="card_instances")
 #     card = models.ForeignKey(Card, on_delete=models.CASCADE, related_name="instances")
-#     deck = models.ForeignKey(CardDeck, on_delete=models.CASCADE, related_name="card_instances")
+#     team = models.ForeignKey()
+#     players = models.ManyToManyField(PlayerProfile, related_name="card_instances", blank=True)
 
 #     pile = models.PositiveSmallIntegerField(choices=CardPile.get_choices(), default=CardPile.DECK.value)
 

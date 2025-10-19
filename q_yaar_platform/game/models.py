@@ -1,10 +1,9 @@
-from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
+from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped
 from common.constants import GameStatus, GameType, Length
 from django.db import models
 
 from common.uuid import unique_uuid4
 from game.popo.game_master_info import GameMasterInfoConfig
-from game.popo.teams_info import TeamInfoListConfig
 from profile_game_master.models import GameMasterProfile
 from profile_player.models import PlayerProfile
 
@@ -19,9 +18,11 @@ class Game(AbstractExternalFacing, AbstractTimeStamped):
     description = models.TextField()
     game_status = models.PositiveSmallIntegerField(choices=GameStatus.get_choices(), default=GameStatus.PENDING.value)
     created_by = models.ForeignKey(GameMasterProfile, on_delete=models.SET_NULL, blank=True, null=True)
-    players = models.ManyToManyField(PlayerProfile, related_name="games", blank=True)
 
     info = models.JSONField(default=dict, blank=True)
+
+    def __str__(self):
+        return self.game_code
 
     class Meta:
         indexes = [
@@ -40,16 +41,6 @@ class Game(AbstractExternalFacing, AbstractTimeStamped):
         if save:
             self.save()
 
-    def get_teams_info(self) -> TeamInfoListConfig:
-        return TeamInfoListConfig.from_json(self.info.get(self.CONST_KEY_TEAMS_INFO))
-
-    def set_teams_info(self, config: TeamInfoListConfig, save: bool = False) -> None:
-        info = self.info
-        info[self.CONST_KEY_TEAMS_INFO] = config.to_json()
-        self.info = info
-        if save:
-            self.save()
-
     @classmethod
     def create(
         cls,
@@ -57,16 +48,11 @@ class Game(AbstractExternalFacing, AbstractTimeStamped):
         name: str,
         description: str,
         created_by: GameMasterProfile,
-        players: list[PlayerProfile],
-        teams_info: TeamInfoListConfig,
     ) -> "Game":
         game_code = str(unique_uuid4())[:6]
         game = cls(
             game_type=game_type.value, game_code=game_code, name=name, description=description, created_by=created_by
         )
-        game.save()
-
-        game.players.add(*players)
         game.set_game_master_info(
             GameMasterInfoConfig.from_json(
                 {
@@ -76,7 +62,39 @@ class Game(AbstractExternalFacing, AbstractTimeStamped):
                 }
             )
         )
-        game.set_teams_info(teams_info)
         game.save()
 
         return game
+
+
+class Team(AbstractTimeStamped):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="teams")
+    team_name = models.CharField(max_length=Length.TEAM_NAME)
+    team_colour = models.CharField(max_length=Length.TEAM_COLOUR)
+
+    class Meta:
+        indexes = [models.Index(fields=["team_name"]), models.Index(fields=["game", "team_name"])]
+        unique_together = (("game", "team_name"),)
+
+    @classmethod
+    def create(cls, game: Game, team_name: str, team_colour: str) -> "Team":
+        team = cls(game=game, team_name=team_name, team_colour=team_colour)
+        team.save()
+        return team
+
+
+class TeamPlayerRelation(AbstractTimeStamped):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    player = models.ForeignKey(PlayerProfile, on_delete=models.CASCADE)
+
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)  # Denormalized for managing constraint
+
+    class Meta:
+        indexes = [models.Index(fields=["team"]), models.Index(fields=["game"])]
+        unique_together = (("player", "game"),)
+
+    @classmethod
+    def create(cls, team: Team, player: PlayerProfile) -> "TeamPlayerRelation":
+        team_player_relation = cls(team=team, player=player, game=team.game)
+        team_player_relation.save()
+        return team_player_relation

@@ -16,6 +16,7 @@ class ErrorCode(BaseErrorCode):
 
     # Object Does Not Exist Errors - 3 series
     PLAYER_DOES_NOT_EXIST = "301"
+    INVALID_PLAYER_IDS = "302"
 
     # Integrity Errors - 4 Series
     PLAYER_ALREADY_ONBOARDED = "401"
@@ -23,16 +24,21 @@ class ErrorCode(BaseErrorCode):
     ERROR_CODE_HTTP_MAP = {
         PLAYER_DOES_NOT_EXIST: status.HTTP_400_BAD_REQUEST,
         PLAYER_ALREADY_ONBOARDED: status.HTTP_400_BAD_REQUEST,
+        INVALID_PLAYER_IDS: status.HTTP_400_BAD_REQUEST,
     }
 
     def get_string_for_player_does_not_exist(kwargs: dict):
         return f"Player profile does not exist for user id - {kwargs.get('user_id')}"
+
+    def get_string_for_invalid_player_ids(kwargs: dict):
+        return f"Invalid player ids - {', '.join(kwargs.get('invalid_ids'))}"
 
     def get_string_for_player_already_onboarded(kwargs: dict):
         return f"Player already onboarded for user id - {kwargs.get('user_id')}"
 
     CODE_MESSAGE_MAP = {
         PLAYER_DOES_NOT_EXIST: get_string_for_player_does_not_exist,
+        INVALID_PLAYER_IDS: get_string_for_invalid_player_ids,
         PLAYER_ALREADY_ONBOARDED: get_string_for_player_already_onboarded,
     }
 

@@ -1,7 +1,9 @@
 from common.constants import GameStatus, GameType
-from game.models import Game
-from profile_player.api.serializers import PlayerProfileSerializer
+from game.models import Game, Team, TeamPlayerRelation
 from rest_framework import serializers
+
+from profile_player.api.serializers import PlayerProfileSerializer
+from profile_player.models import PlayerProfile
 
 
 class GameSerializer(serializers.ModelSerializer):
@@ -9,8 +11,6 @@ class GameSerializer(serializers.ModelSerializer):
     game_type = serializers.SerializerMethodField()
     game_status = serializers.SerializerMethodField()
     game_master = serializers.SerializerMethodField()
-    players = serializers.SerializerMethodField()
-    teams_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Game
@@ -22,8 +22,6 @@ class GameSerializer(serializers.ModelSerializer):
             "description",
             "game_status",
             "game_master",
-            "players",
-            "teams_info",
             "created",
             "modified",
         )
@@ -40,8 +38,19 @@ class GameSerializer(serializers.ModelSerializer):
     def get_game_master(self, obj: Game) -> dict:
         return obj.get_game_master_info().to_json()
 
-    def get_players(self, obj: Game) -> list[dict]:
-        return [PlayerProfileSerializer(player, many=False).data for player in obj.players.all()]
 
-    def get_teams_info(self, obj: Game) -> list[dict]:
-        return obj.get_teams_info().to_json()
+class TeamSerializer(serializers.ModelSerializer):
+    game_id = serializers.SerializerMethodField()
+    players = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Team
+        fields = ("game_id", "team_name", "team_colour", "players", "created", "modified")
+
+    def get_game_id(self, obj: Team) -> str:
+        return str(obj.game.get_external_id())
+
+    def get_players(self, obj: Team) -> list[dict]:
+        players = PlayerProfile.objects.filter(teamplayerrelation__team=obj)
+        result = PlayerProfileSerializer(players, many=True).data
+        return result

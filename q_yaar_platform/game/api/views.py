@@ -5,7 +5,13 @@ from common.constants import UserRolesType
 from common.decorators import validate_profile
 from common.response import get_paginated_response, get_standard_response
 from game.api.serializers import GameSerializer
-from game.services.core import svc_game_create_game, svc_game_end_game, svc_game_get_games, svc_game_start_game
+from game.services.core import (
+    svc_game_create_game,
+    svc_game_create_team,
+    svc_game_end_game,
+    svc_game_get_games,
+    svc_game_start_game,
+)
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
@@ -42,4 +48,18 @@ class GameEndView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
     def post(self, request, game_id: uuid.UUID, **kwargs):
         error, response = svc_game_end_game(game_id=game_id)
+        return get_standard_response(error, response)
+
+
+class TeamListView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".TeamListView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
+    def get(self, request, game_id: uuid.UUID, **kwargs):
+        pass
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    def post(self, request, game_id: uuid.UUID, **kwargs):
+        error, response = svc_game_create_team(game_id, request.data)
         return get_standard_response(error, response)

@@ -34,6 +34,8 @@ class Length:
     PHONE_NUMBER = 14
     GAME_CODE = 8
     GAME_NAME = 255
+    TEAM_NAME = 100
+    TEAM_COLOUR = 50
     CARD_TAG = 100
     CARD_TITLE = 100
     CARD_IMAGE_URL = 200

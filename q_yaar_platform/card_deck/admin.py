@@ -15,6 +15,7 @@ class CardAdmin(admin.ModelAdmin):
     list_display = ("title", "description", "reward")
     search_fields = ["title"]  # Also searches by tags, as done in the overriden method
     list_filter = ("tags",)
+    filter_horizontal = ("tags",)
 
     # Override to use the base manager to include soft-deleted items
     def get_queryset(self, request):
