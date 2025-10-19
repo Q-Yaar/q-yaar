@@ -13,20 +13,26 @@ class ErrorCode(BaseErrorCode):
     MISSING_MANDATORY_FIELD = "002"
     INVALID_FIELD_TYPE = "003"
     INVALID_FIELD_NAME = "004"
+    EMPTY_MANDATORY_FIELD = "005"
 
     # Permission Errors - 1 Series
 
     # Key Errors - 2 Series
 
     # Object Does Not Exist Errors - 3 series
+    INVALID_TAG_NAMES = "301"
 
     # Integrity Errors - 4 Series
+    TAG_ALREADY_EXISTS = "401"
 
     ERROR_CODE_HTTP_MAP = {
         MISSING_TAG_NAME: status.HTTP_400_BAD_REQUEST,
         MISSING_MANDATORY_FIELD: status.HTTP_400_BAD_REQUEST,
         INVALID_FIELD_TYPE: status.HTTP_400_BAD_REQUEST,
         INVALID_FIELD_NAME: status.HTTP_400_BAD_REQUEST,
+        EMPTY_MANDATORY_FIELD: status.HTTP_400_BAD_REQUEST,
+        INVALID_TAG_NAMES: status.HTTP_400_BAD_REQUEST,
+        TAG_ALREADY_EXISTS: status.HTTP_400_BAD_REQUEST,
     }
 
     def get_string_for_missing_tag_name(kwargs: dict):
@@ -50,11 +56,27 @@ class ErrorCode(BaseErrorCode):
         field_name = kwargs.get("field_name")
         return f"Card at index {index} has invalid field name: '{field_name}'"
 
+    def get_string_for_empty_mandatory_field(kwargs: dict):
+        index = kwargs.get("index")
+        field_name = kwargs.get("field_name")
+        return f"Card at index {index} has empty mandatory field: '{field_name}'"
+
+    def get_string_for_invalid_tag_names(kwargs: dict):
+        invalid_tags = kwargs.get("invalid_tags", [])
+        return f"Invalid tag names: {', '.join(invalid_tags)}"
+
+    def get_string_for_tag_already_exists(kwargs: dict):
+        tag_name = kwargs.get("tag_name")
+        return f"Tag with name '{tag_name}' already exists."
+
     CODE_MESSAGE_MAP = {
         MISSING_TAG_NAME: get_string_for_missing_tag_name,
         MISSING_MANDATORY_FIELD: get_string_for_missing_mandatory_field,
         INVALID_FIELD_TYPE: get_string_for_invalid_field_type,
         INVALID_FIELD_NAME: get_string_for_invalid_field_name,
+        EMPTY_MANDATORY_FIELD: get_string_for_empty_mandatory_field,
+        INVALID_TAG_NAMES: get_string_for_invalid_tag_names,
+        TAG_ALREADY_EXISTS: get_string_for_tag_already_exists,
     }
 
     def __init__(self, code, **kwargs) -> None:

@@ -1,31 +1,49 @@
 import pghistory
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
-from common.constants import CardPile
+from common.constants import CardPile, Length
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import JSONField
 from profile_player.models import PlayerProfile
 
 
+class CardTag(AbstractTimeStamped, AbstractVersioned):
+    name = models.CharField(max_length=Length.CARD_TAG, unique=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["name"])]
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def create(cls, name: str) -> "CardTag":
+        tag = cls(name=name)
+        tag.save()
+        return tag
+
+
 @pghistory.track()
 class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=Length.CARD_TITLE)
     description = models.TextField()
-    image = models.URLField(max_length=200, blank=True, null=True)
+    image = models.URLField(max_length=Length.CARD_IMAGE_URL, blank=True, null=True)
 
     reward = models.PositiveIntegerField(default=None, blank=True, null=True)
-    tags = ArrayField(models.CharField(max_length=50), default=list, blank=True)
+    tags = models.ManyToManyField(CardTag, related_name="cards", blank=True)
 
     metadata = JSONField(default=dict, blank=True)
 
     class Meta:
-        indexes = [models.Index(fields=["title"]), models.Index(fields=["tags"])]
+        indexes = [models.Index(fields=["title"])]
 
     @classmethod
     def create(
-        cls, title: str, description: str, image: str, reward: int = None, tags: list[str] = [], metadata: dict = {}
+        cls, title: str, description: str, image: str, tags: list[CardTag], reward: int = None, metadata: dict = {}
     ) -> "Card":
-        card = cls(title=title, description=description, image=image, reward=reward, tags=tags, metadata=metadata)
+        card = cls(title=title, description=description, image=image, reward=reward, metadata=metadata)
+        card.save()
+        card.tags.add(*tags)
         card.save()
         return card
 
@@ -42,4 +60,4 @@ class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
 #     pile = models.PositiveSmallIntegerField(choices=CardPile.get_choices(), default=CardPile.DECK.value)
 
 #     class Meta:
-        # indexes = [models.Index(fields=["pile"]), models.Index(fields=["deck", "pile"])]
+#         indexes = [models.Index(fields=["pile"]), models.Index(fields=["deck", "pile"])]

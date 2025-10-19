@@ -3,6 +3,7 @@ import logging
 from card_deck.api.serializers import CardSerializer
 from card_deck.services.core import (
     svc_card_deck_bulk_create_cards,
+    svc_card_deck_create_tag,
     svc_card_deck_get_cards_by_tag,
     svc_card_deck_get_list_of_tags,
 )
@@ -36,3 +37,8 @@ class CardsTagsListView(generics.GenericAPIView):
     def get(self, request, **kwargs):
         error, tags = svc_card_deck_get_list_of_tags()
         return get_standard_response(error, tags)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    def post(self, request, **kwargs):
+        error, tag = svc_card_deck_create_tag(request.data)
+        return get_standard_response(error, tag)
