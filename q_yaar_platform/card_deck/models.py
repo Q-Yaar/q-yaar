@@ -3,7 +3,7 @@ from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, 
 from common.constants import CardPile, Length
 from django.db import models
 from django.db.models import JSONField
-from game.models import Game
+from game.models import Game, Team
 from profile_player.models import PlayerProfile
 
 
@@ -49,12 +49,7 @@ class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
 
 
 # class CardInstance(AbstractTimeStamped):
-#     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="card_instances")
 #     card = models.ForeignKey(Card, on_delete=models.CASCADE, related_name="instances")
-#     team = models.ForeignKey()
-#     players = models.ManyToManyField(PlayerProfile, related_name="card_instances", blank=True)
+#     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="cards")
 
 #     pile = models.PositiveSmallIntegerField(choices=CardPile.get_choices(), default=CardPile.DECK.value)
-
-#     class Meta:
-#         indexes = [models.Index(fields=["pile"]), models.Index(fields=["deck", "pile"])]

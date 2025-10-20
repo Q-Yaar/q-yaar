@@ -160,3 +160,10 @@ def svc_game_helper_get_teams_for_game(game: Game):
 
     teams = Team.objects.filter(game=game)
     return teams
+
+
+def svc_game_helper_get_teams_for_player(game: Game, player: PlayerProfile):
+    logger.debug(f">> ARGS: {locals()}")
+
+    team = TeamPlayerRelation.objects.get(player=player, game=game).team
+    return team

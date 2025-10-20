@@ -40,12 +40,16 @@ class GameSerializer(serializers.ModelSerializer):
 
 
 class TeamSerializer(serializers.ModelSerializer):
+    team_id = serializers.SerializerMethodField()
     game_id = serializers.SerializerMethodField()
     players = serializers.SerializerMethodField()
 
     class Meta:
         model = Team
-        fields = ("game_id", "team_name", "team_colour", "players", "created", "modified")
+        fields = ("team_id", "game_id", "team_name", "team_colour", "players", "created", "modified")
+
+    def get_team_id(self, obj: Team) -> str:
+        return str(obj.get_external_id())
 
     def get_game_id(self, obj: Team) -> str:
         return str(obj.game.get_external_id())

@@ -67,7 +67,7 @@ class Game(AbstractExternalFacing, AbstractTimeStamped):
         return game
 
 
-class Team(AbstractTimeStamped):
+class Team(AbstractExternalFacing, AbstractTimeStamped):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="teams")
     team_name = models.CharField(max_length=Length.TEAM_NAME)
     team_colour = models.CharField(max_length=Length.TEAM_COLOUR)

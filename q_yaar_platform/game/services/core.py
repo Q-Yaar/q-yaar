@@ -14,11 +14,13 @@ from game.services.helper import (
     svc_game_helper_get_games_for_game_master,
     svc_game_helper_get_players_from_request_data,
     svc_game_helper_get_teams_for_game,
+    svc_game_helper_get_teams_for_player,
     svc_game_helper_run_validations_for_game_creation,
     svc_game_helper_run_validations_for_team_creation,
     svc_game_helper_start_game,
 )
 from profile_game_master.models import GameMasterProfile
+from profile_player.models import PlayerProfile
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +44,7 @@ def svc_game_create_game(request_data: dict, profile: GameMasterProfile, seriali
     return ErrorCode(ErrorCode.CREATED), game
 
 
-def svc_game_get_games(request_data: dict, role: UserRolesType, profile: GameMasterProfile):
+def svc_game_get_games(request_data: dict, role: UserRolesType, profile: GameMasterProfile | PlayerProfile):
     logger.debug(f">> ARGS: {locals()}")
 
     if role == UserRolesType.GAME_MASTER:
@@ -125,3 +127,18 @@ def svc_game_get_teams_for_game(game_id: str, serialized: bool = True):
         teams = TeamSerializer(teams, many=True).data
 
     return ErrorCode(ErrorCode.SUCCESS), teams
+
+
+def svc_game_get_team_for_player(game_id: str, player: PlayerProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    team = svc_game_helper_get_teams_for_player(game=game, player=player)
+
+    if serialized:
+        team = TeamSerializer(team, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), team
