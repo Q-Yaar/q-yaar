@@ -76,6 +76,9 @@ class Team(AbstractExternalFacing, AbstractTimeStamped):
         indexes = [models.Index(fields=["team_name"]), models.Index(fields=["game", "team_name"])]
         unique_together = (("game", "team_name"),)
 
+    def __str__(self):
+        return self.team_name
+
     @classmethod
     def create(cls, game: Game, team_name: str, team_colour: str) -> "Team":
         team = cls(game=game, team_name=team_name, team_colour=team_colour)

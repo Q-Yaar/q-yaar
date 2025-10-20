@@ -1,8 +1,11 @@
 import logging
+import uuid
 
-from card_deck.models import Card, CardTag
+from card_deck.models import Card, CardInstance, CardTag
 from card_deck.services.error_codes import ErrorCode
 from django.db import IntegrityError, transaction
+from game.models import Team
+from game.services.interfacer import svc_game_get_team_by_id
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +77,22 @@ def svc_card_deck_helper_validate_input_for_tag_creation(request_data: dict):
     return None
 
 
+def svc_card_deck_helper_validate_input_for_team_deck_creation(request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if not request_data.get("card_ids"):
+        return ErrorCode(ErrorCode.MISSING_CARD_IDS)
+
+    extracted_ids = Card.objects.filter(external_id__in=request_data["card_ids"]).values_list("external_id", flat=True)
+    missing_ids = set(str(card_id) for card_id in request_data["card_ids"]) - set(
+        str(card_id) for card_id in extracted_ids
+    )
+    if missing_ids:
+        return ErrorCode(ErrorCode.INVALID_CARD_IDS, invalid_card_ids=list(missing_ids))
+
+    return None
+
+
 def svc_card_deck_helper_get_tags_from_card_data(card_data: dict) -> list[str]:
     logger.debug(f">> ARGS: {locals()}")
 
@@ -106,3 +125,30 @@ def svc_card_deck_helper_create_tag(tag_name: str) -> tuple[None | ErrorCode, Ca
         return None, tag
     except IntegrityError:
         return ErrorCode(ErrorCode.TAG_ALREADY_EXISTS, tag_name=tag_name), None
+
+
+def svc_card_deck_helper_get_team_by_id(team_id: uuid.UUID):
+    return svc_game_get_team_by_id(team_id=team_id)
+
+
+def svc_card_deck_helper_create_deck_for_team(team: Team, card_ids: list[uuid.UUID]):
+    logger.debug(f">> ARGS: {locals()}")
+
+    # It is allowed to create multiple instances of the same card
+    with transaction.atomic():
+        for card_id in card_ids:
+            card = Card.objects.get(external_id=card_id)
+            CardInstance.create(card=card, team=team)
+
+    return None
+
+
+def svc_card_deck_helper_get_deck_for_team(team: Team):
+    logger.debug(f">> ARGS: {locals()}")
+
+    card_ids = CardInstance.objects.filter(team=team).order_by("pile").values_list("card", flat=True)
+    cards = []
+    for card_id in card_ids:
+        cards.append(Card.objects.get(pk=card_id))
+
+    return cards

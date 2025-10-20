@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Card, CardTag
+from .models import Card, CardInstance, CardTag
 
 
 class CardTagAdmin(admin.ModelAdmin):
@@ -13,7 +13,7 @@ admin.site.register(CardTag, CardTagAdmin)
 
 class CardAdmin(admin.ModelAdmin):
     list_display = ("title", "description", "reward")
-    search_fields = ["title"]  # Also searches by tags, as done in the overriden method
+    search_fields = ["title"]
     list_filter = ("tags",)
     filter_horizontal = ("tags",)
 
@@ -23,3 +23,11 @@ class CardAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Card, CardAdmin)
+
+
+class CardInstanceAdmin(admin.ModelAdmin):
+    list_display = ("card", "team", "pile")
+    search_fields = ["card__title", "team__team_name"]
+
+
+admin.site.register(CardInstance, CardInstanceAdmin)

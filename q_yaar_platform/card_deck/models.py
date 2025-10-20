@@ -37,6 +37,9 @@ class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
     class Meta:
         indexes = [models.Index(fields=["title"])]
 
+    def __str__(self):
+        return self.title
+
     @classmethod
     def create(
         cls, title: str, description: str, image: str, tags: list[CardTag], reward: int = None, metadata: dict = {}
@@ -48,8 +51,18 @@ class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
         return card
 
 
-# class CardInstance(AbstractTimeStamped):
-#     card = models.ForeignKey(Card, on_delete=models.CASCADE, related_name="instances")
-#     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="cards")
+# List of this forms a deck of cards
+class CardInstance(AbstractTimeStamped):
+    card = models.ForeignKey(Card, on_delete=models.CASCADE, related_name="instances")
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="cards")
 
-#     pile = models.PositiveSmallIntegerField(choices=CardPile.get_choices(), default=CardPile.DECK.value)
+    pile = models.PositiveSmallIntegerField(choices=CardPile.get_choices(), default=CardPile.DECK.value)
+
+    class Meta:
+        indexes = [models.Index(fields=["team", "pile"])]
+
+    @classmethod
+    def create(cls, card: Card, team: Team) -> "CardInstance":
+        card_instance = cls(card=card, team=team)
+        card_instance.save()
+        return card_instance

@@ -1,10 +1,13 @@
 import logging
+import uuid
 
 from card_deck.api.serializers import CardSerializer
 from card_deck.services.core import (
     svc_card_deck_bulk_create_cards,
+    svc_card_deck_create_deck_for_team,
     svc_card_deck_create_tag,
     svc_card_deck_get_cards_by_tag,
+    svc_card_deck_get_deck_for_team,
     svc_card_deck_get_list_of_tags,
 )
 from common.constants import UserRolesType
@@ -42,3 +45,18 @@ class CardsTagsListView(generics.GenericAPIView):
     def post(self, request, **kwargs):
         error, tag = svc_card_deck_create_tag(request.data)
         return get_standard_response(error, tag)
+
+
+class CardDeckView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".CardDeckView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    def get(self, request, team_id: uuid.UUID, **kwargs):
+        error, cards = svc_card_deck_get_deck_for_team(team_id)
+        return get_paginated_response(self, error, cards, CardSerializer)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    def post(self, request, team_id: uuid.UUID, **kwargs):
+        error, response = svc_card_deck_create_deck_for_team(request.data, team_id)
+        return get_standard_response(error, response)

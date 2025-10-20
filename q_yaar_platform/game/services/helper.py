@@ -1,6 +1,8 @@
 import logging
+import uuid
 
 from common.constants import GameStatus, GameType
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError, transaction
 from game.models import Game, Team, TeamPlayerRelation
 from game.services.error_codes import ErrorCode
@@ -167,3 +169,13 @@ def svc_game_helper_get_teams_for_player(game: Game, player: PlayerProfile):
 
     team = TeamPlayerRelation.objects.get(player=player, game=game).team
     return team
+
+
+def svc_game_helper_get_team_by_id(team_id: uuid.UUID):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        team = Team.objects.get(external_id=team_id)
+        return None, team
+    except ObjectDoesNotExist:
+        return ErrorCode(ErrorCode.INVALID_TEAM_ID, team_id=team_id), None
