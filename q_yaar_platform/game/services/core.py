@@ -13,6 +13,7 @@ from game.services.helper import (
     svc_game_helper_get_game_type_from_request_data,
     svc_game_helper_get_games_for_game_master,
     svc_game_helper_get_players_from_request_data,
+    svc_game_helper_get_teams_for_game,
     svc_game_helper_run_validations_for_game_creation,
     svc_game_helper_run_validations_for_team_creation,
     svc_game_helper_start_game,
@@ -109,3 +110,18 @@ def svc_game_create_team(game_id: str, request_data: dict, serialized: bool = Tr
         team = TeamSerializer(team, many=False).data
 
     return ErrorCode(ErrorCode.CREATED), team
+
+
+def svc_game_get_teams_for_game(game_id: str, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    teams = svc_game_helper_get_teams_for_game(game)
+
+    if serialized:
+        teams = TeamSerializer(teams, many=True).data
+
+    return ErrorCode(ErrorCode.SUCCESS), teams

@@ -10,6 +10,7 @@ from game.services.core import (
     svc_game_create_team,
     svc_game_end_game,
     svc_game_get_games,
+    svc_game_get_teams_for_game,
     svc_game_start_game,
 )
 from rest_framework import generics
@@ -57,7 +58,8 @@ class TeamListView(generics.GenericAPIView):
 
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
     def get(self, request, game_id: uuid.UUID, **kwargs):
-        pass
+        error, response = svc_game_get_teams_for_game(game_id=game_id)
+        return get_standard_response(error, response)
 
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
     def post(self, request, game_id: uuid.UUID, **kwargs):

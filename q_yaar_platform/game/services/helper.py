@@ -153,3 +153,10 @@ def svc_game_helper_create_team(game: Game, team_name: str, team_colour: str, pl
             return ErrorCode(ErrorCode.ERROR_CREATING_TEAM, error=str(e)), None
 
     return None, team
+
+
+def svc_game_helper_get_teams_for_game(game: Game):
+    logger.debug(f">> ARGS: {locals()}")
+
+    teams = Team.objects.filter(game=game)
+    return teams
