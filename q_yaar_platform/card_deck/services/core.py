@@ -7,15 +7,20 @@ from card_deck.services.helper import (
     svc_card_deck_helper_bulk_create_cards,
     svc_card_deck_helper_create_deck_for_team,
     svc_card_deck_helper_create_tag,
+    svc_card_deck_helper_get_card_stats,
     svc_card_deck_helper_get_cards_by_tag,
     svc_card_deck_helper_get_deck_for_team,
     svc_card_deck_helper_get_list_of_tags,
     svc_card_deck_helper_get_team_by_id,
+    svc_card_deck_helper_peek_cards,
     svc_card_deck_helper_validate_and_get_request_data,
     svc_card_deck_helper_validate_input_for_bulk_create,
+    svc_card_deck_helper_validate_input_for_peek,
     svc_card_deck_helper_validate_input_for_tag_creation,
     svc_card_deck_helper_validate_input_for_team_deck_creation,
+    svc_card_deck_helper_validate_player_is_in_team,
 )
+from profile_player.models import PlayerProfile
 
 logger = logging.getLogger(__name__)
 
@@ -95,5 +100,44 @@ def svc_card_deck_get_deck_for_team(team_id: uuid.UUID):
         return error, None
 
     cards = svc_card_deck_helper_get_deck_for_team(team=team)
+
+    return ErrorCode(ErrorCode.SUCCESS), cards
+
+
+def svc_card_deck_get_card_stats(team_id: uuid.UUID, player: PlayerProfile):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, team = svc_card_deck_helper_get_team_by_id(team_id=team_id)
+    if error:
+        return error, None
+
+    error = svc_card_deck_helper_validate_player_is_in_team(team=team, player=player)
+    if error:
+        return error, None
+
+    response = svc_card_deck_helper_get_card_stats(team=team)
+
+    return ErrorCode(ErrorCode.SUCCESS), response
+
+
+def svc_card_deck_peek_cards(team_id: uuid.UUID, player: PlayerProfile, request_data: dict, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error = svc_card_deck_helper_validate_input_for_peek(request_data=request_data)
+    if error:
+        return error, None
+
+    error, team = svc_card_deck_helper_get_team_by_id(team_id=team_id)
+    if error:
+        return error, None
+
+    error = svc_card_deck_helper_validate_player_is_in_team(team=team, player=player)
+    if error:
+        return error, None
+
+    cards = svc_card_deck_helper_peek_cards(team=team, num_cards=request_data["num_cards"])
+
+    if serialized:
+        cards = CardSerializer(cards, many=True).data
 
     return ErrorCode(ErrorCode.SUCCESS), cards

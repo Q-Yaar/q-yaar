@@ -24,6 +24,7 @@ class ErrorCode(BaseErrorCode):
     # Object Does Not Exist Errors - 3 series
     INVALID_GAME_ID = "301"
     INVALID_TEAM_ID = "302"
+    PLAYER_DOES_NOT_BELONG_TO_TEAM = "303"
 
     # Integrity Errors - 4 Series
     ERROR_CREATING_TEAM = "401"
@@ -38,6 +39,7 @@ class ErrorCode(BaseErrorCode):
         INVALID_GAME_TYPE: status.HTTP_400_BAD_REQUEST,
         INVALID_GAME_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_TEAM_ID: status.HTTP_400_BAD_REQUEST,
+        PLAYER_DOES_NOT_BELONG_TO_TEAM: status.HTTP_400_BAD_REQUEST,
         ERROR_CREATING_TEAM: status.HTTP_400_BAD_REQUEST,
     }
 
@@ -68,6 +70,9 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_invalid_team_id(kwargs: dict):
         return f"Invalid team ID: {kwargs.get('team_id')}"
 
+    def get_string_for_player_does_not_belong_to_team(kwargs: dict):
+        return f"Player - {kwargs.get('profile_name')} does not belong to team - {kwargs.get('team_name')}"
+
     def get_string_for_error_creating_team(kwargs: dict):
         return f"Error creating team - {kwargs.get('error')}"
 
@@ -81,6 +86,7 @@ class ErrorCode(BaseErrorCode):
         INVALID_GAME_TYPE: get_string_for_invalid_game_type,
         INVALID_GAME_ID: get_string_for_invalid_game_id,
         INVALID_TEAM_ID: get_string_for_invalid_team_id,
+        PLAYER_DOES_NOT_BELONG_TO_TEAM: get_string_for_player_does_not_belong_to_team,
         ERROR_CREATING_TEAM: get_string_for_error_creating_team,
     }
 

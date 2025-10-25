@@ -179,3 +179,15 @@ def svc_game_helper_get_team_by_id(team_id: uuid.UUID):
         return None, team
     except ObjectDoesNotExist:
         return ErrorCode(ErrorCode.INVALID_TEAM_ID, team_id=team_id), None
+
+
+def svc_game_helper_verify_player_is_in_team(player: PlayerProfile, team: Team):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        rel = TeamPlayerRelation.objects.get(player=player, team=team)
+        return None
+    except ObjectDoesNotExist:
+        return ErrorCode(
+            ErrorCode.PLAYER_DOES_NOT_BELONG_TO_TEAM, profile_name=player.profile_name, team_name=team.team_name
+        )

@@ -4,8 +4,10 @@ import uuid
 from card_deck.models import Card, CardInstance, CardTag
 from card_deck.services.error_codes import ErrorCode
 from django.db import IntegrityError, transaction
+from common.constants import CardPile
 from game.models import Team
-from game.services.interfacer import svc_game_get_team_by_id
+from game.services.interfacer import svc_game_get_team_by_id, svc_game_verify_player_belongs_to_team
+from profile_player.models import PlayerProfile
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +95,15 @@ def svc_card_deck_helper_validate_input_for_team_deck_creation(request_data: dic
     return None
 
 
+def svc_card_deck_helper_validate_input_for_peek(request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if not request_data.get("num_cards"):
+        return ErrorCode(ErrorCode.MISSING_NUM_CARDS)
+
+    return None
+
+
 def svc_card_deck_helper_get_tags_from_card_data(card_data: dict) -> list[str]:
     logger.debug(f">> ARGS: {locals()}")
 
@@ -150,5 +161,37 @@ def svc_card_deck_helper_get_deck_for_team(team: Team):
     cards = []
     for card_id in card_ids:
         cards.append(Card.objects.get(pk=card_id))
+
+    return cards
+
+
+def svc_card_deck_helper_validate_player_is_in_team(team: Team, player: PlayerProfile):
+    logger.debug(f">> ARGS: {locals()}")
+
+    return svc_game_verify_player_belongs_to_team(player=player, team=team)
+
+
+def svc_card_deck_helper_get_card_stats(team: Team):
+    logger.debug(f">> ARGS: {locals()}")
+
+    total_cards = CardInstance.objects.filter(team=team).count()
+    deck_cards = CardInstance.objects.filter(team=team, pile=CardPile.DECK.value).count()
+    hand_cards = CardInstance.objects.filter(team=team, pile=CardPile.HAND.value).count()
+    discard_cards = CardInstance.objects.filter(team=team, pile=CardPile.DISCARD.value).count()
+
+    return {
+        "total_cards": total_cards,
+        "deck_cards": deck_cards,
+        "hand_cards": hand_cards,
+        "discard_cards": discard_cards,
+    }
+
+
+def svc_card_deck_helper_peek_cards(team: Team, num_cards: int):
+    logger.debug(f">> ARGS: {locals()}")
+
+    card_instances = CardInstance.objects.filter(team=team, pile=CardPile.DECK.value).order_by("?")[:num_cards]
+
+    cards = [instance.card for instance in card_instances]
 
     return cards
