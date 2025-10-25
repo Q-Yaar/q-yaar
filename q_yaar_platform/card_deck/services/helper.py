@@ -195,3 +195,23 @@ def svc_card_deck_helper_peek_cards(team: Team, num_cards: int):
     cards = [instance.card for instance in card_instances]
 
     return cards
+
+
+def svc_card_deck_helper_view_hand_pile(team: Team):
+    logger.debug(f">> ARGS: {locals()}")
+
+    card_instances = CardInstance.objects.filter(team=team, pile=CardPile.HAND.value)
+
+    cards = [instance.card for instance in card_instances]
+
+    return cards
+
+
+def svc_card_deck_helper_view_discard_pile(team: Team):
+    logger.debug(f">> ARGS: {locals()}")
+
+    card_instances = CardInstance.objects.filter(team=team, pile=CardPile.DISCARD.value)
+
+    cards = [instance.card for instance in card_instances]
+
+    return cards

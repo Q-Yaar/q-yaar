@@ -10,5 +10,7 @@ urlpatterns = [
     path(r"tags/", views.CardsTagsListView.as_view(), name="handler-cards-tags-list"),
     path(r"deck/<uuid:team_id>/", views.CardDeckView.as_view(), name="handler-card-deck"),
     path(r"deck/<uuid:team_id>/stats", views.CardStatsView.as_view(), name="handler-card-stats"),
+    path(r"deck/<uuid:team_id>/pile/hand", views.CardHandListView.as_view(), name="handler-card-hand-list"),
+    path(r"deck/<uuid:team_id>/pile/discard", views.CardDiscardListView.as_view(), name="handler-card-discard-list"),
     path(r"deck/<uuid:team_id>/peek", views.CardPeekView.as_view(), name="handler-card-peek"),
 ]

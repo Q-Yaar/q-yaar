@@ -19,6 +19,8 @@ from card_deck.services.helper import (
     svc_card_deck_helper_validate_input_for_tag_creation,
     svc_card_deck_helper_validate_input_for_team_deck_creation,
     svc_card_deck_helper_validate_player_is_in_team,
+    svc_card_deck_helper_view_discard_pile,
+    svc_card_deck_helper_view_hand_pile,
 )
 from profile_player.models import PlayerProfile
 
@@ -141,3 +143,41 @@ def svc_card_deck_peek_cards(team_id: uuid.UUID, player: PlayerProfile, request_
         cards = CardSerializer(cards, many=True).data
 
     return ErrorCode(ErrorCode.SUCCESS), cards
+
+
+def svc_card_deck_view_hand_pile(team_id: uuid.UUID, player: PlayerProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, team = svc_card_deck_helper_get_team_by_id(team_id=team_id)
+    if error:
+        return error, None
+
+    error = svc_card_deck_helper_validate_player_is_in_team(team=team, player=player)
+    if error:
+        return error, None
+
+    hand_cards = svc_card_deck_helper_view_hand_pile(team=team)
+
+    if serialized:
+        hand_cards = CardSerializer(hand_cards, many=True).data
+
+    return ErrorCode(ErrorCode.SUCCESS), hand_cards
+
+
+def svc_card_deck_view_discard_pile(team_id: uuid.UUID, player: PlayerProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, team = svc_card_deck_helper_get_team_by_id(team_id=team_id)
+    if error:
+        return error, None
+
+    error = svc_card_deck_helper_validate_player_is_in_team(team=team, player=player)
+    if error:
+        return error, None
+
+    discard_cards = svc_card_deck_helper_view_discard_pile(team=team)
+
+    if serialized:
+        discard_cards = CardSerializer(discard_cards, many=True).data
+
+    return ErrorCode(ErrorCode.SUCCESS), discard_cards

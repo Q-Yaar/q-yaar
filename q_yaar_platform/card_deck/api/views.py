@@ -11,6 +11,8 @@ from card_deck.services.core import (
     svc_card_deck_get_deck_for_team,
     svc_card_deck_get_list_of_tags,
     svc_card_deck_peek_cards,
+    svc_card_deck_view_discard_pile,
+    svc_card_deck_view_hand_pile,
 )
 from common.constants import UserRolesType
 from common.decorators import validate_profile
@@ -71,6 +73,26 @@ class CardStatsView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def get(self, request, team_id: uuid.UUID, **kwargs):
         error, response = svc_card_deck_get_card_stats(team_id, kwargs["profile"])
+        return get_standard_response(error, response)
+
+
+class CardHandListView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".CardHandListView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def get(self, request, team_id: uuid.UUID, **kwargs):
+        error, response = svc_card_deck_view_hand_pile(team_id, kwargs["profile"])
+        return get_standard_response(error, response)
+
+
+class CardDiscardListView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".CardDiscardListView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def get(self, request, team_id: uuid.UUID, **kwargs):
+        error, response = svc_card_deck_view_discard_pile(team_id, kwargs["profile"])
         return get_standard_response(error, response)
 
 
