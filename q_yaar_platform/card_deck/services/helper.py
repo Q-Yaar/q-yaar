@@ -104,6 +104,27 @@ def svc_card_deck_helper_validate_input_for_peek(request_data: dict):
     return None
 
 
+def svc_card_deck_helper_validate_input_and_get_piles_for_shuffle(request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if not request_data.get("piles"):
+        return ErrorCode(ErrorCode.MISSING_PILES), None
+
+    piles = request_data["piles"]
+    if not isinstance(piles, list):
+        return ErrorCode(ErrorCode.INVALID_PILES_FORMAT), None
+
+    pile_names = []
+    for pile_name in piles:
+        try:
+            pile = CardPile.tokentype_from_string(pile_name)
+            pile_names.append(pile.value)
+        except KeyError:
+            return ErrorCode(ErrorCode.INVALID_PILE_NAME, pile_name=pile_name), None
+
+    return None, pile_names
+
+
 def svc_card_deck_helper_get_tags_from_card_data(card_data: dict) -> list[str]:
     logger.debug(f">> ARGS: {locals()}")
 
@@ -259,3 +280,11 @@ def svc_card_deck_helper_return_card(card_instance: CardInstance):
     card_instance.save()
 
     return card_instance
+
+
+def svc_card_deck_helper_shuffle_deck(team: Team, piles: list[CardPile]):
+    logger.debug(f">> ARGS: {locals()}")
+
+    updated_count = CardInstance.objects.filter(team=team, pile__in=piles).update(pile=CardPile.DECK.value)
+
+    return updated_count

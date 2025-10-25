@@ -22,4 +22,5 @@ urlpatterns = [
     path(
         r"deck/<uuid:team_id>/cards/<uuid:card_id>/return", views.CardReturnView.as_view(), name="handler-card-return"
     ),
+    path(r"deck/<uuid:team_id>/shuffle", views.CardDeckShuffleView.as_view(), name="handler-card-deck-shuffle"),
 ]

@@ -16,10 +16,13 @@ class ErrorCode(BaseErrorCode):
     EMPTY_MANDATORY_FIELD = "005"
     MISSING_CARD_IDS = "006"
     MISSING_NUM_CARDS = "007"
+    MISSING_PILES = "008"
+    INVALID_PILES_FORMAT = "009"
 
     # Permission Errors - 1 Series
 
     # Key Errors - 2 Series
+    INVALID_PILE_NAME = "201"
 
     # Object Does Not Exist Errors - 3 series
     INVALID_TAG_NAMES = "301"
@@ -37,6 +40,9 @@ class ErrorCode(BaseErrorCode):
         EMPTY_MANDATORY_FIELD: status.HTTP_400_BAD_REQUEST,
         MISSING_CARD_IDS: status.HTTP_400_BAD_REQUEST,
         MISSING_NUM_CARDS: status.HTTP_400_BAD_REQUEST,
+        MISSING_PILES: status.HTTP_400_BAD_REQUEST,
+        INVALID_PILES_FORMAT: status.HTTP_400_BAD_REQUEST,
+        INVALID_PILE_NAME: status.HTTP_400_BAD_REQUEST,
         INVALID_TAG_NAMES: status.HTTP_400_BAD_REQUEST,
         INVALID_CARD_IDS: status.HTTP_400_BAD_REQUEST,
         CARD_NOT_AVAILABLE_FOR_ACTION: status.HTTP_400_BAD_REQUEST,
@@ -75,6 +81,15 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_missing_num_cards(kwargs: dict):
         return "Missing num_cards"
 
+    def get_string_for_missing_piles(kwargs: dict):
+        return "Missing piles"
+
+    def get_string_for_invalid_piles_format(kwargs: dict):
+        return "Invalid format - piles must be of type list[str]"
+
+    def get_string_for_invalid_pile_name(kwargs: dict):
+        return f"Invalid pile name - {kwargs.get('pile_name')}"
+
     def get_string_for_invalid_tag_names(kwargs: dict):
         invalid_tags = kwargs.get("invalid_tags", [])
         return f"Invalid tag names: {', '.join(invalid_tags)}"
@@ -98,6 +113,9 @@ class ErrorCode(BaseErrorCode):
         EMPTY_MANDATORY_FIELD: get_string_for_empty_mandatory_field,
         MISSING_CARD_IDS: get_string_for_missing_card_ids,
         MISSING_NUM_CARDS: get_string_for_missing_num_cards,
+        MISSING_PILES: get_string_for_missing_piles,
+        INVALID_PILES_FORMAT: get_string_for_invalid_piles_format,
+        INVALID_PILE_NAME: get_string_for_invalid_pile_name,
         INVALID_TAG_NAMES: get_string_for_invalid_tag_names,
         INVALID_CARD_IDS: get_string_for_invalid_card_ids,
         CARD_NOT_AVAILABLE_FOR_ACTION: get_string_for_card_not_available_for_action,

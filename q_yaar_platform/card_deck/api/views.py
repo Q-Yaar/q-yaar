@@ -14,6 +14,7 @@ from card_deck.services.core import (
     svc_card_deck_get_list_of_tags,
     svc_card_deck_peek_cards,
     svc_card_deck_return_card,
+    svc_card_deck_shuffle_deck,
     svc_card_deck_view_discard_pile,
     svc_card_deck_view_hand_pile,
 )
@@ -136,4 +137,14 @@ class CardReturnView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def post(self, request, team_id: uuid.UUID, card_id: uuid.UUID, **kwargs):
         error, response = svc_card_deck_return_card(team_id, kwargs["profile"], card_id)
+        return get_standard_response(error, response)
+
+
+class CardDeckShuffleView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".CardDeckShuffleView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    def post(self, request, team_id: uuid.UUID, **kwargs):
+        error, response = svc_card_deck_shuffle_deck(request.data, team_id)
         return get_standard_response(error, response)

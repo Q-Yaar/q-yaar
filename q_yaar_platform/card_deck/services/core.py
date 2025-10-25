@@ -17,7 +17,9 @@ from card_deck.services.helper import (
     svc_card_deck_helper_get_team_by_id,
     svc_card_deck_helper_peek_cards,
     svc_card_deck_helper_return_card,
+    svc_card_deck_helper_shuffle_deck,
     svc_card_deck_helper_validate_and_get_request_data,
+    svc_card_deck_helper_validate_input_and_get_piles_for_shuffle,
     svc_card_deck_helper_validate_input_for_bulk_create,
     svc_card_deck_helper_validate_input_for_peek,
     svc_card_deck_helper_validate_input_for_tag_creation,
@@ -267,3 +269,19 @@ def svc_card_deck_return_card(team_id: uuid.UUID, player: PlayerProfile, card_id
         card = CardSerializer(card, many=False).data
 
     return ErrorCode(ErrorCode.SUCCESS), card
+
+
+def svc_card_deck_shuffle_deck(request_data: dict, team_id: uuid.UUID):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, team = svc_card_deck_helper_get_team_by_id(team_id=team_id)
+    if error:
+        return error, None
+
+    error, piles = svc_card_deck_helper_validate_input_and_get_piles_for_shuffle(request_data=request_data)
+    if error:
+        return error, None
+
+    updated_count = svc_card_deck_helper_shuffle_deck(team=team, piles=piles)
+
+    return ErrorCode(ErrorCode.NO_CONTENT), None
