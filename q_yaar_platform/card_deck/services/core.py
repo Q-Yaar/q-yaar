@@ -7,12 +7,16 @@ from card_deck.services.helper import (
     svc_card_deck_helper_bulk_create_cards,
     svc_card_deck_helper_create_deck_for_team,
     svc_card_deck_helper_create_tag,
+    svc_card_deck_helper_discard_card,
+    svc_card_deck_helper_draw_card,
+    svc_card_deck_helper_get_card_instance_by_card_id,
     svc_card_deck_helper_get_card_stats,
     svc_card_deck_helper_get_cards_by_tag,
     svc_card_deck_helper_get_deck_for_team,
     svc_card_deck_helper_get_list_of_tags,
     svc_card_deck_helper_get_team_by_id,
     svc_card_deck_helper_peek_cards,
+    svc_card_deck_helper_return_card,
     svc_card_deck_helper_validate_and_get_request_data,
     svc_card_deck_helper_validate_input_for_bulk_create,
     svc_card_deck_helper_validate_input_for_peek,
@@ -22,6 +26,7 @@ from card_deck.services.helper import (
     svc_card_deck_helper_view_discard_pile,
     svc_card_deck_helper_view_hand_pile,
 )
+from common.constants import CardPile
 from profile_player.models import PlayerProfile
 
 logger = logging.getLogger(__name__)
@@ -181,3 +186,84 @@ def svc_card_deck_view_discard_pile(team_id: uuid.UUID, player: PlayerProfile, s
         discard_cards = CardSerializer(discard_cards, many=True).data
 
     return ErrorCode(ErrorCode.SUCCESS), discard_cards
+
+
+def svc_card_deck_draw_card(team_id: uuid.UUID, player: PlayerProfile, card_id: uuid.UUID, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, team = svc_card_deck_helper_get_team_by_id(team_id=team_id)
+    if error:
+        return error, None
+
+    error = svc_card_deck_helper_validate_player_is_in_team(team=team, player=player)
+    if error:
+        return error, None
+
+    error, card_instance = svc_card_deck_helper_get_card_instance_by_card_id(
+        card_id=card_id, team=team, pile=CardPile.DECK
+    )
+    if error:
+        return error, None
+
+    card_instance = svc_card_deck_helper_draw_card(card_instance=card_instance)
+
+    card = card_instance.card
+
+    if serialized:
+        card = CardSerializer(card, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), card
+
+
+def svc_card_deck_discard_card(team_id: uuid.UUID, player: PlayerProfile, card_id: uuid.UUID, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, team = svc_card_deck_helper_get_team_by_id(team_id=team_id)
+    if error:
+        return error, None
+
+    error = svc_card_deck_helper_validate_player_is_in_team(team=team, player=player)
+    if error:
+        return error, None
+
+    error, card_instance = svc_card_deck_helper_get_card_instance_by_card_id(
+        card_id=card_id, team=team, pile=CardPile.HAND
+    )
+    if error:
+        return error, None
+
+    card_instance = svc_card_deck_helper_discard_card(card_instance=card_instance)
+
+    card = card_instance.card
+
+    if serialized:
+        card = CardSerializer(card, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), card
+
+
+def svc_card_deck_return_card(team_id: uuid.UUID, player: PlayerProfile, card_id: uuid.UUID, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, team = svc_card_deck_helper_get_team_by_id(team_id=team_id)
+    if error:
+        return error, None
+
+    error = svc_card_deck_helper_validate_player_is_in_team(team=team, player=player)
+    if error:
+        return error, None
+
+    error, card_instance = svc_card_deck_helper_get_card_instance_by_card_id(
+        card_id=card_id, team=team, pile=CardPile.HAND
+    )
+    if error:
+        return error, None
+
+    card_instance = svc_card_deck_helper_return_card(card_instance=card_instance)
+
+    card = card_instance.card
+
+    if serialized:
+        card = CardSerializer(card, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), card

@@ -28,6 +28,7 @@ admin.site.register(Card, CardAdmin)
 class CardInstanceAdmin(admin.ModelAdmin):
     list_display = ("card", "team", "pile")
     search_fields = ["card__title", "team__team_name"]
+    readonly_fields = ("card", "team")
 
 
 admin.site.register(CardInstance, CardInstanceAdmin)

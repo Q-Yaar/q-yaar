@@ -24,6 +24,7 @@ class ErrorCode(BaseErrorCode):
     # Object Does Not Exist Errors - 3 series
     INVALID_TAG_NAMES = "301"
     INVALID_CARD_IDS = "302"
+    CARD_NOT_AVAILABLE_FOR_ACTION = "303"
 
     # Integrity Errors - 4 Series
     TAG_ALREADY_EXISTS = "401"
@@ -38,6 +39,7 @@ class ErrorCode(BaseErrorCode):
         MISSING_NUM_CARDS: status.HTTP_400_BAD_REQUEST,
         INVALID_TAG_NAMES: status.HTTP_400_BAD_REQUEST,
         INVALID_CARD_IDS: status.HTTP_400_BAD_REQUEST,
+        CARD_NOT_AVAILABLE_FOR_ACTION: status.HTTP_400_BAD_REQUEST,
         TAG_ALREADY_EXISTS: status.HTTP_400_BAD_REQUEST,
     }
 
@@ -81,6 +83,9 @@ class ErrorCode(BaseErrorCode):
         invalid_ids = kwargs.get("invalid_card_ids", [])
         return f"Invalid card ids: {', '.join(invalid_ids)}"
 
+    def get_string_for_card_not_available_for_action(kwargs: dict):
+        return f"Card - {kwargs.get('card_id')} not available in pile - {kwargs.get('pile_name')}"
+
     def get_string_for_tag_already_exists(kwargs: dict):
         tag_name = kwargs.get("tag_name")
         return f"Tag with name '{tag_name}' already exists."
@@ -95,6 +100,7 @@ class ErrorCode(BaseErrorCode):
         MISSING_NUM_CARDS: get_string_for_missing_num_cards,
         INVALID_TAG_NAMES: get_string_for_invalid_tag_names,
         INVALID_CARD_IDS: get_string_for_invalid_card_ids,
+        CARD_NOT_AVAILABLE_FOR_ACTION: get_string_for_card_not_available_for_action,
         TAG_ALREADY_EXISTS: get_string_for_tag_already_exists,
     }
 

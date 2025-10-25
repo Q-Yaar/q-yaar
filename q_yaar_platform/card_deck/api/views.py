@@ -6,11 +6,14 @@ from card_deck.services.core import (
     svc_card_deck_bulk_create_cards,
     svc_card_deck_create_deck_for_team,
     svc_card_deck_create_tag,
+    svc_card_deck_discard_card,
+    svc_card_deck_draw_card,
     svc_card_deck_get_card_stats,
     svc_card_deck_get_cards_by_tag,
     svc_card_deck_get_deck_for_team,
     svc_card_deck_get_list_of_tags,
     svc_card_deck_peek_cards,
+    svc_card_deck_return_card,
     svc_card_deck_view_discard_pile,
     svc_card_deck_view_hand_pile,
 )
@@ -103,4 +106,34 @@ class CardPeekView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def post(self, request, team_id: uuid.UUID, **kwargs):
         error, response = svc_card_deck_peek_cards(team_id, kwargs["profile"], request.data)
+        return get_standard_response(error, response)
+
+
+class CardDrawView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".CardDrawView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def post(self, request, team_id: uuid.UUID, card_id: uuid.UUID, **kwargs):
+        error, response = svc_card_deck_draw_card(team_id, kwargs["profile"], card_id)
+        return get_standard_response(error, response)
+
+
+class CardDiscardView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".CardDiscardView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def post(self, request, team_id: uuid.UUID, card_id: uuid.UUID, **kwargs):
+        error, response = svc_card_deck_discard_card(team_id, kwargs["profile"], card_id)
+        return get_standard_response(error, response)
+
+
+class CardReturnView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".CardReturnView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def post(self, request, team_id: uuid.UUID, card_id: uuid.UUID, **kwargs):
+        error, response = svc_card_deck_return_card(team_id, kwargs["profile"], card_id)
         return get_standard_response(error, response)

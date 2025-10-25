@@ -215,3 +215,47 @@ def svc_card_deck_helper_view_discard_pile(team: Team):
     cards = [instance.card for instance in card_instances]
 
     return cards
+
+
+def svc_card_deck_helper_get_card_instance_by_card_id(card_id: uuid.UUID, team: Team, pile: CardPile):
+    logger.debug(f">> ARGS: {locals()}")
+
+    card_instance = CardInstance.objects.filter(card__external_id=card_id, team=team, pile=pile.value).first()
+    if not card_instance:
+        return (
+            ErrorCode(
+                ErrorCode.CARD_NOT_AVAILABLE_FOR_ACTION,
+                card_id=card_id,
+                pile_name=CardPile.get_string_for_type(CardPile(pile)),
+            ),
+            None,
+        )
+
+    return None, card_instance
+
+
+def svc_card_deck_helper_draw_card(card_instance: CardInstance):
+    logger.debug(f">> ARGS: {locals()}")
+
+    card_instance.pile = CardPile.HAND.value
+    card_instance.save()
+
+    return card_instance
+
+
+def svc_card_deck_helper_discard_card(card_instance: CardInstance):
+    logger.debug(f">> ARGS: {locals()}")
+
+    card_instance.pile = CardPile.DISCARD.value
+    card_instance.save()
+
+    return card_instance
+
+
+def svc_card_deck_helper_return_card(card_instance: CardInstance):
+    logger.debug(f">> ARGS: {locals()}")
+
+    card_instance.pile = CardPile.DECK.value
+    card_instance.save()
+
+    return card_instance
