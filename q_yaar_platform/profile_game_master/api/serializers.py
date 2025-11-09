@@ -1,19 +1,19 @@
 from rest_framework import serializers
 
 from account.api.serializers import PlatformUserSerializer
-from profile_player.models import PlayerProfile
+from profile_game_master.models import GameMasterProfile
 
 
-class PlayerProfileSerializer(serializers.ModelSerializer):
+class GameMasterProfileSerializer(serializers.ModelSerializer):
     user_profile = serializers.SerializerMethodField()
     profile_pic = serializers.SerializerMethodField()
 
     class Meta:
-        model = PlayerProfile
+        model = GameMasterProfile
         fields = ("profile_name", "user_profile", "profile_pic", "created", "modified", "is_suspended")
 
-    def get_user_profile(self, obj: PlayerProfile) -> dict:
+    def get_user_profile(self, obj: GameMasterProfile) -> dict:
         return PlatformUserSerializer(obj.platform_user, many=False).data
 
-    def get_profile_pic(self, obj: PlayerProfile) -> dict:
+    def get_profile_pic(self, obj: GameMasterProfile) -> dict:
         return obj.get_profile_pic()

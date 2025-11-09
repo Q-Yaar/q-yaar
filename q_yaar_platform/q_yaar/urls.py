@@ -32,5 +32,6 @@ admin.site.login_form = CustomAdminAuthenticationForm
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/auth/", include("jwt_auth.api.urls")),
+    path("api/v1/games/", include("game.api.urls")),
     path("api/v1/cards/", include("card_deck.api.urls")),
 ]

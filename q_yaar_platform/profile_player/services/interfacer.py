@@ -1,15 +1,18 @@
 import logging
+import uuid
 
 from account.models import PlatformUser
 from profile_player.models import PlayerProfile
+
 from .helper import (
     svc_player_helper_check_if_player_with_email_exists,
     svc_player_helper_create_player,
     svc_player_helper_get_player_for_platform_user,
+    svc_player_helper_get_player_for_user_id,
+    svc_player_helper_get_players_for_user_ids,
     svc_player_helper_get_serialized_player,
     svc_player_helper_update_player,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -55,4 +58,15 @@ def svc_player_update_player(profile: PlayerProfile, request_data: dict, seriali
 
 
 def svc_player_check_if_player_with_email_exists(email: str):
+    logger.debug(f">> ARGS: {locals()}")
     return svc_player_helper_check_if_player_with_email_exists(email=email)
+
+
+def svc_player_get_player_by_platform_user_id(user_id: uuid.UUID):
+    logger.debug(f">> ARGS: {locals()}")
+    return svc_player_helper_get_player_for_user_id(user_id=user_id)
+
+
+def svc_player_get_player_list_by_platform_user_ids(user_ids: list[uuid.UUID]):
+    logger.debug(f">> ARGS: {locals()}")
+    return svc_player_helper_get_players_for_user_ids(user_ids=user_ids)
