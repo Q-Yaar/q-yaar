@@ -49,7 +49,7 @@ services:
   
   db:
     image: postgres
-    env_file: ./../q_yaar_platform/.env_docker
+    env_file: ./../build_meta/.env_staging
     ports:
       - "5434:5432"
     expose:
