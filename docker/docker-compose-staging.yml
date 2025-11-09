@@ -46,6 +46,18 @@ services:
     env_file: ./../build_meta/.env_staging
     networks:
       - backend
+  
+  db:
+    image: postgres
+    env_file: ./../q_yaar_platform/.env_docker
+    ports:
+      - "5434:5432"
+    expose:
+      - "5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
 
 networks:
   backend:
@@ -53,4 +65,3 @@ networks:
 
 volumes:
   redisdata:
-  dbdata:
