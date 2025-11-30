@@ -25,14 +25,14 @@ if [ "$git_pull" = "true" ]; then
   git -C $PROJECT_HOME/ pull
 fi
 
-sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml -f $PROJECT_HOME/docker/docker-compose-staging.yml build
-sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml -f $PROJECT_HOME/docker/docker-compose-staging.yml up -d
+sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml build
+sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml up -d
 
 if [ "$collectstatic" = "true" ]; then
-  sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec web_monolith mkdir static
-  sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec web_monolith python manage.py collectstatic --noinput
+  sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core mkdir static
+  sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py collectstatic --noinput
 fi
 
 if [ "$git_pull" = "true" ]; then
-  sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec web_monolith python manage.py migrate
+  sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py migrate
 fi
