@@ -63,7 +63,7 @@ services:
     restart: always
     build:
       context: ./../nginx/
-      dockerfile: ./../nginx/Dockerfile-staging-master
+      dockerfile: ./../nginx/Dockerfile-staging
     container_name: nginxserver
     ports:
       - "80:80"
