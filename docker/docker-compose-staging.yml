@@ -59,7 +59,6 @@ services:
     networks:
       - backend
 
-  services:
   nginxserver:
     restart: always
     build:
