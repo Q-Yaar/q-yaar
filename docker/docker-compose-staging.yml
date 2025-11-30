@@ -46,7 +46,7 @@ services:
     env_file: ./../build_meta/.env_staging
     networks:
       - backend
-  
+
   db:
     image: postgres
     env_file: ./../build_meta/.env_staging
@@ -55,9 +55,23 @@ services:
     expose:
       - "5432"
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql
     networks:
       - backend
+
+  services:
+  nginxserver:
+    restart: always
+    build:
+      context: ./../nginx/
+      dockerfile: ./../nginx/Dockerfile-staging-master
+    container_name: nginxserver
+    ports:
+      - "80:80"
+    networks:
+      - backend
+    depends_on:
+      - q_yaar_core
 
 networks:
   backend:
