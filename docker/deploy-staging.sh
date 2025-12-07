@@ -25,14 +25,14 @@ if [ "$git_pull" = "true" ]; then
   git -C $PROJECT_HOME/ pull
 fi
 
-docker-compose -f $PROJECT_HOME/docker/docker-compose-staging.yml build
-docker-compose -f $PROJECT_HOME/docker/docker-compose-staging.yml up -d
+docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml build
+docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml up -d
 
 if [ "$collectstatic" = "true" ]; then
-  docker-compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core mkdir static
-  docker-compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py collectstatic --noinput
+  docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core mkdir static
+  docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py collectstatic --noinput
 fi
 
 if [ "$git_pull" = "true" ]; then
-  docker-compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py migrate
+  docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py migrate
 fi
