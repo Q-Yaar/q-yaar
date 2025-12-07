@@ -7,3 +7,4 @@ staticfiles
 docker/redis/
 .venv/
 build_meta
+docker/postgres/
