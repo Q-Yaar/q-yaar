@@ -14,38 +14,41 @@ services:
       - "8000:8000"
     networks:
       - backend
+    depends_on:
+      - db
+      - redis
     command: >
       bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
 
-  fast_worker:
-    build:
-      context: ./../q_yaar_platform
-      dockerfile: ./../q_yaar_platform/Dockerfile-staging
-    command: celery -A q_yaar worker -E -l info --concurrency=8 --pool=prefork -n fast_worker@qyaar.com  -Q example
-    env_file: ./../build_meta/.env_staging
-    networks:
-      - backend
+  # fast_worker:
+  #   build:
+  #     context: ./../q_yaar_platform
+  #     dockerfile: ./../q_yaar_platform/Dockerfile-staging
+  #   command: celery -A q_yaar worker -E -l info --concurrency=8 --pool=prefork -n fast_worker@qyaar.com  -Q example
+  #   env_file: ./../build_meta/.env_staging
+  #   networks:
+  #     - backend
 
-  slow_worker:
-    build:
-      context: ./../q_yaar_platform
-      dockerfile: ./../q_yaar_platform/Dockerfile-staging
-    command: celery -A q_yaar worker -E -l info --concurrency=8 --pool=prefork -n slow_worker@qyaar.com  -Q default
-    env_file: ./../build_meta/.env_staging
-    networks:
-      - backend
+  # slow_worker:
+  #   build:
+  #     context: ./../q_yaar_platform
+  #     dockerfile: ./../q_yaar_platform/Dockerfile-staging
+  #   command: celery -A q_yaar worker -E -l info --concurrency=8 --pool=prefork -n slow_worker@qyaar.com  -Q default
+  #   env_file: ./../build_meta/.env_staging
+  #   networks:
+  #     - backend
 
-  celery_beat:
-    build:
-      context: ./../q_yaar_platform
-      dockerfile: ./../q_yaar_platform/Dockerfile-staging
-    extra_hosts:
-      # For ubuntu docker to access host machine services
-      - "host.docker.internal:host-gateway"
-    command: celery -A q_yaar beat -l debug
-    env_file: ./../build_meta/.env_staging
-    networks:
-      - backend
+  # celery_beat:
+  #   build:
+  #     context: ./../q_yaar_platform
+  #     dockerfile: ./../q_yaar_platform/Dockerfile-staging
+  #   extra_hosts:
+  #     # For ubuntu docker to access host machine services
+  #     - "host.docker.internal:host-gateway"
+  #   command: celery -A q_yaar beat -l debug
+  #   env_file: ./../build_meta/.env_staging
+  #   networks:
+  #     - backend
 
   db:
     image: postgres
@@ -59,22 +62,22 @@ services:
     networks:
       - backend
 
-  # nginxserver:
-  #   restart: always
-  #   build:
-  #     context: ./../nginx/
-  #     dockerfile: ./../nginx/Dockerfile-staging
-  #   container_name: nginxserver
-  #   ports:
-  #     - "80:80"
-  #   networks:
-  #     - backend
-  #   depends_on:
-  #     - q_yaar_core
+  redis:
+    image: redis:7.4-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+    command: >
+      redis-server --save 20 1 --loglevel warning --requirepass your_strong_password
+    networks:
+      - backend
 
 networks:
   backend:
 
 
 volumes:
-  redisdata:
+  redis:
+  postgres:

@@ -37,7 +37,7 @@ IS_LOCAL = config("IS_LOCAL", default=False, cast=bool)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-p(ik-w@g&pzgae#3+h*v57&#trv7jskbmu%w3ha_5v%&qxb8r*"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["game.crayfish-musical.ts.net", "game"]
 
 #######################################################################################################################
 
@@ -74,6 +74,7 @@ PROJECT_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",  # Logging-Request-ID
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -234,6 +235,20 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
+
+# CORS
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_HEADERS = True
+# CORS_ALLOW_HEADERS = [
+#     "authorization",
+#     "content-type",
+#     "accept",
+#     "origin",
+#     "user-agent",
+#     "x-csrftoken",
+#     "x-requested-with",
+# ]
+
 
 #######################################################################################################################
 
