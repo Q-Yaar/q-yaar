@@ -5,6 +5,6 @@
 .coverage
 staticfiles
 docker/redis/
+docker/postgres/
 .venv/
 build_meta
-docker/postgres/
