@@ -14,6 +14,9 @@ services:
       - "8000:8000"
     networks:
       - backend
+    depends_on:
+      - db
+      - redis
     command: >
       bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
 
@@ -59,22 +62,22 @@ services:
     networks:
       - backend
 
-  # nginxserver:
-  #   restart: always
-  #   build:
-  #     context: ./../nginx/
-  #     dockerfile: ./../nginx/Dockerfile-staging
-  #   container_name: nginxserver
-  #   ports:
-  #     - "80:80"
-  #   networks:
-  #     - backend
-  #   depends_on:
-  #     - q_yaar_core
+  redis:
+    image: redis:7.4-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+    command: >
+      redis-server --save 20 1 --loglevel warning --requirepass your_strong_password
+    networks:
+      - backend
 
 networks:
   backend:
 
 
 volumes:
-  redisdata:
+  redis:
+  postgres:
