@@ -24,7 +24,7 @@ def svc_card_deck_helper_validate_and_get_request_data(request_data: dict):
 def svc_card_deck_helper_get_cards_by_tag(tag_name: str):
     logger.debug(f">> ARGS: {locals()}")
 
-    return Card.objects.filter(tags__icontains=tag_name).order_by("-created")
+    return Card.objects.filter(tags__name__icontains=tag_name).order_by("-created")
 
 
 def svc_card_deck_helper_validate_input_for_bulk_create(cards_data: list[dict]):
