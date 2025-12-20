@@ -33,6 +33,6 @@ if [ "$collectstatic" = "true" ]; then
   sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py collectstatic --noinput
 fi
 
-if [ "$git_pull" = "true" ]; then
-  sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py migrate
-fi
+# if [ "$git_pull" = "true" ]; then
+#   sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py migrate
+# fi
