@@ -12,9 +12,9 @@ admin.site.register(CardTag, CardTagAdmin)
 
 
 class CardAdmin(admin.ModelAdmin):
-    list_display = ("title", "description", "reward")
+    list_display = ("title", "description", "card_type", "reward")
     search_fields = ["title"]
-    list_filter = ("tags",)
+    list_filter = ("tags", "card_type")
     filter_horizontal = ("tags",)
 
     # Override to use the base manager to include soft-deleted items
