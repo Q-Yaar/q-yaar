@@ -52,7 +52,12 @@ class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
         metadata: dict = {},
     ) -> "Card":
         card = cls(
-            title=title, description=description, card_type=card_type, image=image, reward=reward, metadata=metadata
+            title=title,
+            description=description,
+            card_type=CardType.tokentype_from_string(card_type),
+            image=image,
+            reward=reward,
+            metadata=metadata,
         )
         card.save()
         card.tags.add(*tags)
