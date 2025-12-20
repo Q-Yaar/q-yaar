@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from common.admin_panel_features import ExportCsvMixin
+
 from .models import Card, CardInstance, CardTag
 
 
@@ -11,11 +13,13 @@ class CardTagAdmin(admin.ModelAdmin):
 admin.site.register(CardTag, CardTagAdmin)
 
 
-class CardAdmin(admin.ModelAdmin):
+class CardAdmin(admin.ModelAdmin, ExportCsvMixin):
     list_display = ("title", "description", "card_type", "reward")
     search_fields = ["title"]
     list_filter = ("tags", "card_type")
     filter_horizontal = ("tags",)
+
+    actions = ["export_as_csv"]
 
     # Override to use the base manager to include soft-deleted items
     def get_queryset(self, request):
