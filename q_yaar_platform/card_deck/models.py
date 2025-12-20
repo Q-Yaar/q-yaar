@@ -1,10 +1,9 @@
 import pghistory
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
-from common.constants import CardPile, Length
+from common.constants import CardPile, CardType, Length
 from django.db import models
 from django.db.models import JSONField
-from game.models import Game, Team
-from profile_player.models import PlayerProfile
+from game.models import Team
 
 
 class CardTag(AbstractTimeStamped, AbstractVersioned):
@@ -27,6 +26,7 @@ class CardTag(AbstractTimeStamped, AbstractVersioned):
 class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
     title = models.CharField(max_length=Length.CARD_TITLE)
     description = models.TextField()
+    card_type = models.PositiveIntegerField(choices=CardType.get_choices())
     image = models.URLField(max_length=Length.CARD_IMAGE_URL, blank=True, null=True)
 
     reward = models.PositiveIntegerField(default=None, blank=True, null=True)
@@ -42,9 +42,18 @@ class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
 
     @classmethod
     def create(
-        cls, title: str, description: str, image: str, tags: list[CardTag], reward: int = None, metadata: dict = {}
+        cls,
+        title: str,
+        description: str,
+        card_type: CardType,
+        image: str,
+        tags: list[CardTag],
+        reward: int = None,
+        metadata: dict = {},
     ) -> "Card":
-        card = cls(title=title, description=description, image=image, reward=reward, metadata=metadata)
+        card = cls(
+            title=title, description=description, card_type=card_type, image=image, reward=reward, metadata=metadata
+        )
         card.save()
         card.tags.add(*tags)
         card.save()

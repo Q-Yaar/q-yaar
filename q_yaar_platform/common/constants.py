@@ -65,6 +65,11 @@ class GameStatus(BaseIntEnum):
     COMPLETED = 3
 
 
+class CardType(BaseIntEnum):
+    CURSE = 1
+    POWERUP = 2
+
+
 class CardPile(BaseIntEnum):
     DECK = 1
     HAND = 2

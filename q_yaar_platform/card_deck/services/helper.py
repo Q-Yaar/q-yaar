@@ -3,8 +3,8 @@ import uuid
 
 from card_deck.models import Card, CardInstance, CardTag
 from card_deck.services.error_codes import ErrorCode
-from django.db import IntegrityError, transaction
 from common.constants import CardPile
+from django.db import IntegrityError, transaction
 from game.models import Team
 from game.services.interfacer import svc_game_get_team_by_id, svc_game_verify_player_belongs_to_team
 from profile_player.models import PlayerProfile
@@ -30,10 +30,11 @@ def svc_card_deck_helper_get_cards_by_tag(tag_name: str):
 def svc_card_deck_helper_validate_input_for_bulk_create(cards_data: list[dict]):
     logger.debug(f">> ARGS: {locals()}")
 
-    required_fields = {"title", "description", "tags"}
+    required_fields = {"title", "description", "card_type", "tags"}
     allowed_fields = {
         "title": str,
         "description": str,
+        "card_type": str,
         "image": str,
         "reward": int,
         "tags": list,
