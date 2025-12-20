@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   q_yaar_core:
     restart: always
