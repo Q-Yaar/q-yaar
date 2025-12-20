@@ -1,7 +1,6 @@
 from card_deck.models import Card
-from rest_framework import serializers
-
 from common.constants import CardType
+from rest_framework import serializers
 
 
 class CardSerializer(serializers.ModelSerializer):
