@@ -144,7 +144,7 @@ class CardDeckShuffleView(generics.GenericAPIView):
     logger = logging.getLogger(__name__ + ".CardDeckShuffleView")
     permission_classes = (IsAuthenticated,)
 
-    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER, UserRolesType.GAME_MASTER])
     def post(self, request, team_id: uuid.UUID, **kwargs):
         error, response = svc_card_deck_shuffle_deck(request.data, team_id)
         return get_standard_response(error, response)
