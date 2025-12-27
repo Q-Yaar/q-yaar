@@ -13,6 +13,9 @@ class ErrorCode(BaseErrorCode):
     MISSING_REWARD_TYPE = "002"
     MISSING_REWARD_META = "003"
     INVALID_REWARD_META = "004"
+    MISSING_CATEGORY_NAME = "005"
+    MISSING_REWARD_ID = "006"
+    MISSING_PRIORITY = "007"
 
     # Permission Errors - 1 Series
 
@@ -20,6 +23,7 @@ class ErrorCode(BaseErrorCode):
     INVALID_REWARD_TYPE = "201"
 
     # Object Does Not Exist Errors - 3 series
+    INVALID_REWARD_ID = "301"
 
     # Integrity Errors - 4 Series
 
@@ -28,7 +32,11 @@ class ErrorCode(BaseErrorCode):
         MISSING_REWARD_TYPE: status.HTTP_400_BAD_REQUEST,
         MISSING_REWARD_META: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_META: status.HTTP_400_BAD_REQUEST,
+        MISSING_CATEGORY_NAME: status.HTTP_400_BAD_REQUEST,
+        MISSING_REWARD_ID: status.HTTP_400_BAD_REQUEST,
+        MISSING_PRIORITY: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_TYPE: status.HTTP_400_BAD_REQUEST,
+        INVALID_REWARD_ID: status.HTTP_400_BAD_REQUEST,
     }
 
     def get_string_for_missing_reward_name(kwargs: dict):
@@ -43,15 +51,31 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_invalid_reward_meta(kwargs: dict):
         return f"Invalid reward_meta: {kwargs.get('reward_meta')}"
 
+    def get_string_for_missing_category_name(kwargs: dict):
+        return "Missing category_name"
+
+    def get_string_for_missing_reward_id(kwargs: dict):
+        return "Missing reward_id"
+
+    def get_string_for_missing_priority(kwargs: dict):
+        return "Missing priority"
+
     def get_string_for_invalid_reward_type(kwargs: dict):
         return f"Invalid reward_type: {kwargs.get('reward_type')}"
+
+    def get_string_for_invalid_reward_id(kwargs: dict):
+        return f"Invalid reward_id: {kwargs.get('reward_id')}"
 
     CODE_MESSAGE_MAP = {
         MISSING_REWARD_NAME: get_string_for_missing_reward_name,
         MISSING_REWARD_TYPE: get_string_for_missing_reward_type,
         MISSING_REWARD_META: get_string_for_missing_reward_meta,
         INVALID_REWARD_META: get_string_for_invalid_reward_meta,
+        MISSING_CATEGORY_NAME: get_string_for_missing_category_name,
+        MISSING_REWARD_ID: get_string_for_missing_reward_id,
+        MISSING_PRIORITY: get_string_for_missing_priority,
         INVALID_REWARD_TYPE: get_string_for_invalid_reward_type,
+        INVALID_REWARD_ID: get_string_for_invalid_reward_id,
     }
 
     def __init__(self, code, **kwargs) -> None:

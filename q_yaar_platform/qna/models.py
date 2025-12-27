@@ -38,6 +38,7 @@ class QuestionReward(AbstractExternalFacing, AbstractTimeStamped, AbstractVersio
 class QuestionCategory(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
     category_name = models.CharField(max_length=Length.QUESTION_CATEGORY, unique=True)
     reward = models.ForeignKey(QuestionReward, on_delete=models.PROTECT, related_name="question_categories")
+    priority = models.PositiveIntegerField()
 
     class Meta:
         indexes = [models.Index(fields=["category_name"])]
@@ -46,8 +47,8 @@ class QuestionCategory(AbstractExternalFacing, AbstractTimeStamped, AbstractVers
         return self.category_name
 
     @classmethod
-    def create(cls, name: str) -> "QuestionCategory":
-        category = cls(name=name)
+    def create(cls, category_name: str, reward: QuestionReward, priority: int) -> "QuestionCategory":
+        category = cls(category_name=category_name, reward=reward, priority=priority)
         category.save()
         return category
 

@@ -13,7 +13,7 @@ admin.site.register(QuestionReward, QuestionRewardAdmin)
 
 
 class QuestionCategoryAdmin(admin.ModelAdmin):
-    list_display = ("category_name", "reward")
+    list_display = ("category_name", "reward", "priority")
     search_fields = ["category_name", "reward__reward_name"]
     list_filter = ("reward__reward_type",)
 

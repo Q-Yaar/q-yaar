@@ -2,9 +2,14 @@ import logging
 
 from common.constants import QuestionRewardType
 from qna.services.helper import (
+    svc_qna_helper_create_category,
     svc_qna_helper_create_reward,
+    svc_qna_helper_get_categories,
+    svc_qna_helper_get_reward_by_id,
     svc_qna_helper_get_rewards,
+    svc_qna_helper_get_serialized_categories,
     svc_qna_helper_get_serialized_rewards,
+    svc_qna_helper_run_validations_to_create_category,
     svc_qna_helper_run_validations_to_create_reward,
     svc_qna_helper_run_validations_to_get_rewards,
 )
@@ -46,3 +51,33 @@ def svc_qna_create_reward(request_data: dict, serialized: bool = True):
         reward = svc_qna_helper_get_serialized_rewards(reward, many=False)
 
     return ErrorCode(ErrorCode.CREATED), reward
+
+
+def svc_qna_get_categories(serialized: bool = False):
+    logger.debug(f">> ARGS: {locals()}")
+
+    categories = svc_qna_helper_get_categories()
+
+    if serialized:
+        categories = svc_qna_helper_get_serialized_categories(categories, many=True)
+
+    return ErrorCode(ErrorCode.SUCCESS), categories
+
+
+def svc_qna_create_cateogory(request_data: dict, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error = svc_qna_helper_run_validations_to_create_category(request_data)
+    if error:
+        return error, None
+
+    error, reward = svc_qna_helper_get_reward_by_id(request_data["reward_id"])
+    if error:
+        return error, None
+
+    category = svc_qna_helper_create_category(request_data["category_name"], reward, request_data["priority"])
+
+    if serialized:
+        category = svc_qna_helper_get_serialized_categories(category, many=False)
+
+    return ErrorCode(ErrorCode.CREATED), category
