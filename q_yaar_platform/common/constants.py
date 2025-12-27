@@ -39,6 +39,10 @@ class Length:
     CARD_TAG = 100
     CARD_TITLE = 100
     CARD_IMAGE_URL = 200
+    REWARD_NAME = 100
+    QUESTION_CATEGORY = 100
+    PLACEHOLDER_NAME = 100
+    PLACEHOLDER_VALUE = 255
 
 
 class ModuleErrorPrefix:
@@ -48,6 +52,7 @@ class ModuleErrorPrefix:
     PROFILE_GAME_MASTER = "GMST"
     CARD_DECK = "CRD"
     GAME = "GAM"
+    QNA = "QNA"
 
 
 class UserRolesType(BaseIntEnum):
@@ -74,3 +79,7 @@ class CardPile(BaseIntEnum):
     DECK = 1
     HAND = 2
     DISCARD = 3
+
+
+class QuestionRewardType(BaseIntEnum):
+    CARD_DRAW = 1

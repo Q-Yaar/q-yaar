@@ -1,6 +1,5 @@
-from django.contrib import admin
-
 from common.admin_panel_features import ExportCsvMixin
+from django.contrib import admin
 
 from .models import Card, CardInstance, CardTag
 
