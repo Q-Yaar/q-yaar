@@ -1,8 +1,9 @@
 import logging
 import uuid
 
-from common.constants import QuestionRewardType
+from common.constants import QuestionRewardType, UserRolesType
 from qna.services.helper import (
+    svc_qna_helper_assign_question_to_game,
     svc_qna_helper_create_category,
     svc_qna_helper_create_question,
     svc_qna_helper_create_reward,
@@ -15,10 +16,13 @@ from qna.services.helper import (
     svc_qna_helper_get_serialized_categories,
     svc_qna_helper_get_serialized_questions,
     svc_qna_helper_get_serialized_rewards,
+    svc_qna_helper_run_validations_to_assign_question_to_game,
     svc_qna_helper_run_validations_to_create_category,
     svc_qna_helper_run_validations_to_create_question,
     svc_qna_helper_run_validations_to_create_reward,
+    svc_qna_helper_run_validations_to_get_questions_for_category_player,
     svc_qna_helper_run_validations_to_get_rewards,
+    svc_qna_helper_validate_and_get_game,
 )
 
 from .error_codes import ErrorCode
@@ -90,14 +94,31 @@ def svc_qna_create_cateogory(request_data: dict, serialized: bool = True):
     return ErrorCode(ErrorCode.CREATED), category
 
 
-def svc_qna_get_questions_for_category(category_id: uuid.UUID, serialized: bool = False):
+def svc_qna_get_questions_for_category(
+    category_id: uuid.UUID, role: UserRolesType, request_data: dict, serialized: bool = False
+):
     logger.debug(f">> ARGS: {locals()}")
 
     error, category = svc_qna_helper_get_category_by_id(category_id)
     if error:
         return error, None
 
-    questions = svc_qna_helper_get_questions_for_category(category)
+    game = None
+
+    if role == UserRolesType.PLAYER:
+        error = svc_qna_helper_run_validations_to_get_questions_for_category_player(request_data)
+        if error:
+            return error, None
+
+        error, game = svc_qna_helper_validate_and_get_game(request_data["game_id"])
+        if error:
+            return error, None
+    elif role == UserRolesType.GAME_MASTER and request_data.get("game_id"):
+        error, game = svc_qna_helper_validate_and_get_game(request_data["game_id"])
+        if error:
+            return error, None
+
+    questions = svc_qna_helper_get_questions_for_category(category, role, game=game)
 
     if serialized:
         questions = svc_qna_helper_get_serialized_questions(questions, many=True)
@@ -116,9 +137,7 @@ def svc_qna_create_question(request_data: dict, category_id: uuid.UUID, serializ
     if error:
         return error, None
 
-    question = svc_qna_helper_create_question(
-        request_data["template"], request_data.get("placeholders", {}), category
-    )
+    question = svc_qna_helper_create_question(request_data["template"], request_data.get("placeholders", {}), category)
 
     if serialized:
         question = svc_qna_helper_get_serialized_questions(question, many=False)
@@ -141,3 +160,19 @@ def svc_qna_get_question_by_id(category_id: uuid.UUID, question_id: uuid.UUID, s
         question = svc_qna_helper_get_serialized_questions(question, many=False)
 
     return ErrorCode(ErrorCode.SUCCESS), question
+
+
+def svc_qna_assign_question_to_game(game_id: uuid.UUID, request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error = svc_qna_helper_run_validations_to_assign_question_to_game(request_data)
+    if error:
+        return error, None
+
+    error, game = svc_qna_helper_validate_and_get_game(game_id)
+    if error:
+        return error, None
+
+    svc_qna_helper_assign_question_to_game(game, request_data["question_ids"])
+
+    return ErrorCode(ErrorCode.NO_CONTENT), None

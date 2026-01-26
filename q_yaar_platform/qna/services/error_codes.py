@@ -18,6 +18,8 @@ class ErrorCode(BaseErrorCode):
     MISSING_PRIORITY = "007"
     MISSING_TEMPLATE = "008"
     MISSING_PLACEHOLDERS = "009"
+    MISSING_QUESTION_IDS = "010"
+    MISSING_GAME_ID = "011"
 
     # Permission Errors - 1 Series
 
@@ -28,6 +30,7 @@ class ErrorCode(BaseErrorCode):
     INVALID_REWARD_ID = "301"
     INVALID_CATEGORY_ID = "302"
     INVALID_QUESTION_ID = "303"
+    INVALID_QUESTION_IDS = "304"
 
     # Integrity Errors - 4 Series
 
@@ -41,10 +44,13 @@ class ErrorCode(BaseErrorCode):
         MISSING_PRIORITY: status.HTTP_400_BAD_REQUEST,
         MISSING_TEMPLATE: status.HTTP_400_BAD_REQUEST,
         MISSING_PLACEHOLDERS: status.HTTP_400_BAD_REQUEST,
+        MISSING_QUESTION_IDS: status.HTTP_400_BAD_REQUEST,
+        MISSING_GAME_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_TYPE: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_CATEGORY_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_QUESTION_ID: status.HTTP_400_BAD_REQUEST,
+        INVALID_QUESTION_IDS: status.HTTP_400_BAD_REQUEST,
     }
 
     def get_string_for_missing_reward_name(kwargs: dict):
@@ -74,6 +80,12 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_missing_placeholders(kwargs: dict):
         return "Missing placeholders"
 
+    def get_string_for_missing_question_ids(kwargs: dict):
+        return "Missing question_ids"
+
+    def get_string_for_missing_game_id(kwargs: dict):
+        return "Missing game_id"
+
     def get_string_for_invalid_reward_type(kwargs: dict):
         return f"Invalid reward_type: {kwargs.get('reward_type')}"
 
@@ -86,6 +98,9 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_invalid_question_id(kwargs: dict):
         return f"Invalid question_id: {kwargs.get('question_id')}"
 
+    def get_string_for_invalid_question_ids(kwargs: dict):
+        return f"Invalid question_ids: {kwargs.get('question_ids')}"
+
     CODE_MESSAGE_MAP = {
         MISSING_REWARD_NAME: get_string_for_missing_reward_name,
         MISSING_REWARD_TYPE: get_string_for_missing_reward_type,
@@ -96,10 +111,13 @@ class ErrorCode(BaseErrorCode):
         MISSING_PRIORITY: get_string_for_missing_priority,
         MISSING_TEMPLATE: get_string_for_missing_template,
         MISSING_PLACEHOLDERS: get_string_for_missing_placeholders,
+        MISSING_QUESTION_IDS: get_string_for_missing_question_ids,
+        MISSING_GAME_ID: get_string_for_missing_game_id,
         INVALID_REWARD_TYPE: get_string_for_invalid_reward_type,
         INVALID_REWARD_ID: get_string_for_invalid_reward_id,
         INVALID_CATEGORY_ID: get_string_for_invalid_category_id,
         INVALID_QUESTION_ID: get_string_for_invalid_question_id,
+        INVALID_QUESTION_IDS: get_string_for_invalid_question_ids,
     }
 
     def __init__(self, code, **kwargs) -> None:

@@ -14,4 +14,7 @@ urlpatterns = [
         views.QuestionDetailView.as_view(),
         name="handler-questions-detail",
     ),
+    path(
+        r"game/<uuid:game_id>/questions", views.GameQuestionsListView.as_view(), name="handler-game-questions-list"
+    ),
 ]

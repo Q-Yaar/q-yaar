@@ -1,15 +1,26 @@
 import logging
 import uuid
 
-from common.constants import QuestionRewardType
+from common.constants import QuestionRewardType, UserRolesType
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
+from django.db.utils import IntegrityError
+from game.models import Game
+from game.services.interfacer import svc_game_get_game_by_id
 from qna.api.serializers import (
     QuestionCategorySerializer,
     QuestionDetailSerializer,
     QuestionRewardSerializer,
     QuestionSerializer,
 )
-from qna.models import Placeholder, PlaceholderAllowedValue, QuestionCategory, QuestionReward, QuestionTemplate
+from qna.models import (
+    GameQuestion,
+    Placeholder,
+    PlaceholderAllowedValue,
+    QuestionCategory,
+    QuestionReward,
+    QuestionTemplate,
+)
 from qna.popo.reward_meta.reward_types_map import REWARD_TYPE_MAP
 
 from .error_codes import ErrorCode
@@ -94,6 +105,39 @@ def svc_qna_helper_run_validations_to_create_question(request_data: dict):
     return None
 
 
+def svc_qna_helper_run_validations_to_assign_question_to_game(request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if not request_data.get("question_ids"):
+        return ErrorCode(ErrorCode.MISSING_QUESTION_IDS)
+
+    extracted_ids = QuestionTemplate.objects.filter(external_id__in=request_data["question_ids"]).values_list(
+        "external_id", flat=True
+    )
+    missing_ids = set(str(question_id) for question_id in request_data["question_ids"]) - set(
+        str(question_id) for question_id in extracted_ids
+    )
+    if missing_ids:
+        return ErrorCode(ErrorCode.INVALID_QUESTION_IDS, invalid_question_ids=list(missing_ids))
+
+    return None
+
+
+def svc_qna_helper_run_validations_to_get_questions_for_category_player(request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if not request_data.get("game_id"):
+        return ErrorCode(ErrorCode.MISSING_GAME_ID)
+
+    return None
+
+
+def svc_qna_helper_validate_and_get_game(game_id: uuid.UUID):
+    logger.debug(f">> ARGS: {locals()}")
+
+    return svc_game_get_game_by_id(game_id=game_id)
+
+
 def svc_qna_helper_get_category_by_id(category_id: uuid.UUID):
     logger.debug(f">> ARGS: {locals()}")
 
@@ -170,10 +214,18 @@ def svc_qna_helper_create_category(category_name: str, reward: QuestionReward, p
     return QuestionCategory.create(category_name=category_name, reward=reward, priority=priority)
 
 
-def svc_qna_helper_get_questions_for_category(category: QuestionCategory) -> list[QuestionTemplate]:
+def svc_qna_helper_get_questions_for_category(
+    category: QuestionCategory, role: UserRolesType, game: Game = None
+) -> list[QuestionTemplate]:
     logger.debug(f">> ARGS: {locals()}")
 
-    return QuestionTemplate.objects.filter(category=category).order_by("created")
+    if game:
+        question_ids = game.questions.filter(question_template__category=category).values_list(
+            "question_template", flat=True
+        )
+        return QuestionTemplate.objects.filter(pk__in=question_ids).order_by("created")
+    else:
+        return QuestionTemplate.objects.filter(category=category).order_by("created")
 
 
 def svc_qna_helper_create_question(
@@ -201,3 +253,17 @@ def svc_qna_helper_get_serialized_questions(
         return QuestionSerializer(questions, many=True).data
 
     return QuestionDetailSerializer(questions, many=False).data
+
+
+def svc_qna_helper_assign_question_to_game(game: Game, question_ids: list[str]):
+    logger.debug(f">> ARGS: {locals()}")
+
+    with transaction.atomic():
+        for question_id in question_ids:
+            question = QuestionTemplate.objects.get(external_id=question_id)
+            try:
+                GameQuestion.create(question_template=question, game=game)
+            except IntegrityError:
+                continue
+
+    return None

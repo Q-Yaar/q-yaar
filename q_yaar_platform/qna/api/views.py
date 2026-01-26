@@ -6,6 +6,7 @@ from common.decorators import validate_profile
 from common.response import get_paginated_response, get_standard_response
 from qna.api.serializers import QuestionCategorySerializer, QuestionRewardSerializer, QuestionSerializer
 from qna.services.core import (
+    svc_qna_assign_question_to_game,
     svc_qna_create_cateogory,
     svc_qna_create_question,
     svc_qna_create_reward,
@@ -52,9 +53,10 @@ class QuestionListView(generics.GenericAPIView):
     logger = logging.getLogger(__name__ + ".QuestionListView")
     permission_classes = (IsAuthenticated,)
 
-    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
     def get(self, request, category_id: uuid.UUID, **kwargs):
-        error, questions = svc_qna_get_questions_for_category(category_id)
+        role = kwargs["role"]
+        error, questions = svc_qna_get_questions_for_category(category_id, role, request.query_params)
         return get_paginated_response(self, error, questions, QuestionSerializer)
 
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
@@ -67,7 +69,17 @@ class QuestionDetailView(generics.GenericAPIView):
     logger = logging.getLogger(__name__ + ".QuestionDetailView")
     permission_classes = (IsAuthenticated,)
 
-    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
     def get(self, request, category_id: uuid.UUID, question_id: uuid.UUID, **kwargs):
         error, response = svc_qna_get_question_by_id(category_id, question_id)
+        return get_standard_response(error, response)
+
+
+class GameQuestionsListView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".GameQuestionsListView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    def post(self, request, game_id: uuid.UUID, **kwargs):
+        error, response = svc_qna_assign_question_to_game(game_id, request.data)
         return get_standard_response(error, response)

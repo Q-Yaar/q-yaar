@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import Placeholder, PlaceholderAllowedValue, QuestionCategory, QuestionReward, QuestionTemplate
+from .models import (
+    GameQuestion,
+    Placeholder,
+    PlaceholderAllowedValue,
+    QuestionCategory,
+    QuestionReward,
+    QuestionTemplate,
+)
 
 
 class QuestionRewardAdmin(admin.ModelAdmin):
@@ -45,3 +52,17 @@ class PlaceholderAllowedValueAdmin(admin.ModelAdmin):
 
 
 admin.site.register(PlaceholderAllowedValue, PlaceholderAllowedValueAdmin)
+
+
+class GameQuestionAdmin(admin.ModelAdmin):
+    list_display = ("question_template", "game")
+    search_fields = [
+        "question_template__external_id",
+        "question_template__category__category_name",
+        "game__game_code",
+        "game__name",
+    ]
+    readonly_fields = ("question_template", "game")
+
+
+admin.site.register(GameQuestion, GameQuestionAdmin)

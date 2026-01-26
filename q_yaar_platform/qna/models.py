@@ -1,6 +1,7 @@
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
 from common.constants import Length, QuestionRewardType
 from django.db import models
+from game.models import Game
 from qna.popo.reward_meta.reward import RewardConfig
 from qna.popo.reward_meta.reward_types_map import REWARD_TYPE_MAP
 
@@ -94,3 +95,18 @@ class PlaceholderAllowedValue(AbstractVersioned):
         allowed_value = cls(placeholder=placeholder, value=value)
         allowed_value.save()
         return allowed_value
+
+
+class GameQuestion(AbstractTimeStamped):
+    question_template = models.ForeignKey(QuestionTemplate, on_delete=models.CASCADE, related_name="game_questions")
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="questions")
+
+    class Meta:
+        indexes = [models.Index(fields=["game"])]
+        unique_together = (("question_template", "game"),)
+
+    @classmethod
+    def create(cls, question_template: QuestionTemplate, game: Game) -> "GameQuestion":
+        game_question = cls(question_template=question_template, game=game)
+        game_question.save()
+        return game_question
