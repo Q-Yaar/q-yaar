@@ -1,5 +1,5 @@
 from common.constants import QuestionRewardType
-from qna.models import QuestionCategory, QuestionReward
+from qna.models import QuestionCategory, QuestionReward, QuestionTemplate
 from rest_framework import serializers
 
 
@@ -35,3 +35,35 @@ class QuestionCategorySerializer(serializers.ModelSerializer):
 
     def get_reward(self, obj: QuestionCategory) -> dict:
         return QuestionRewardSerializer(obj.reward).data
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    question_id = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+
+    class Meta:
+        model = QuestionTemplate
+        fields = ("question_id", "template", "category", "created", "modified")
+
+    def get_question_id(self, obj: QuestionTemplate) -> str:
+        return str(obj.get_external_id())
+
+    def get_category(self, obj: QuestionTemplate) -> dict:
+        return QuestionCategorySerializer(obj.category).data
+
+
+class QuestionDetailSerializer(QuestionSerializer):
+    placeholders = serializers.SerializerMethodField()
+
+    class Meta:
+        model = QuestionTemplate
+        fields = QuestionSerializer.Meta.fields + ("placeholders",)
+
+    def get_placeholders(self, obj: QuestionTemplate) -> dict:
+        placeholders_data = {}
+        for placeholder in obj.placeholders.all():
+            placeholders_data[placeholder.placeholder_name] = {
+                "required": placeholder.required,
+                "allowed_values": [allowed_value.value for allowed_value in placeholder.allowed_values.all()],
+            }
+        return placeholders_data

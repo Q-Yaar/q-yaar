@@ -83,3 +83,7 @@ class CardPile(BaseIntEnum):
 
 class QuestionRewardType(BaseIntEnum):
     CARD_DRAW = 1
+
+
+class QuestionAnswerType(BaseIntEnum):
+    IMAGE = 1

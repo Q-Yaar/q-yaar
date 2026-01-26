@@ -1,15 +1,22 @@
 import logging
+import uuid
 
 from common.constants import QuestionRewardType
 from qna.services.helper import (
     svc_qna_helper_create_category,
+    svc_qna_helper_create_question,
     svc_qna_helper_create_reward,
     svc_qna_helper_get_categories,
+    svc_qna_helper_get_category_by_id,
+    svc_qna_helper_get_question_by_id,
+    svc_qna_helper_get_questions_for_category,
     svc_qna_helper_get_reward_by_id,
     svc_qna_helper_get_rewards,
     svc_qna_helper_get_serialized_categories,
+    svc_qna_helper_get_serialized_questions,
     svc_qna_helper_get_serialized_rewards,
     svc_qna_helper_run_validations_to_create_category,
+    svc_qna_helper_run_validations_to_create_question,
     svc_qna_helper_run_validations_to_create_reward,
     svc_qna_helper_run_validations_to_get_rewards,
 )
@@ -81,3 +88,56 @@ def svc_qna_create_cateogory(request_data: dict, serialized: bool = True):
         category = svc_qna_helper_get_serialized_categories(category, many=False)
 
     return ErrorCode(ErrorCode.CREATED), category
+
+
+def svc_qna_get_questions_for_category(category_id: uuid.UUID, serialized: bool = False):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, category = svc_qna_helper_get_category_by_id(category_id)
+    if error:
+        return error, None
+
+    questions = svc_qna_helper_get_questions_for_category(category)
+
+    if serialized:
+        questions = svc_qna_helper_get_serialized_questions(questions, many=True)
+
+    return ErrorCode(ErrorCode.SUCCESS), questions
+
+
+def svc_qna_create_question(request_data: dict, category_id: uuid.UUID, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error = svc_qna_helper_run_validations_to_create_question(request_data)
+    if error:
+        return error, None
+
+    error, category = svc_qna_helper_get_category_by_id(category_id)
+    if error:
+        return error, None
+
+    question = svc_qna_helper_create_question(
+        request_data["template"], request_data.get("placeholders", {}), category
+    )
+
+    if serialized:
+        question = svc_qna_helper_get_serialized_questions(question, many=False)
+
+    return ErrorCode(ErrorCode.CREATED), question
+
+
+def svc_qna_get_question_by_id(category_id: uuid.UUID, question_id: uuid.UUID, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, category = svc_qna_helper_get_category_by_id(category_id)
+    if error:
+        return error, None
+
+    error, question = svc_qna_helper_get_question_by_id(category, question_id)
+    if error:
+        return error, None
+
+    if serialized:
+        question = svc_qna_helper_get_serialized_questions(question, many=False)
+
+    return ErrorCode(ErrorCode.SUCCESS), question
