@@ -69,6 +69,7 @@ PROJECT_APPS = [
     "jwt_auth.apps.JwtAuthConfig",
     "game.apps.GameConfig",
     "card_deck.apps.CardDeckConfig",
+    "qna.apps.QnaConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
