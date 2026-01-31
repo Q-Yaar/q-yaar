@@ -75,6 +75,8 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
     rendered_question = serializers.SerializerMethodField()
     template = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
+    question_meta = serializers.SerializerMethodField()
+    answer_meta = serializers.SerializerMethodField()
 
     class Meta:
         model = AskedQuestion
@@ -84,6 +86,10 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
             "rendered_question",
             "template",
             "category",
+            "question_meta",
+            "answer_meta",
+            "answered",
+            "accepted",
             "created",
             "modified",
         )
@@ -102,3 +108,9 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
 
     def get_category(self, obj: AskedQuestion) -> dict:
         return QuestionCategorySerializer(obj.game_question.question_template.category).data
+
+    def get_question_meta(self, obj: AskedQuestion) -> dict:
+        return obj.get_question_meta()
+
+    def get_answer_meta(self, obj: AskedQuestion) -> dict:
+        return obj.get_answer_meta()

@@ -2,7 +2,9 @@ import logging
 import uuid
 
 from common.constants import QuestionRewardType, UserRolesType
+from profile_player.models import PlayerProfile
 from qna.services.helper import (
+    svc_qna_helper_answer_asked_question,
     svc_qna_helper_ask_question,
     svc_qna_helper_assign_question_to_game,
     svc_qna_helper_create_category,
@@ -20,6 +22,7 @@ from qna.services.helper import (
     svc_qna_helper_get_serialized_categories,
     svc_qna_helper_get_serialized_questions,
     svc_qna_helper_get_serialized_rewards,
+    svc_qna_helper_run_validations_to_answer_asked_question,
     svc_qna_helper_run_validations_to_ask_question,
     svc_qna_helper_run_validations_to_assign_question_to_game,
     svc_qna_helper_run_validations_to_create_category,
@@ -27,9 +30,11 @@ from qna.services.helper import (
     svc_qna_helper_run_validations_to_create_reward,
     svc_qna_helper_run_validations_to_get_questions_for_category_player,
     svc_qna_helper_run_validations_to_get_rewards,
+    svc_qna_helper_validate_and_get_asked_question,
     svc_qna_helper_validate_and_get_game,
     svc_qna_helper_validate_and_get_game_question,
     svc_qna_helper_validate_and_get_team,
+    svc_qna_helper_verify_player_belongs_to_team,
 )
 
 from .error_codes import ErrorCode
@@ -233,3 +238,30 @@ def svc_qna_get_asked_questions_for_game(game_id: uuid.UUID, request_data: dict,
         asked_questions = svc_qna_helper_get_serialized_asked_questions(asked_questions, many=True)
 
     return ErrorCode(ErrorCode.SUCCESS), asked_questions
+
+
+def svc_qna_answer_asked_question(
+    asked_question_id: uuid.UUID, request_data: dict, player: PlayerProfile, serialized: bool = True
+):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error = svc_qna_helper_run_validations_to_answer_asked_question(request_data)
+    if error:
+        return error, None
+
+    error, asked_question = svc_qna_helper_validate_and_get_asked_question(asked_question_id)
+    if error:
+        return error, None
+
+    error = svc_qna_helper_verify_player_belongs_to_team(player, asked_question.target)
+    if error:
+        return error, None
+
+    error, asked_question = svc_qna_helper_answer_asked_question(asked_question, request_data["answer_meta"])
+    if error:
+        return error, None
+
+    if serialized:
+        asked_question = svc_qna_helper_get_serialized_asked_questions(asked_question, many=False)
+
+    return ErrorCode(ErrorCode.SUCCESS), asked_question

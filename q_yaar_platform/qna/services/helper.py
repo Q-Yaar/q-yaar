@@ -6,7 +6,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.utils import IntegrityError
 from game.models import Game, Team
-from game.services.interfacer import svc_game_get_game_by_id, svc_game_get_team_by_id
+from game.services.interfacer import (
+    svc_game_get_game_by_id,
+    svc_game_get_team_by_id,
+    svc_game_verify_player_belongs_to_team,
+)
+from profile_player.models import PlayerProfile
 from qna.api.serializers import (
     AskedQuestionDetailSerializer,
     QuestionCategorySerializer,
@@ -158,6 +163,25 @@ def svc_qna_helper_run_validations_to_get_questions_for_category_player(request_
     return None
 
 
+def svc_qna_helper_run_validations_to_answer_asked_question(request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if not request_data.get("answer_meta"):
+        return ErrorCode(ErrorCode.MISSING_ANSWER_META)
+
+    return None
+
+
+def svc_qna_helper_verify_player_belongs_to_team(player: PlayerProfile, team: Team):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error = svc_game_verify_player_belongs_to_team(player, team)
+    if error:
+        return error
+
+    return None
+
+
 def svc_qna_helper_validate_and_get_game(game_id: uuid.UUID):
     logger.debug(f">> ARGS: {locals()}")
 
@@ -230,6 +254,17 @@ def svc_qna_helper_validate_and_get_game_question(game: Game, question: Question
         )
 
     return None, game_question
+
+
+def svc_qna_helper_validate_and_get_asked_question(asked_question_id: uuid.UUID):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        asked_question = AskedQuestion.objects.get(external_id=asked_question_id)
+    except ObjectDoesNotExist:
+        return ErrorCode(ErrorCode.INVALID_QUESTION_ID, question_id=asked_question_id), None
+
+    return None, asked_question
 
 
 def svc_qna_helper_get_rewards(request_data: dict) -> list[QuestionReward]:
@@ -365,3 +400,18 @@ def svc_qna_helper_get_asked_questions_for_game(game: Game, request_data: dict):
     asked_questions = _apply_filters_to_asked_questions(asked_questions, request_data)
 
     return asked_questions
+
+
+def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, answer_meta: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if asked_question.accepted:
+        return ErrorCode(ErrorCode.QUESTION_ANSWER_ALREADY_ACCEPTED), None
+
+    asked_question.answered = True
+
+    asked_question.set_answer_meta(answer_meta, save=True)
+
+    return None, asked_question
+
+    return None, asked_question

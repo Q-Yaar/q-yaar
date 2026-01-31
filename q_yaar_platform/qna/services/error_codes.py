@@ -23,8 +23,10 @@ class ErrorCode(BaseErrorCode):
     MISSING_TARGET_TEAM_ID = "012"
     MISSING_CHOSEN_PLACEHOLDERS = "013"
     MISSING_QUESTION_META = "014"
+    MISSING_ANSWER_META = "015"
 
     # Permission Errors - 1 Series
+    QUESTION_ANSWER_ALREADY_ACCEPTED = "101"
 
     # Key Errors - 2 Series
     INVALID_REWARD_TYPE = "201"
@@ -54,6 +56,8 @@ class ErrorCode(BaseErrorCode):
         MISSING_TARGET_TEAM_ID: status.HTTP_400_BAD_REQUEST,
         MISSING_CHOSEN_PLACEHOLDERS: status.HTTP_400_BAD_REQUEST,
         MISSING_QUESTION_META: status.HTTP_400_BAD_REQUEST,
+        MISSING_ANSWER_META: status.HTTP_400_BAD_REQUEST,
+        QUESTION_ANSWER_ALREADY_ACCEPTED: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_TYPE: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_CATEGORY_ID: status.HTTP_400_BAD_REQUEST,
@@ -105,6 +109,12 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_missing_question_meta(kwargs: dict):
         return "Missing question_meta"
 
+    def get_string_for_missing_answer_meta(kwargs: dict):
+        return "Missing answer_meta"
+
+    def get_string_for_question_answer_already_accepted(kwargs: dict):
+        return "Question cannot be answered after it is accepted"
+
     def get_string_for_invalid_reward_type(kwargs: dict):
         return f"Invalid reward_type: {kwargs.get('reward_type')}"
 
@@ -141,6 +151,8 @@ class ErrorCode(BaseErrorCode):
         MISSING_TARGET_TEAM_ID: get_string_for_missing_target_team_id,
         MISSING_CHOSEN_PLACEHOLDERS: get_string_for_missing_chosen_placeholders,
         MISSING_QUESTION_META: get_string_for_missing_question_meta,
+        MISSING_ANSWER_META: get_string_for_missing_answer_meta,
+        QUESTION_ANSWER_ALREADY_ACCEPTED: get_string_for_question_answer_already_accepted,
         INVALID_REWARD_TYPE: get_string_for_invalid_reward_type,
         INVALID_REWARD_ID: get_string_for_invalid_reward_id,
         INVALID_CATEGORY_ID: get_string_for_invalid_category_id,

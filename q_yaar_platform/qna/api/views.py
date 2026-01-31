@@ -11,6 +11,7 @@ from qna.api.serializers import (
     QuestionSerializer,
 )
 from qna.services.core import (
+    svc_qna_answer_asked_question,
     svc_qna_ask_question,
     svc_qna_assign_question_to_game,
     svc_qna_create_cateogory,
@@ -92,6 +93,16 @@ class GameQuestionsListView(generics.GenericAPIView):
         return get_standard_response(error, response)
 
 
+class GameAskedQuestionsListView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".GameAskedQuestionsListView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
+    def get(self, request, game_id: uuid.UUID, **kwargs):
+        error, questions = svc_qna_get_asked_questions_for_game(game_id, request.query_params)
+        return get_paginated_response(self, error, questions, AskedQuestionDetailSerializer)
+
+
 class GameQuestionsAskView(generics.GenericAPIView):
     logger = logging.getLogger(__name__ + ".GameQuestionsAskView")
     permission_classes = (IsAuthenticated,)
@@ -102,11 +113,12 @@ class GameQuestionsAskView(generics.GenericAPIView):
         return get_standard_response(error, response)
 
 
-class GameAskedQuestionsListView(generics.GenericAPIView):
-    logger = logging.getLogger(__name__ + ".GameAskedQuestionsListView")
+class GameQuestionsAnswerView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".GameQuestionsAnswerView")
     permission_classes = (IsAuthenticated,)
 
-    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
-    def get(self, request, game_id: uuid.UUID, **kwargs):
-        error, questions = svc_qna_get_asked_questions_for_game(game_id, request.query_params)
-        return get_paginated_response(self, error, questions, AskedQuestionDetailSerializer)
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def patch(self, request, game_id: uuid.UUID, asked_question_id: uuid.UUID, **kwargs):
+        profile = kwargs["profile"]
+        error, response = svc_qna_answer_asked_question(asked_question_id, request.data, profile)
+        return get_standard_response(error, response)

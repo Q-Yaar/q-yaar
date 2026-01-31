@@ -123,6 +123,9 @@ class AskedQuestion(AbstractExternalFacing, AbstractTimeStamped):
     game_question = models.ForeignKey(GameQuestion, on_delete=models.CASCADE, related_name="asked_questions")
     target = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="asked_questions")
 
+    answered = models.BooleanField(default=False)
+    accepted = models.BooleanField(default=False)
+
     info = models.JSONField(default=dict, blank=True)
 
     def get_chosen_placeholders(self) -> dict[str, str]:
