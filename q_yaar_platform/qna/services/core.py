@@ -4,6 +4,7 @@ import uuid
 from common.constants import QuestionRewardType, UserRolesType
 from profile_player.models import PlayerProfile
 from qna.services.helper import (
+    svc_qna_helper_accept_answered_question,
     svc_qna_helper_answer_asked_question,
     svc_qna_helper_ask_question,
     svc_qna_helper_assign_question_to_game,
@@ -34,6 +35,7 @@ from qna.services.helper import (
     svc_qna_helper_validate_and_get_game,
     svc_qna_helper_validate_and_get_game_question,
     svc_qna_helper_validate_and_get_team,
+    svc_qna_helper_verify_player_belongs_to_game,
     svc_qna_helper_verify_player_belongs_to_team,
 )
 
@@ -258,6 +260,31 @@ def svc_qna_answer_asked_question(
         return error, None
 
     error, asked_question = svc_qna_helper_answer_asked_question(asked_question, request_data["answer_meta"])
+    if error:
+        return error, None
+
+    if serialized:
+        asked_question = svc_qna_helper_get_serialized_asked_questions(asked_question, many=False)
+
+    return ErrorCode(ErrorCode.SUCCESS), asked_question
+
+
+def svc_qna_accept_answered_question(asked_question_id: uuid.UUID, player: PlayerProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, asked_question = svc_qna_helper_validate_and_get_asked_question(asked_question_id)
+    if error:
+        return error, None
+
+    error = svc_qna_helper_verify_player_belongs_to_game(player, asked_question.game_question.game)
+    if error:
+        return error, None
+
+    error = svc_qna_helper_verify_player_belongs_to_team(player, asked_question.target)
+    if not error:
+        return ErrorCode(ErrorCode.ASSIGNEE_CANNOT_ACCEPT_ANSWER), None
+
+    error, asked_question = svc_qna_helper_accept_answered_question(asked_question)
     if error:
         return error, None
 

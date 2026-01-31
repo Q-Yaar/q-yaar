@@ -11,6 +11,7 @@ from qna.api.serializers import (
     QuestionSerializer,
 )
 from qna.services.core import (
+    svc_qna_accept_answered_question,
     svc_qna_answer_asked_question,
     svc_qna_ask_question,
     svc_qna_assign_question_to_game,
@@ -121,4 +122,15 @@ class GameQuestionsAnswerView(generics.GenericAPIView):
     def patch(self, request, game_id: uuid.UUID, asked_question_id: uuid.UUID, **kwargs):
         profile = kwargs["profile"]
         error, response = svc_qna_answer_asked_question(asked_question_id, request.data, profile)
+        return get_standard_response(error, response)
+
+
+class GameQuestionsAnswerAcceptView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".GameQuestionsAnswerAcceptView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def patch(self, request, game_id: uuid.UUID, asked_question_id: uuid.UUID, **kwargs):
+        profile = kwargs["profile"]
+        error, response = svc_qna_accept_answered_question(asked_question_id, profile)
         return get_standard_response(error, response)

@@ -9,6 +9,7 @@ from game.models import Game, Team
 from game.services.interfacer import (
     svc_game_get_game_by_id,
     svc_game_get_team_by_id,
+    svc_game_verify_player_belongs_to_game,
     svc_game_verify_player_belongs_to_team,
 )
 from profile_player.models import PlayerProfile
@@ -176,6 +177,16 @@ def svc_qna_helper_verify_player_belongs_to_team(player: PlayerProfile, team: Te
     logger.debug(f">> ARGS: {locals()}")
 
     error = svc_game_verify_player_belongs_to_team(player, team)
+    if error:
+        return error
+
+    return None
+
+
+def svc_qna_helper_verify_player_belongs_to_game(player: PlayerProfile, game: Game):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error = svc_game_verify_player_belongs_to_game(player, game)
     if error:
         return error
 
@@ -413,5 +424,19 @@ def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, answer_m
     asked_question.set_answer_meta(answer_meta, save=True)
 
     return None, asked_question
+
+
+def svc_qna_helper_accept_answered_question(asked_question: AskedQuestion):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if not asked_question.answered:
+        return ErrorCode(ErrorCode.QUESTION_ANSWER_NOT_ANSWERED), None
+
+    if asked_question.accepted:
+        return ErrorCode(ErrorCode.QUESTION_ANSWER_ALREADY_ACCEPTED), None
+
+    asked_question.accepted = True
+
+    asked_question.save()
 
     return None, asked_question

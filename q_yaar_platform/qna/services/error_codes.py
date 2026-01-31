@@ -27,6 +27,8 @@ class ErrorCode(BaseErrorCode):
 
     # Permission Errors - 1 Series
     QUESTION_ANSWER_ALREADY_ACCEPTED = "101"
+    ASSIGNEE_CANNOT_ACCEPT_ANSWER = "102"
+    QUESTION_ANSWER_NOT_ANSWERED = "103"
 
     # Key Errors - 2 Series
     INVALID_REWARD_TYPE = "201"
@@ -58,6 +60,8 @@ class ErrorCode(BaseErrorCode):
         MISSING_QUESTION_META: status.HTTP_400_BAD_REQUEST,
         MISSING_ANSWER_META: status.HTTP_400_BAD_REQUEST,
         QUESTION_ANSWER_ALREADY_ACCEPTED: status.HTTP_400_BAD_REQUEST,
+        ASSIGNEE_CANNOT_ACCEPT_ANSWER: status.HTTP_400_BAD_REQUEST,
+        QUESTION_ANSWER_NOT_ANSWERED: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_TYPE: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_CATEGORY_ID: status.HTTP_400_BAD_REQUEST,
@@ -115,6 +119,12 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_question_answer_already_accepted(kwargs: dict):
         return "Question cannot be answered after it is accepted"
 
+    def get_string_for_assignee_cannot_accept_answer(kwargs: dict):
+        return "Assignee cannot accept their own answer"
+
+    def get_string_for_question_answer_not_answered(kwargs: dict):
+        return "Question is not answered yet"
+
     def get_string_for_invalid_reward_type(kwargs: dict):
         return f"Invalid reward_type: {kwargs.get('reward_type')}"
 
@@ -153,6 +163,7 @@ class ErrorCode(BaseErrorCode):
         MISSING_QUESTION_META: get_string_for_missing_question_meta,
         MISSING_ANSWER_META: get_string_for_missing_answer_meta,
         QUESTION_ANSWER_ALREADY_ACCEPTED: get_string_for_question_answer_already_accepted,
+        ASSIGNEE_CANNOT_ACCEPT_ANSWER: get_string_for_assignee_cannot_accept_answer,
         INVALID_REWARD_TYPE: get_string_for_invalid_reward_type,
         INVALID_REWARD_ID: get_string_for_invalid_reward_id,
         INVALID_CATEGORY_ID: get_string_for_invalid_category_id,

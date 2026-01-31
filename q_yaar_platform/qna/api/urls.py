@@ -30,4 +30,9 @@ urlpatterns = [
         views.GameQuestionsAnswerView.as_view(),
         name="handler-game-questions-answer",
     ),
+    path(
+        r"game/<uuid:game_id>/asked-questions/<uuid:asked_question_id>/accept",
+        views.GameQuestionsAnswerAcceptView.as_view(),
+        name="handler-game-questions-answer-accept",
+    ),
 ]
