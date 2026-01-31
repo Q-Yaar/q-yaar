@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import (
+    AskedQuestion,
     GameQuestion,
     Placeholder,
     PlaceholderAllowedValue,
@@ -66,3 +67,17 @@ class GameQuestionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(GameQuestion, GameQuestionAdmin)
+
+
+class AskedQuestionAdmin(admin.ModelAdmin):
+    list_display = ("game_question", "target")
+    search_fields = [
+        "game_question__question_template__external_id",
+        "game_question__game__game_code",
+        "game_question__game__name",
+        "target__team_name",
+    ]
+    readonly_fields = ("game_question", "target")
+
+
+admin.site.register(AskedQuestion, AskedQuestionAdmin)

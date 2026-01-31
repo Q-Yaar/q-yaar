@@ -3,19 +3,24 @@ import uuid
 
 from common.constants import QuestionRewardType, UserRolesType
 from qna.services.helper import (
+    svc_qna_helper_ask_question,
     svc_qna_helper_assign_question_to_game,
     svc_qna_helper_create_category,
     svc_qna_helper_create_question,
     svc_qna_helper_create_reward,
+    svc_qna_helper_get_asked_questions_for_game,
     svc_qna_helper_get_categories,
     svc_qna_helper_get_category_by_id,
     svc_qna_helper_get_question_by_id,
+    svc_qna_helper_get_question_for_category_by_id,
     svc_qna_helper_get_questions_for_category,
     svc_qna_helper_get_reward_by_id,
     svc_qna_helper_get_rewards,
+    svc_qna_helper_get_serialized_asked_questions,
     svc_qna_helper_get_serialized_categories,
     svc_qna_helper_get_serialized_questions,
     svc_qna_helper_get_serialized_rewards,
+    svc_qna_helper_run_validations_to_ask_question,
     svc_qna_helper_run_validations_to_assign_question_to_game,
     svc_qna_helper_run_validations_to_create_category,
     svc_qna_helper_run_validations_to_create_question,
@@ -23,6 +28,8 @@ from qna.services.helper import (
     svc_qna_helper_run_validations_to_get_questions_for_category_player,
     svc_qna_helper_run_validations_to_get_rewards,
     svc_qna_helper_validate_and_get_game,
+    svc_qna_helper_validate_and_get_game_question,
+    svc_qna_helper_validate_and_get_team,
 )
 
 from .error_codes import ErrorCode
@@ -152,7 +159,7 @@ def svc_qna_get_question_by_id(category_id: uuid.UUID, question_id: uuid.UUID, s
     if error:
         return error, None
 
-    error, question = svc_qna_helper_get_question_by_id(category, question_id)
+    error, question = svc_qna_helper_get_question_for_category_by_id(category, question_id)
     if error:
         return error, None
 
@@ -176,3 +183,53 @@ def svc_qna_assign_question_to_game(game_id: uuid.UUID, request_data: dict):
     svc_qna_helper_assign_question_to_game(game, request_data["question_ids"])
 
     return ErrorCode(ErrorCode.NO_CONTENT), None
+
+
+def svc_qna_ask_question(game_id: uuid.UUID, question_id: uuid.UUID, request_data: dict, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error = svc_qna_helper_run_validations_to_ask_question(request_data)
+    if error:
+        return error, None
+
+    error, game = svc_qna_helper_validate_and_get_game(game_id)
+    if error:
+        return error, None
+
+    error, question = svc_qna_helper_get_question_by_id(question_id)
+    if error:
+        return error, None
+
+    error, game_question = svc_qna_helper_validate_and_get_game_question(game, question)
+    if error:
+        return error, None
+
+    error, target = svc_qna_helper_validate_and_get_team(request_data["target_team_id"])
+    if error:
+        return error, None
+
+    error, asked_question = svc_qna_helper_ask_question(
+        game_question, target, request_data["chosen_placeholders"], request_data["question_meta"]
+    )
+    if error:
+        return error, None
+
+    if serialized:
+        asked_question = svc_qna_helper_get_serialized_asked_questions(asked_question, many=False)
+
+    return ErrorCode(ErrorCode.SUCCESS), asked_question
+
+
+def svc_qna_get_asked_questions_for_game(game_id: uuid.UUID, request_data: dict, serialized: bool = False):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_qna_helper_validate_and_get_game(game_id)
+    if error:
+        return error, None
+
+    asked_questions = svc_qna_helper_get_asked_questions_for_game(game, request_data)
+
+    if serialized:
+        asked_questions = svc_qna_helper_get_serialized_asked_questions(asked_questions, many=True)
+
+    return ErrorCode(ErrorCode.SUCCESS), asked_questions

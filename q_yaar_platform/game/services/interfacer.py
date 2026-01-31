@@ -28,3 +28,9 @@ def svc_game_get_game_by_id(game_id: uuid.UUID):
     logger.debug(f">> ARGS: {locals()}")
 
     return svc_game_helper_get_game_by_id(game_id=game_id)
+
+
+def svc_game_get_team_by_id(team_id: uuid.UUID):
+    logger.debug(f">> ARGS: {locals()}")
+
+    return svc_game_helper_get_team_by_id(team_id=team_id)

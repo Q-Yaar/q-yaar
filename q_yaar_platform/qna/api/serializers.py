@@ -1,5 +1,5 @@
 from common.constants import QuestionRewardType
-from qna.models import QuestionCategory, QuestionReward, QuestionTemplate
+from qna.models import AskedQuestion, QuestionCategory, QuestionReward, QuestionTemplate
 from rest_framework import serializers
 
 
@@ -67,3 +67,38 @@ class QuestionDetailSerializer(QuestionSerializer):
                 "allowed_values": [allowed_value.value for allowed_value in placeholder.allowed_values.all()],
             }
         return placeholders_data
+
+
+class AskedQuestionDetailSerializer(serializers.ModelSerializer):
+    question_id = serializers.SerializerMethodField()
+    question_template_id = serializers.SerializerMethodField()
+    rendered_question = serializers.SerializerMethodField()
+    template = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AskedQuestion
+        fields = (
+            "question_id",
+            "question_template_id",
+            "rendered_question",
+            "template",
+            "category",
+            "created",
+            "modified",
+        )
+
+    def get_question_id(self, obj: AskedQuestion) -> str:
+        return str(obj.get_external_id())
+
+    def get_question_template_id(self, obj: AskedQuestion) -> str:
+        return str(obj.game_question.question_template.get_external_id())
+
+    def get_rendered_question(self, obj: AskedQuestion) -> str:
+        return obj.render()
+
+    def get_template(self, obj: AskedQuestion) -> str:
+        return obj.game_question.question_template.template
+
+    def get_category(self, obj: AskedQuestion) -> dict:
+        return QuestionCategorySerializer(obj.game_question.question_template.category).data

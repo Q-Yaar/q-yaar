@@ -20,6 +20,9 @@ class ErrorCode(BaseErrorCode):
     MISSING_PLACEHOLDERS = "009"
     MISSING_QUESTION_IDS = "010"
     MISSING_GAME_ID = "011"
+    MISSING_TARGET_TEAM_ID = "012"
+    MISSING_CHOSEN_PLACEHOLDERS = "013"
+    MISSING_QUESTION_META = "014"
 
     # Permission Errors - 1 Series
 
@@ -31,6 +34,8 @@ class ErrorCode(BaseErrorCode):
     INVALID_CATEGORY_ID = "302"
     INVALID_QUESTION_ID = "303"
     INVALID_QUESTION_IDS = "304"
+    INVALID_CHOSEN_PLACEHOLDERS = "305"
+    QUESTION_NOT_ASSIGNED_TO_GAME = "306"
 
     # Integrity Errors - 4 Series
 
@@ -46,11 +51,16 @@ class ErrorCode(BaseErrorCode):
         MISSING_PLACEHOLDERS: status.HTTP_400_BAD_REQUEST,
         MISSING_QUESTION_IDS: status.HTTP_400_BAD_REQUEST,
         MISSING_GAME_ID: status.HTTP_400_BAD_REQUEST,
+        MISSING_TARGET_TEAM_ID: status.HTTP_400_BAD_REQUEST,
+        MISSING_CHOSEN_PLACEHOLDERS: status.HTTP_400_BAD_REQUEST,
+        MISSING_QUESTION_META: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_TYPE: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_CATEGORY_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_QUESTION_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_QUESTION_IDS: status.HTTP_400_BAD_REQUEST,
+        INVALID_CHOSEN_PLACEHOLDERS: status.HTTP_400_BAD_REQUEST,
+        QUESTION_NOT_ASSIGNED_TO_GAME: status.HTTP_400_BAD_REQUEST,
     }
 
     def get_string_for_missing_reward_name(kwargs: dict):
@@ -86,6 +96,15 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_missing_game_id(kwargs: dict):
         return "Missing game_id"
 
+    def get_string_for_missing_target_team_id(kwargs: dict):
+        return "Missing target_team_id"
+
+    def get_string_for_missing_chosen_placeholders(kwargs: dict):
+        return "Missing chosen_placeholders"
+
+    def get_string_for_missing_question_meta(kwargs: dict):
+        return "Missing question_meta"
+
     def get_string_for_invalid_reward_type(kwargs: dict):
         return f"Invalid reward_type: {kwargs.get('reward_type')}"
 
@@ -101,6 +120,12 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_invalid_question_ids(kwargs: dict):
         return f"Invalid question_ids: {kwargs.get('question_ids')}"
 
+    def get_string_for_invalid_chosen_placeholders(kwargs: dict):
+        return f"Invalid chosen_placeholders: {kwargs.get('error')}"
+
+    def get_string_for_question_not_assigned_to_game(kwargs: dict):
+        return f"Question {kwargs.get('question_id')} is not assigned to game {kwargs.get('game_id')}"
+
     CODE_MESSAGE_MAP = {
         MISSING_REWARD_NAME: get_string_for_missing_reward_name,
         MISSING_REWARD_TYPE: get_string_for_missing_reward_type,
@@ -113,11 +138,16 @@ class ErrorCode(BaseErrorCode):
         MISSING_PLACEHOLDERS: get_string_for_missing_placeholders,
         MISSING_QUESTION_IDS: get_string_for_missing_question_ids,
         MISSING_GAME_ID: get_string_for_missing_game_id,
+        MISSING_TARGET_TEAM_ID: get_string_for_missing_target_team_id,
+        MISSING_CHOSEN_PLACEHOLDERS: get_string_for_missing_chosen_placeholders,
+        MISSING_QUESTION_META: get_string_for_missing_question_meta,
         INVALID_REWARD_TYPE: get_string_for_invalid_reward_type,
         INVALID_REWARD_ID: get_string_for_invalid_reward_id,
         INVALID_CATEGORY_ID: get_string_for_invalid_category_id,
         INVALID_QUESTION_ID: get_string_for_invalid_question_id,
         INVALID_QUESTION_IDS: get_string_for_invalid_question_ids,
+        INVALID_CHOSEN_PLACEHOLDERS: get_string_for_invalid_chosen_placeholders,
+        QUESTION_NOT_ASSIGNED_TO_GAME: get_string_for_question_not_assigned_to_game,
     }
 
     def __init__(self, code, **kwargs) -> None:

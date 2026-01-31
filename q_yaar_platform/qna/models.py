@@ -1,7 +1,8 @@
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
 from common.constants import Length, QuestionRewardType
 from django.db import models
-from game.models import Game
+from django.template import Context, Template
+from game.models import Game, Team
 from qna.popo.reward_meta.reward import RewardConfig
 from qna.popo.reward_meta.reward_types_map import REWARD_TYPE_MAP
 
@@ -110,3 +111,80 @@ class GameQuestion(AbstractTimeStamped):
         game_question = cls(question_template=question_template, game=game)
         game_question.save()
         return game_question
+
+
+class AskedQuestion(AbstractExternalFacing, AbstractTimeStamped):
+    # TODO: Add POPOs in future, currently fully flexible.
+    CONST_KEY_CHOSEN_PLACEHOLDERS = "chosen_placeholders"
+
+    CONST_KEY_QUESTION_META = "question_meta"
+    CONST_KEY_ANSWER_META = "answer_meta"
+
+    game_question = models.ForeignKey(GameQuestion, on_delete=models.CASCADE, related_name="asked_questions")
+    target = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="asked_questions")
+
+    info = models.JSONField(default=dict, blank=True)
+
+    def get_chosen_placeholders(self) -> dict[str, str]:
+        return self.info.get(self.CONST_KEY_CHOSEN_PLACEHOLDERS, {})
+
+    def set_chosen_placeholders(self, chosen_placeholders: dict[str, str], save: bool = False) -> "AskedQuestion":
+        info = self.info
+        info[self.CONST_KEY_CHOSEN_PLACEHOLDERS] = chosen_placeholders
+        self.info = info
+        if save:
+            self.save()
+        return self
+
+    def get_question_meta(self) -> dict[str, str]:
+        return self.info.get(self.CONST_KEY_QUESTION_META, {})
+
+    def set_question_meta(self, question_meta: dict[str, str], save: bool = False) -> "AskedQuestion":
+        info = self.info
+        info[self.CONST_KEY_QUESTION_META] = question_meta
+        self.info = info
+        if save:
+            self.save()
+        return self
+
+    def get_answer_meta(self) -> dict[str, str]:
+        return self.info.get(self.CONST_KEY_ANSWER_META, {})
+
+    def set_answer_meta(self, answer_meta: dict[str, str], save: bool = False) -> "AskedQuestion":
+        info = self.info
+        info[self.CONST_KEY_ANSWER_META] = answer_meta
+        self.info = info
+        if save:
+            self.save()
+        return self
+
+    def render(self) -> str:
+        return Template(self.game_question.question_template.template).render(Context(self.get_chosen_placeholders()))
+
+    def _validate_placeholders(self, chosen_placeholders: dict[str, str]) -> None:
+        for placeholder in self.game_question.question_template.placeholders.all():
+            name = placeholder.placeholder_name
+            if placeholder.required and name not in chosen_placeholders:
+                raise ValueError(f"Missing required placeholder: {name}")
+            if name in chosen_placeholders:
+                value = chosen_placeholders[name]
+                if (
+                    placeholder.allowed_values.all().exists()
+                    and not placeholder.allowed_values.filter(value=value).exists()
+                ):
+                    raise ValueError(f"Invalid value for placeholder: {name}")
+
+    @classmethod
+    def create(
+        cls,
+        game_question: GameQuestion,
+        target: Team,
+        chosen_placeholders: dict[str, str],
+        question_meta: dict[str, str],
+    ) -> "AskedQuestion":
+        asked_question = cls(game_question=game_question, target=target)
+        asked_question._validate_placeholders(chosen_placeholders)
+        asked_question.set_chosen_placeholders(chosen_placeholders)
+        asked_question.set_question_meta(question_meta)
+        asked_question.save()
+        return asked_question

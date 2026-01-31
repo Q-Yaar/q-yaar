@@ -5,15 +5,17 @@ from common.constants import QuestionRewardType, UserRolesType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.utils import IntegrityError
-from game.models import Game
-from game.services.interfacer import svc_game_get_game_by_id
+from game.models import Game, Team
+from game.services.interfacer import svc_game_get_game_by_id, svc_game_get_team_by_id
 from qna.api.serializers import (
+    AskedQuestionDetailSerializer,
     QuestionCategorySerializer,
     QuestionDetailSerializer,
     QuestionRewardSerializer,
     QuestionSerializer,
 )
 from qna.models import (
+    AskedQuestion,
     GameQuestion,
     Placeholder,
     PlaceholderAllowedValue,
@@ -37,6 +39,15 @@ def _apply_filters_to_rewards(rewards: list[QuestionReward], request_data: dict)
         )
 
     return rewards
+
+
+def _apply_filters_to_asked_questions(asked_questions: list[AskedQuestion], request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if "target_team_id" in request_data:
+        asked_questions = asked_questions.filter(target__external_id=request_data["target_team_id"])
+
+    return asked_questions
 
 
 def svc_qna_helper_run_validations_to_get_rewards(request_data: dict):
@@ -123,6 +134,21 @@ def svc_qna_helper_run_validations_to_assign_question_to_game(request_data: dict
     return None
 
 
+def svc_qna_helper_run_validations_to_ask_question(request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if not request_data.get("target_team_id"):
+        return ErrorCode(ErrorCode.MISSING_TARGET_TEAM_ID)
+
+    if not request_data.get("chosen_placeholders"):
+        return ErrorCode(ErrorCode.MISSING_CHOSEN_PLACEHOLDERS)
+
+    if not request_data.get("question_meta"):
+        return ErrorCode(ErrorCode.MISSING_QUESTION_META)
+
+    return None
+
+
 def svc_qna_helper_run_validations_to_get_questions_for_category_player(request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
@@ -138,6 +164,12 @@ def svc_qna_helper_validate_and_get_game(game_id: uuid.UUID):
     return svc_game_get_game_by_id(game_id=game_id)
 
 
+def svc_qna_helper_validate_and_get_team(team_id: uuid.UUID):
+    logger.debug(f">> ARGS: {locals()}")
+
+    return svc_game_get_team_by_id(team_id=team_id)
+
+
 def svc_qna_helper_get_category_by_id(category_id: uuid.UUID):
     logger.debug(f">> ARGS: {locals()}")
 
@@ -149,11 +181,22 @@ def svc_qna_helper_get_category_by_id(category_id: uuid.UUID):
     return None, category
 
 
-def svc_qna_helper_get_question_by_id(category: QuestionCategory, question_id: uuid.UUID):
+def svc_qna_helper_get_question_for_category_by_id(category: QuestionCategory, question_id: uuid.UUID):
     logger.debug(f">> ARGS: {locals()}")
 
     try:
         question = QuestionTemplate.objects.get(category=category, external_id=question_id)
+    except ObjectDoesNotExist:
+        return ErrorCode(ErrorCode.INVALID_QUESTION_ID, question_id=question_id), None
+
+    return None, question
+
+
+def svc_qna_helper_get_question_by_id(question_id: uuid.UUID):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        question = QuestionTemplate.objects.get(external_id=question_id)
     except ObjectDoesNotExist:
         return ErrorCode(ErrorCode.INVALID_QUESTION_ID, question_id=question_id), None
 
@@ -171,6 +214,24 @@ def svc_qna_helper_get_reward_by_id(reward_id: uuid.UUID):
     return None, reward
 
 
+def svc_qna_helper_validate_and_get_game_question(game: Game, question: QuestionTemplate):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        game_question = GameQuestion.objects.get(game=game, question_template=question)
+    except ObjectDoesNotExist:
+        return (
+            ErrorCode(
+                ErrorCode.QUESTION_NOT_ASSIGNED_TO_GAME,
+                game_id=str(game.get_external_id()),
+                question_id=str(question.get_external_id()),
+            ),
+            None,
+        )
+
+    return None, game_question
+
+
 def svc_qna_helper_get_rewards(request_data: dict) -> list[QuestionReward]:
     logger.debug(f">> ARGS: {locals()}")
 
@@ -180,7 +241,9 @@ def svc_qna_helper_get_rewards(request_data: dict) -> list[QuestionReward]:
     return rewards
 
 
-def svc_qna_helper_get_serialized_rewards(rewards: QuestionReward | list[QuestionReward], many: bool) -> list[dict]:
+def svc_qna_helper_get_serialized_rewards(
+    rewards: QuestionReward | list[QuestionReward], many: bool
+) -> dict | list[dict]:
     logger.debug(f">> ARGS: {locals()}")
 
     return QuestionRewardSerializer(rewards, many=many).data
@@ -202,7 +265,7 @@ def svc_qna_helper_get_categories():
 
 def svc_qna_helper_get_serialized_categories(
     categories: QuestionCategory | list[QuestionCategory], many: bool
-) -> list[dict]:
+) -> dict | list[dict]:
     logger.debug(f">> ARGS: {locals()}")
 
     return QuestionCategorySerializer(categories, many=many).data
@@ -246,7 +309,7 @@ def svc_qna_helper_create_question(
 
 def svc_qna_helper_get_serialized_questions(
     questions: QuestionTemplate | list[QuestionTemplate], many: bool
-) -> list[dict]:
+) -> dict | list[dict]:
     logger.debug(f">> ARGS: {locals()}")
 
     if many:
@@ -267,3 +330,38 @@ def svc_qna_helper_assign_question_to_game(game: Game, question_ids: list[str]):
                 continue
 
     return None
+
+
+def svc_qna_helper_ask_question(
+    game_question: GameQuestion, target: Team, chosen_placeholders: dict, question_meta: dict
+):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        asked_question = AskedQuestion.create(
+            game_question=game_question,
+            target=target,
+            chosen_placeholders=chosen_placeholders,
+            question_meta=question_meta,
+        )
+    except ValueError as e:
+        return ErrorCode(ErrorCode.INVALID_CHOSEN_PLACEHOLDERS, error=str(e)), None
+
+    return None, asked_question
+
+
+def svc_qna_helper_get_serialized_asked_questions(
+    asked_questions: AskedQuestion | list[AskedQuestion], many: bool
+) -> dict | list[dict]:
+    logger.debug(f">> ARGS: {locals()}")
+
+    return AskedQuestionDetailSerializer(asked_questions, many=many).data
+
+
+def svc_qna_helper_get_asked_questions_for_game(game: Game, request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    asked_questions = AskedQuestion.objects.filter(game_question__game=game).order_by("created")
+    asked_questions = _apply_filters_to_asked_questions(asked_questions, request_data)
+
+    return asked_questions
