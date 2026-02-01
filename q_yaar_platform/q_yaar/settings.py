@@ -41,8 +41,7 @@ ALLOWED_HOSTS = ["game.crayfish-musical.ts.net", "game", "localhost"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://game.crayfish-musical.ts.net",
-    "http://game.crayfish-musical.ts.net",
-    "game.crayfish-musical.ts.net",
+    "http://game.crayfish-musical.ts.net"
 ]
 
 
