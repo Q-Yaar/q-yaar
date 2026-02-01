@@ -39,6 +39,12 @@ SECRET_KEY = "django-insecure-p(ik-w@g&pzgae#3+h*v57&#trv7jskbmu%w3ha_5v%&qxb8r*
 
 ALLOWED_HOSTS = ["game.crayfish-musical.ts.net", "game", "localhost"]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://game.crayfish-musical.ts.net",
+    "http://game.crayfish-musical.ts.net"
+]
+
+
 #######################################################################################################################
 
 # Application definition
