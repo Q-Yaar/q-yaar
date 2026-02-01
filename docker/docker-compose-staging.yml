@@ -16,7 +16,7 @@ services:
       - db
       - redis
     command: >
-      bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      bash -c "python manage.py migrate && gunicorn q_yaar.wsgi:application --bind 0.0.0.0:8000 --workers 5"
 
   # fast_worker:
   #   build:
