@@ -20,6 +20,7 @@ class ErrorCode(BaseErrorCode):
     INVALID_FACT_TYPE = "201"
 
     # Object Does Not Exist Errors - 3 series
+    INVALID_FACT_ID = "301"
 
     # Integrity Errors - 4 Series
 
@@ -29,6 +30,7 @@ class ErrorCode(BaseErrorCode):
         MISSING_GAME_ID: status.HTTP_400_BAD_REQUEST,
         MISSING_TEAM_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_FACT_TYPE: status.HTTP_400_BAD_REQUEST,
+        INVALID_FACT_ID: status.HTTP_400_BAD_REQUEST,
     }
 
     def get_string_for_missing_fact_type(kwargs: dict):
@@ -46,12 +48,16 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_invalid_fact_type(kwargs: dict):
         return f"Invalid fact_type: {kwargs.get('fact_type')}"
 
+    def get_string_for_invalid_fact_id(kwargs: dict):
+        return f"Invalid fact_id: {kwargs.get('fact_id')}"
+
     CODE_MESSAGE_MAP = {
         MISSING_FACT_TYPE: get_string_for_missing_fact_type,
         MISSING_FACT_INFO: get_string_for_missing_fact_info,
         MISSING_GAME_ID: get_string_for_missing_game_id,
         MISSING_TEAM_ID: get_string_for_missing_team_id,
         INVALID_FACT_TYPE: get_string_for_invalid_fact_type,
+        INVALID_FACT_ID: get_string_for_invalid_fact_id,
     }
 
     def __init__(self, code, **kwargs) -> None:

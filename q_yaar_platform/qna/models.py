@@ -1,5 +1,6 @@
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
 from common.constants import Length, QuestionRewardType
+from common.models import FilteredModelManager
 from django.db import models
 from django.template import Context, Template
 from game.models import Game, Team
@@ -14,6 +15,8 @@ class QuestionReward(AbstractExternalFacing, AbstractTimeStamped, AbstractVersio
     reward_type = models.PositiveIntegerField(choices=QuestionRewardType.get_choices())
 
     info = models.JSONField(default=dict, blank=True)
+
+    objects = FilteredModelManager()
 
     def __str__(self):
         return self.reward_name
@@ -42,6 +45,8 @@ class QuestionCategory(AbstractExternalFacing, AbstractTimeStamped, AbstractVers
     reward = models.ForeignKey(QuestionReward, on_delete=models.PROTECT, related_name="question_categories")
     priority = models.PositiveIntegerField()
 
+    objects = FilteredModelManager()
+
     class Meta:
         indexes = [models.Index(fields=["category_name"])]
 
@@ -59,6 +64,8 @@ class QuestionTemplate(AbstractExternalFacing, AbstractTimeStamped, AbstractVers
     template = models.TextField(help_text="Example: 'Are you within {{ distance }} metres of me?'")
     category = models.ForeignKey(QuestionCategory, on_delete=models.CASCADE, related_name="question_templates")
 
+    objects = FilteredModelManager()
+
     def __str__(self):
         return f"{self.external_id}"
 
@@ -74,6 +81,8 @@ class Placeholder(AbstractVersioned):
     placeholder_name = models.CharField(max_length=Length.PLACEHOLDER_NAME)
     required = models.BooleanField(default=True)
 
+    objects = FilteredModelManager()
+
     def __str__(self):
         return f"{self.question.external_id}:{self.placeholder_name}"
 
@@ -87,6 +96,8 @@ class Placeholder(AbstractVersioned):
 class PlaceholderAllowedValue(AbstractVersioned):
     placeholder = models.ForeignKey(Placeholder, on_delete=models.CASCADE, related_name="allowed_values")
     value = models.CharField(max_length=Length.PLACEHOLDER_VALUE)
+
+    objects = FilteredModelManager()
 
     def __str__(self):
         return f"{self.placeholder.placeholder_name} = {self.value}"

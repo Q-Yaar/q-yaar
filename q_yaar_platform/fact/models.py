@@ -1,5 +1,6 @@
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
 from common.constants import FactType
+from common.models import FilteredModelManager
 from django.db import models
 from game.models import Game, Team
 
@@ -13,6 +14,8 @@ class Fact(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
     target_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="facts")
 
     info = models.JSONField(default=dict, blank=True)
+
+    objects = FilteredModelManager()
 
     class Meta:
         indexes = [
@@ -39,6 +42,7 @@ class Fact(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
 
     @classmethod
     def create(cls, fact_type: FactType, game: Game, target_team: Team, fact_info: dict) -> "Fact":
-        fact = cls(fact_type=fact_type, game=game, target_team=target_team, info=fact_info)
+        fact = cls(fact_type=fact_type, game=game, target_team=target_team)
+        fact.set_fact_info(fact_info)
         fact.save()
         return fact
