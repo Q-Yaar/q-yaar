@@ -16,6 +16,10 @@ class QuestionRewardAdmin(admin.ModelAdmin):
     search_fields = ["reward_name"]
     list_filter = ("reward_type",)
 
+    # Override to use the base manager to include soft-deleted items
+    def get_queryset(self, request):
+        return self.model._base_manager.get_queryset()
+
 
 admin.site.register(QuestionReward, QuestionRewardAdmin)
 
@@ -24,6 +28,10 @@ class QuestionCategoryAdmin(admin.ModelAdmin):
     list_display = ("category_name", "reward", "priority")
     search_fields = ["category_name", "reward__reward_name"]
     list_filter = ("reward__reward_type",)
+
+    # Override to use the base manager to include soft-deleted items
+    def get_queryset(self, request):
+        return self.model._base_manager.get_queryset()
 
 
 admin.site.register(QuestionCategory, QuestionCategoryAdmin)
@@ -34,6 +42,10 @@ class QuestionTemplateAdmin(admin.ModelAdmin):
     search_fields = ["external_id", "category__category_name"]
     list_filter = ("category__reward__reward_type",)
 
+    # Override to use the base manager to include soft-deleted items
+    def get_queryset(self, request):
+        return self.model._base_manager.get_queryset()
+
 
 admin.site.register(QuestionTemplate, QuestionTemplateAdmin)
 
@@ -43,6 +55,10 @@ class PlaceholderAdmin(admin.ModelAdmin):
     search_fields = ["question__external_id", "placeholder_name"]
     list_filter = ("required",)
 
+    # Override to use the base manager to include soft-deleted items
+    def get_queryset(self, request):
+        return self.model._base_manager.get_queryset()
+
 
 admin.site.register(Placeholder, PlaceholderAdmin)
 
@@ -50,6 +66,10 @@ admin.site.register(Placeholder, PlaceholderAdmin)
 class PlaceholderAllowedValueAdmin(admin.ModelAdmin):
     list_display = ("placeholder", "value")
     search_fields = ["placeholder__placeholder_name", "value"]
+
+    # Override to use the base manager to include soft-deleted items
+    def get_queryset(self, request):
+        return self.model._base_manager.get_queryset()
 
 
 admin.site.register(PlaceholderAllowedValue, PlaceholderAllowedValueAdmin)

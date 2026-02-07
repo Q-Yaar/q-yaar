@@ -8,6 +8,10 @@ class CardTagAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ["name"]
 
+    # Override to use the base manager to include soft-deleted items
+    def get_queryset(self, request):
+        return self.model._base_manager.get_queryset()
+
 
 admin.site.register(CardTag, CardTagAdmin)
 
