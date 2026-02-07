@@ -53,6 +53,7 @@ class ModuleErrorPrefix:
     CARD_DECK = "CRD"
     GAME = "GAM"
     QNA = "QNA"
+    FACT = "FACT"
 
 
 class UserRolesType(BaseIntEnum):
@@ -87,3 +88,9 @@ class QuestionRewardType(BaseIntEnum):
 
 class QuestionAnswerType(BaseIntEnum):
     IMAGE = 1
+
+
+class FactType(BaseIntEnum):
+    TEXT = 1
+    IMAGE = 2
+    GEO = 3

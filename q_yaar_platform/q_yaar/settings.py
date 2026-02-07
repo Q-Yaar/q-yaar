@@ -39,10 +39,7 @@ SECRET_KEY = "django-insecure-p(ik-w@g&pzgae#3+h*v57&#trv7jskbmu%w3ha_5v%&qxb8r*
 
 ALLOWED_HOSTS = ["game.crayfish-musical.ts.net", "game", "localhost"]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://game.crayfish-musical.ts.net",
-    "http://game.crayfish-musical.ts.net"
-]
+CSRF_TRUSTED_ORIGINS = ["https://game.crayfish-musical.ts.net", "http://game.crayfish-musical.ts.net"]
 
 
 #######################################################################################################################
@@ -76,6 +73,7 @@ PROJECT_APPS = [
     "game.apps.GameConfig",
     "card_deck.apps.CardDeckConfig",
     "qna.apps.QnaConfig",
+    "fact.apps.FactConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS

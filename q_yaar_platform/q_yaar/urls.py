@@ -35,4 +35,5 @@ urlpatterns = [
     path("api/v1/games/", include("game.api.urls")),
     path("api/v1/cards/", include("card_deck.api.urls")),
     path("api/v1/qna/", include("qna.api.urls")),
+    path("api/v1/facts/", include("fact.api.urls")),
 ]
