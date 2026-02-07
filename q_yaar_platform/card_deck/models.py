@@ -1,6 +1,7 @@
 import pghistory
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
 from common.constants import CardPile, CardType, Length
+from common.models import FilteredModelManager
 from django.db import models
 from django.db.models import JSONField
 from game.models import Team
@@ -8,6 +9,8 @@ from game.models import Team
 
 class CardTag(AbstractTimeStamped, AbstractVersioned):
     name = models.CharField(max_length=Length.CARD_TAG, unique=True)
+
+    objects = FilteredModelManager()
 
     class Meta:
         indexes = [models.Index(fields=["name"])]
@@ -33,6 +36,8 @@ class Card(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
     tags = models.ManyToManyField(CardTag, related_name="cards", blank=True)
 
     metadata = JSONField(default=dict, blank=True)
+
+    objects = FilteredModelManager()
 
     class Meta:
         indexes = [models.Index(fields=["title"])]
