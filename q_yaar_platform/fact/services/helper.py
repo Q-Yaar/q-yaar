@@ -5,6 +5,7 @@ from common.constants import FactType
 from django.db.models import ObjectDoesNotExist
 from fact.api.serializers import FactSerializer
 from fact.models import Fact
+from fact.popo.fact_meta import FactMetaConfig
 from game.models import Game, Team
 from game.services.interfacer import svc_game_get_game_by_id, svc_game_get_team_by_id
 
@@ -100,9 +101,14 @@ def svc_fact_helper_validate_and_get_fact_by_id(fact_id: uuid.UUID):
 def svc_fact_helper_create_fact(fact_type: FactType, game: Game, target_team: Team, fact_info: dict) -> Fact:
     logger.debug(f">> ARGS: {locals()}")
 
+    try:
+        fact_info = FactMetaConfig.from_json(fact_info)
+    except KeyError as e:
+        return ErrorCode(ErrorCode.INVALID_FACT_INFO, error=repr(e)), None
+
     fact = Fact.create(fact_type=fact_type, game=game, target_team=target_team, fact_info=fact_info)
 
-    return fact
+    return None, fact
 
 
 def svc_fact_helper_get_serialized_facts(facts: Fact | list[Fact], many: bool):
@@ -128,9 +134,14 @@ def svc_fact_helper_get_facts(game: Game, request_data: dict):
 def svc_fact_helper_update_fact(fact: Fact, fact_info: dict):
     logger.debug(f">> ARGS: {locals()}")
 
+    try:
+        fact_info = FactMetaConfig.from_json(fact_info)
+    except KeyError as e:
+        return ErrorCode(ErrorCode.INVALID_FACT_INFO, error=repr(e)), None
+
     fact.set_fact_info(fact_info, save=True)
 
-    return fact
+    return None, fact
 
 
 def svc_fact_helper_delete_fact(fact: Fact):
