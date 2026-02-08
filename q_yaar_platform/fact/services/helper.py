@@ -58,7 +58,7 @@ def svc_fact_helper_run_validations_to_get_facts(request_data: dict):
 def svc_fact_helper_run_validations_to_update_fact(request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
-    if not "fact_info" in request_data:
+    if not request_data.get("fact_info"):
         return ErrorCode(ErrorCode.MISSING_FACT_INFO)
 
     return None
