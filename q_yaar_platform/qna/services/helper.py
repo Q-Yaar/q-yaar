@@ -29,6 +29,8 @@ from qna.models import (
     QuestionReward,
     QuestionTemplate,
 )
+from qna.popo.answer_meta.answer import AnswerConfig
+from qna.popo.question_meta.question import QuestionMetaConfig
 from qna.popo.reward_meta.reward_types_map import REWARD_TYPE_MAP
 
 from .error_codes import ErrorCode
@@ -379,9 +381,14 @@ def svc_qna_helper_assign_question_to_game(game: Game, question_ids: list[str]):
 
 
 def svc_qna_helper_ask_question(
-    game_question: GameQuestion, target: Team, chosen_placeholders: dict, question_meta: dict
+    game_question: GameQuestion, target: Team, chosen_placeholders: dict, question_meta: QuestionMetaConfig
 ):
     logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        question_meta = QuestionMetaConfig.from_json(question_meta)
+    except KeyError as e:
+        return ErrorCode(ErrorCode.INVALID_QUESTION_META, error=repr(e)), None
 
     try:
         asked_question = AskedQuestion.create(
@@ -418,6 +425,11 @@ def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, answer_m
 
     if asked_question.accepted:
         return ErrorCode(ErrorCode.QUESTION_ANSWER_ALREADY_ACCEPTED), None
+
+    try:
+        answer_meta = AnswerConfig.from_json(answer_meta)
+    except KeyError as e:
+        return ErrorCode(ErrorCode.INVALID_ANSWER_META, error=repr(e)), None
 
     asked_question.answered = True
 

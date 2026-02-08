@@ -40,7 +40,9 @@ def svc_fact_create_fact(request_data: dict, serialized: bool = True):
     if error:
         return error, None
 
-    fact = svc_fact_helper_create_fact(fact_type, game, team, request_data["fact_info"])
+    error, fact = svc_fact_helper_create_fact(fact_type, game, team, request_data["fact_info"])
+    if error:
+        return error, None
 
     if serialized:
         fact = svc_fact_helper_get_serialized_facts(fact, many=False)
@@ -80,7 +82,9 @@ def svc_fact_update_fact(fact_id: uuid.UUID, request_data: dict, serialized: boo
     if error:
         return error, None
 
-    fact = svc_fact_helper_update_fact(fact, request_data["fact_info"])
+    error, fact = svc_fact_helper_update_fact(fact, request_data["fact_info"])
+    if error:
+        return error, None
 
     if serialized:
         fact = svc_fact_helper_get_serialized_facts(fact, many=False)

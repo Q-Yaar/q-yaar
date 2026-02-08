@@ -19,4 +19,4 @@ class FactSerializer(serializers.ModelSerializer):
         return FactType.get_string_for_type(FactType(obj.fact_type))
 
     def get_fact_info(self, obj: Fact) -> dict:
-        return obj.get_fact_info()
+        return obj.get_fact_info().to_json()

@@ -110,7 +110,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
         return QuestionCategorySerializer(obj.game_question.question_template.category).data
 
     def get_question_meta(self, obj: AskedQuestion) -> dict:
-        return obj.get_question_meta()
+        return obj.get_question_meta().to_json()
 
     def get_answer_meta(self, obj: AskedQuestion) -> dict:
-        return obj.get_answer_meta()
+        return obj.get_answer_meta().to_json()

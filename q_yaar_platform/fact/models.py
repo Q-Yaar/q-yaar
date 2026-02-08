@@ -3,6 +3,7 @@ from common.constants import FactType
 from common.models import FilteredModelManager
 from django.db import models
 from game.models import Game, Team
+from fact.popo.fact_meta import FactMetaConfig
 
 
 class Fact(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
@@ -28,12 +29,12 @@ class Fact(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
     def __str__(self):
         return f"{self.get_external_id()}"
 
-    def get_fact_info(self) -> dict:
-        return self.info.get(self.CONST_KEY_FACT_INFO, {})
+    def get_fact_info(self) -> FactMetaConfig:
+        return FactMetaConfig.from_json(self.info.get(self.CONST_KEY_FACT_INFO, {}))
 
-    def set_fact_info(self, fact_info: dict, save: bool = False) -> "Fact":
+    def set_fact_info(self, fact_info: FactMetaConfig, save: bool = False) -> "Fact":
         info = self.info
-        info[self.CONST_KEY_FACT_INFO] = fact_info
+        info[self.CONST_KEY_FACT_INFO] = fact_info.to_json()
         self.info = info
         if save:
             self.save()
@@ -41,7 +42,7 @@ class Fact(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
         return self
 
     @classmethod
-    def create(cls, fact_type: FactType, game: Game, target_team: Team, fact_info: dict) -> "Fact":
+    def create(cls, fact_type: FactType, game: Game, target_team: Team, fact_info: FactMetaConfig) -> "Fact":
         fact = cls(fact_type=fact_type, game=game, target_team=target_team)
         fact.set_fact_info(fact_info)
         fact.save()
