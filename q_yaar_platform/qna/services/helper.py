@@ -308,7 +308,7 @@ def svc_qna_helper_create_reward(
 def svc_qna_helper_get_categories():
     logger.debug(f">> ARGS: {locals()}")
 
-    return QuestionCategory.objects.all().order_by("priority")
+    return QuestionCategory.objects.all().order_by("-priority")
 
 
 def svc_qna_helper_get_serialized_categories(

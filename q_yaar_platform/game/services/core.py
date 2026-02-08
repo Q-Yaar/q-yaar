@@ -136,7 +136,9 @@ def svc_game_get_team_for_player(game_id: str, player: PlayerProfile, serialized
     if error:
         return error, None
 
-    team = svc_game_helper_get_teams_for_player(game=game, player=player)
+    error, team = svc_game_helper_get_teams_for_player(game=game, player=player)
+    if error:
+        return error, None
 
     if serialized:
         team = TeamSerializer(team, many=False).data

@@ -93,7 +93,7 @@ def svc_game_helper_get_game_for_player(player: PlayerProfile):
     logger.debug(f">> ARGS: {locals()}")
 
     game_ids = TeamPlayerRelation.objects.filter(player=player).values_list("game", flat=True)
-    games = Game.objects.filter(id__in=game_ids)
+    games = Game.objects.filter(id__in=game_ids).order_by("-created")
 
     return games
 
@@ -167,8 +167,11 @@ def svc_game_helper_get_teams_for_game(game: Game):
 def svc_game_helper_get_teams_for_player(game: Game, player: PlayerProfile):
     logger.debug(f">> ARGS: {locals()}")
 
-    team = TeamPlayerRelation.objects.get(player=player, game=game).team
-    return team
+    try:
+        team = TeamPlayerRelation.objects.get(player=player, game=game).team
+        return None, team
+    except ObjectDoesNotExist:
+        return ErrorCode(ErrorCode.PLAYER_DOES_NOT_BELONG_TO_ANY_TEAM, profile_name=player.profile_name), None
 
 
 def svc_game_helper_get_team_by_id(team_id: uuid.UUID):
