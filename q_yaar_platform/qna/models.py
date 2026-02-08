@@ -4,6 +4,8 @@ from common.models import FilteredModelManager
 from django.db import models
 from django.template import Context, Template
 from game.models import Game, Team
+from qna.popo.answer_meta.answer import AnswerConfig
+from qna.popo.question_meta.question import QuestionMetaConfig
 from qna.popo.reward_meta.reward import RewardConfig
 from qna.popo.reward_meta.reward_types_map import REWARD_TYPE_MAP
 
@@ -150,23 +152,23 @@ class AskedQuestion(AbstractExternalFacing, AbstractTimeStamped):
             self.save()
         return self
 
-    def get_question_meta(self) -> dict[str, str]:
-        return self.info.get(self.CONST_KEY_QUESTION_META, {})
+    def get_question_meta(self) -> QuestionMetaConfig:
+        return QuestionMetaConfig.from_json(self.info.get(self.CONST_KEY_QUESTION_META, {}))
 
-    def set_question_meta(self, question_meta: dict[str, str], save: bool = False) -> "AskedQuestion":
+    def set_question_meta(self, question_meta: QuestionMetaConfig, save: bool = False) -> "AskedQuestion":
         info = self.info
-        info[self.CONST_KEY_QUESTION_META] = question_meta
+        info[self.CONST_KEY_QUESTION_META] = question_meta.to_json()
         self.info = info
         if save:
             self.save()
         return self
 
-    def get_answer_meta(self) -> dict[str, str]:
-        return self.info.get(self.CONST_KEY_ANSWER_META, {})
+    def get_answer_meta(self) -> AnswerConfig:
+        return AnswerConfig.from_json(self.info.get(self.CONST_KEY_ANSWER_META, {}))
 
-    def set_answer_meta(self, answer_meta: dict[str, str], save: bool = False) -> "AskedQuestion":
+    def set_answer_meta(self, answer_meta: AnswerConfig, save: bool = False) -> "AskedQuestion":
         info = self.info
-        info[self.CONST_KEY_ANSWER_META] = answer_meta
+        info[self.CONST_KEY_ANSWER_META] = answer_meta.to_json()
         self.info = info
         if save:
             self.save()
@@ -194,7 +196,7 @@ class AskedQuestion(AbstractExternalFacing, AbstractTimeStamped):
         game_question: GameQuestion,
         target: Team,
         chosen_placeholders: dict[str, str],
-        question_meta: dict[str, str],
+        question_meta: QuestionMetaConfig,
     ) -> "AskedQuestion":
         asked_question = cls(game_question=game_question, target=target)
         asked_question._validate_placeholders(chosen_placeholders)

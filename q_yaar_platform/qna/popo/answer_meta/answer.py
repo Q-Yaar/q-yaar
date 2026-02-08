@@ -5,5 +5,14 @@ from common.popo import PopoBase
 
 @dataclass(init=True, repr=False, eq=False)
 class AnswerConfig(PopoBase):
-    # Just a wrapper class, actual classes defined in answer_types_map.py
-    pass
+    result: bool
+    metadata: dict
+
+    @classmethod
+    def from_json(cls, config: dict) -> "AnswerConfig":
+        if not config:
+            return cls.default()
+        return cls(result=config["result"], metadata=config["metadata"])
+
+    def to_json(self) -> dict:
+        return {"result": self.result, "metadata": self.metadata}
