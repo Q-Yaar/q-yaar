@@ -50,6 +50,7 @@ services:
 
   db:
     image: postgres
+    restart: always
     env_file: ./../build_meta/.env_staging
     ports:
       - "5432:5432"
