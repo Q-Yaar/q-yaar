@@ -26,6 +26,11 @@ urlpatterns = [
         name="handler-game-questions-ask",
     ),
     path(
+        r"game/<uuid:game_id>/asked-questions/<uuid:asked_question_id>/update",
+        views.GameQuestionsUpdateView.as_view(),
+        name="handler-game-questions-update",
+    ),
+    path(
         r"game/<uuid:game_id>/asked-questions/<uuid:asked_question_id>/answer",
         views.GameQuestionsAnswerView.as_view(),
         name="handler-game-questions-answer",
