@@ -77,6 +77,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
     question_meta = serializers.SerializerMethodField()
     answer_meta = serializers.SerializerMethodField()
+    reward = serializers.SerializerMethodField()
 
     class Meta:
         model = AskedQuestion
@@ -90,6 +91,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
             "answer_meta",
             "answered",
             "accepted",
+            "reward",
             "created",
             "modified",
         )
@@ -114,3 +116,6 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
 
     def get_answer_meta(self, obj: AskedQuestion) -> dict:
         return obj.get_answer_meta().to_json()
+
+    def get_reward(self, obj: AskedQuestion) -> dict:
+        return QuestionRewardSerializer(obj.game_question.question_template.category.reward).data

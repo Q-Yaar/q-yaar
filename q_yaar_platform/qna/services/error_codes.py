@@ -29,6 +29,8 @@ class ErrorCode(BaseErrorCode):
     QUESTION_ANSWER_ALREADY_ACCEPTED = "101"
     ASSIGNEE_CANNOT_ACCEPT_ANSWER = "102"
     QUESTION_ANSWER_NOT_ANSWERED = "103"
+    QUESTION_ALREADY_ANSWERED = "104"
+    ASSIGNEE_CANNOT_UPDATE_QUESTION = "105"
 
     # Key Errors - 2 Series
     INVALID_REWARD_TYPE = "201"
@@ -64,6 +66,8 @@ class ErrorCode(BaseErrorCode):
         QUESTION_ANSWER_ALREADY_ACCEPTED: status.HTTP_400_BAD_REQUEST,
         ASSIGNEE_CANNOT_ACCEPT_ANSWER: status.HTTP_400_BAD_REQUEST,
         QUESTION_ANSWER_NOT_ANSWERED: status.HTTP_400_BAD_REQUEST,
+        QUESTION_ALREADY_ANSWERED: status.HTTP_400_BAD_REQUEST,
+        ASSIGNEE_CANNOT_UPDATE_QUESTION: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_TYPE: status.HTTP_400_BAD_REQUEST,
         INVALID_QUESTION_META: status.HTTP_400_BAD_REQUEST,
         INVALID_ANSWER_META: status.HTTP_400_BAD_REQUEST,
@@ -129,6 +133,12 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_question_answer_not_answered(kwargs: dict):
         return "Question is not answered yet"
 
+    def get_string_for_question_already_answered(kwargs: dict):
+        return "Question is already answered"
+
+    def get_string_for_assignee_cannot_update_question(kwargs: dict):
+        return "Assignee cannot update the question"
+
     def get_string_for_invalid_reward_type(kwargs: dict):
         return f"Invalid reward_type: {kwargs.get('reward_type')}"
 
@@ -174,6 +184,9 @@ class ErrorCode(BaseErrorCode):
         MISSING_ANSWER_META: get_string_for_missing_answer_meta,
         QUESTION_ANSWER_ALREADY_ACCEPTED: get_string_for_question_answer_already_accepted,
         ASSIGNEE_CANNOT_ACCEPT_ANSWER: get_string_for_assignee_cannot_accept_answer,
+        QUESTION_ANSWER_NOT_ANSWERED: get_string_for_question_answer_not_answered,
+        QUESTION_ALREADY_ANSWERED: get_string_for_question_already_answered,
+        ASSIGNEE_CANNOT_UPDATE_QUESTION: get_string_for_assignee_cannot_update_question,
         INVALID_REWARD_TYPE: get_string_for_invalid_reward_type,
         INVALID_QUESTION_META: get_string_for_invalid_question_meta,
         INVALID_ANSWER_META: get_string_for_invalid_answer_meta,

@@ -23,6 +23,7 @@ from qna.services.core import (
     svc_qna_get_question_by_id,
     svc_qna_get_questions_for_category,
     svc_qna_get_rewards,
+    svc_qna_update_asked_question,
 )
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -111,6 +112,17 @@ class GameQuestionsAskView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def post(self, request, game_id: uuid.UUID, question_id: uuid.UUID, **kwargs):
         error, response = svc_qna_ask_question(game_id, question_id, request.data)
+        return get_standard_response(error, response)
+
+
+class GameQuestionsUpdateView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".GameQuestionsUpdateView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def patch(self, request, game_id: uuid.UUID, asked_question_id: uuid.UUID, **kwargs):
+        profile = kwargs["profile"]
+        error, response = svc_qna_update_asked_question(asked_question_id, request.data, profile)
         return get_standard_response(error, response)
 
 

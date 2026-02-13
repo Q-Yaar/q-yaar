@@ -157,6 +157,15 @@ def svc_qna_helper_run_validations_to_ask_question(request_data: dict):
     return None
 
 
+def svc_qna_helper_run_validations_to_update_asked_question(request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if not request_data.get("question_meta"):
+        return ErrorCode(ErrorCode.MISSING_QUESTION_META)
+
+    return None
+
+
 def svc_qna_helper_run_validations_to_get_questions_for_category_player(request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
@@ -381,7 +390,7 @@ def svc_qna_helper_assign_question_to_game(game: Game, question_ids: list[str]):
 
 
 def svc_qna_helper_ask_question(
-    game_question: GameQuestion, target: Team, chosen_placeholders: dict, question_meta: QuestionMetaConfig
+    game_question: GameQuestion, target: Team, chosen_placeholders: dict, question_meta: dict
 ):
     logger.debug(f">> ARGS: {locals()}")
 
@@ -399,6 +408,22 @@ def svc_qna_helper_ask_question(
         )
     except ValueError as e:
         return ErrorCode(ErrorCode.INVALID_CHOSEN_PLACEHOLDERS, error=str(e)), None
+
+    return None, asked_question
+
+
+def svc_qna_helper_update_asked_question(asked_question: AskedQuestion, question_meta: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if asked_question.answered:
+        return ErrorCode(ErrorCode.QUESTION_ALREADY_ANSWERED), None
+
+    try:
+        question_meta = QuestionMetaConfig.from_json(question_meta)
+    except KeyError as e:
+        return ErrorCode(ErrorCode.INVALID_QUESTION_META, error=repr(e)), None
+
+    asked_question.set_question_meta(question_meta, save=True)
 
     return None, asked_question
 
