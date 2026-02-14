@@ -36,6 +36,7 @@ class ErrorCode(BaseErrorCode):
     INVALID_REWARD_TYPE = "201"
     INVALID_QUESTION_META = "202"
     INVALID_ANSWER_META = "203"
+    INVALID_GEO_COUNT = "204"
 
     # Object Does Not Exist Errors - 3 series
     INVALID_REWARD_ID = "301"
@@ -71,6 +72,7 @@ class ErrorCode(BaseErrorCode):
         INVALID_REWARD_TYPE: status.HTTP_400_BAD_REQUEST,
         INVALID_QUESTION_META: status.HTTP_400_BAD_REQUEST,
         INVALID_ANSWER_META: status.HTTP_400_BAD_REQUEST,
+        INVALID_GEO_COUNT: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_CATEGORY_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_QUESTION_ID: status.HTTP_400_BAD_REQUEST,
@@ -148,6 +150,9 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_invalid_answer_meta(kwargs: dict):
         return f"Invalid answer_meta: {kwargs.get('error')}"
 
+    def get_string_for_invalid_geo_count(kwargs: dict):
+        return f"Invalid geo_count: {kwargs.get('error')}"
+
     def get_string_for_invalid_reward_id(kwargs: dict):
         return f"Invalid reward_id: {kwargs.get('reward_id')}"
 
@@ -190,6 +195,7 @@ class ErrorCode(BaseErrorCode):
         INVALID_REWARD_TYPE: get_string_for_invalid_reward_type,
         INVALID_QUESTION_META: get_string_for_invalid_question_meta,
         INVALID_ANSWER_META: get_string_for_invalid_answer_meta,
+        INVALID_GEO_COUNT: get_string_for_invalid_geo_count,
         INVALID_REWARD_ID: get_string_for_invalid_reward_id,
         INVALID_CATEGORY_ID: get_string_for_invalid_category_id,
         INVALID_QUESTION_ID: get_string_for_invalid_question_id,

@@ -40,16 +40,20 @@ class QuestionCategorySerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     question_id = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
+    geo = serializers.SerializerMethodField()
 
     class Meta:
         model = QuestionTemplate
-        fields = ("question_id", "template", "category", "created", "modified")
+        fields = ("question_id", "template", "category", "geo", "created", "modified")
 
     def get_question_id(self, obj: QuestionTemplate) -> str:
         return str(obj.get_external_id())
 
     def get_category(self, obj: QuestionTemplate) -> dict:
         return QuestionCategorySerializer(obj.category).data
+
+    def get_geo(self, obj: QuestionTemplate) -> dict:
+        return obj.get_geo().to_json()
 
 
 class QuestionDetailSerializer(QuestionSerializer):
@@ -75,6 +79,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
     rendered_question = serializers.SerializerMethodField()
     template = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
+    geo = serializers.SerializerMethodField()
     question_meta = serializers.SerializerMethodField()
     answer_meta = serializers.SerializerMethodField()
     reward = serializers.SerializerMethodField()
@@ -87,6 +92,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
             "rendered_question",
             "template",
             "category",
+            "geo",
             "question_meta",
             "answer_meta",
             "answered",
@@ -110,6 +116,9 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
 
     def get_category(self, obj: AskedQuestion) -> dict:
         return QuestionCategorySerializer(obj.game_question.question_template.category).data
+
+    def get_geo(self, obj: AskedQuestion) -> dict:
+        return obj.game_question.question_template.get_geo_count().to_json()
 
     def get_question_meta(self, obj: AskedQuestion) -> dict:
         return obj.get_question_meta().to_json()

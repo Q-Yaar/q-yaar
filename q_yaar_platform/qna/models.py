@@ -6,6 +6,7 @@ from django.template import Context, Template
 from game.models import Game, Team
 from qna.popo.answer_meta.answer import AnswerConfig
 from qna.popo.question_meta.question import QuestionMetaConfig
+from qna.popo.question_meta_type.geo_count import GeoCountConfig
 from qna.popo.reward_meta.reward import RewardConfig
 from qna.popo.reward_meta.reward_types_map import REWARD_TYPE_MAP
 
@@ -63,17 +64,33 @@ class QuestionCategory(AbstractExternalFacing, AbstractTimeStamped, AbstractVers
 
 
 class QuestionTemplate(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
+    GEO_COUNT = "geo"
+
     template = models.TextField(help_text="Example: 'Are you within {{ distance }} metres of me?'")
     category = models.ForeignKey(QuestionCategory, on_delete=models.CASCADE, related_name="question_templates")
+
+    info = models.JSONField(default=dict, blank=True)
 
     objects = FilteredModelManager()
 
     def __str__(self):
         return f"{self.external_id}"
 
+    def get_geo(self) -> GeoCountConfig:
+        return GeoCountConfig.from_json(self.info.get(self.GEO_COUNT, {}))
+
+    def set_geo(self, geo_count: GeoCountConfig, save: bool = False) -> "QuestionTemplate":
+        info = self.info
+        info[self.GEO_COUNT] = geo_count.to_json()
+        self.info = info
+        if save:
+            self.save()
+        return self
+
     @classmethod
-    def create(cls, template: str, category: QuestionCategory) -> "QuestionTemplate":
+    def create(cls, template: str, category: QuestionCategory, geo_count: GeoCountConfig) -> "QuestionTemplate":
         question_template = cls(template=template, category=category)
+        question_template.set_geo(geo_count)
         question_template.save()
         return question_template
 

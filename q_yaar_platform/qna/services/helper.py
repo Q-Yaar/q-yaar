@@ -13,6 +13,7 @@ from game.services.interfacer import (
     svc_game_verify_player_belongs_to_team,
 )
 from profile_player.models import PlayerProfile
+from qna.popo.question_meta_type.geo_count import GeoCountConfig
 from qna.api.serializers import (
     AskedQuestionDetailSerializer,
     QuestionCategorySerializer,
@@ -349,11 +350,16 @@ def svc_qna_helper_get_questions_for_category(
 
 
 def svc_qna_helper_create_question(
-    template: str, placeholders: dict[str, dict], category: QuestionCategory
+    template: str, placeholders: dict[str, dict], category: QuestionCategory, geo: dict
 ) -> QuestionTemplate:
     logger.debug(f">> ARGS: {locals()}")
 
-    question_template = QuestionTemplate.create(template=template, category=category)
+    try:
+        geo = GeoCountConfig.from_json(geo)
+    except KeyError as e:
+        return ErrorCode(ErrorCode.INVALID_GEO_COUNT, error=repr(e)), None
+
+    question_template = QuestionTemplate.create(template=template, category=category, geo_count=geo)
 
     for key, value in placeholders.items():
         placeholder = Placeholder.create(question=question_template, placeholder_name=key, required=value["required"])
