@@ -10,4 +10,5 @@ urlpatterns = [
     path(r"<uuid:game_id>/end", views.GameEndView.as_view(), name="handler-game-end"),
     path(r"<uuid:game_id>/team/", views.TeamListView.as_view(), name="handler-team-list"),
     path(r"<uuid:game_id>/team/me", views.PlayerTeamView.as_view(), name="handler-player-team"),
+    path(r"<uuid:game_id>", views.GameDetailView.as_view(), name="handler-game-detail"),
 ]

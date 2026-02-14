@@ -9,6 +9,7 @@ from game.services.core import (
     svc_game_create_game,
     svc_game_create_team,
     svc_game_end_game,
+    svc_game_get_game_by_id,
     svc_game_get_games,
     svc_game_get_team_for_player,
     svc_game_get_teams_for_game,
@@ -30,6 +31,16 @@ class GameListView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
     def post(self, request, **kwargs):
         error, response = svc_game_create_game(request.data, kwargs["profile"])
+        return get_standard_response(error, response)
+
+
+class GameDetailView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".GameDetailView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
+    def get(self, request, game_id: uuid.UUID, **kwargs):
+        error, response = svc_game_get_game_by_id(game_id)
         return get_standard_response(error, response)
 
 
