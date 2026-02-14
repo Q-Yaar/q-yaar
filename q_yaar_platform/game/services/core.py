@@ -55,6 +55,19 @@ def svc_game_get_games(request_data: dict, role: UserRolesType, profile: GameMas
     return ErrorCode(ErrorCode.SUCCESS), games
 
 
+def svc_game_get_game_by_id(game_id: uuid.UUID, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    if serialized:
+        game = GameSerializer(game, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), game
+
+
 def svc_game_start_game(game_id: uuid.UUID, serialized: bool = True):
     logger.debug(f">> ARGS: {locals()}")
 
