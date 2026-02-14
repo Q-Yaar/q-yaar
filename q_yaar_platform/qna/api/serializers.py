@@ -118,7 +118,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
         return QuestionCategorySerializer(obj.game_question.question_template.category).data
 
     def get_geo(self, obj: AskedQuestion) -> dict:
-        return obj.game_question.question_template.get_geo_count().to_json()
+        return obj.game_question.question_template.get_geo().to_json()
 
     def get_question_meta(self, obj: AskedQuestion) -> dict:
         return obj.get_question_meta().to_json()
