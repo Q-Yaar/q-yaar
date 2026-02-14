@@ -153,7 +153,9 @@ def svc_qna_create_question(request_data: dict, category_id: uuid.UUID, serializ
     if error:
         return error, None
 
-    question = svc_qna_helper_create_question(request_data["template"], request_data.get("placeholders", {}), category)
+    question = svc_qna_helper_create_question(
+        request_data["template"], request_data.get("placeholders", {}), category, request_data.get("geo_count", {})
+    )
 
     if serialized:
         question = svc_qna_helper_get_serialized_questions(question, many=False)
