@@ -74,6 +74,7 @@ class GameStatus(BaseIntEnum):
 class CardType(BaseIntEnum):
     CURSE = 1
     POWERUP = 2
+    TIME_BONUS = 3
 
 
 class CardPile(BaseIntEnum):
