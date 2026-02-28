@@ -43,6 +43,7 @@ class Length:
     QUESTION_CATEGORY = 100
     PLACEHOLDER_NAME = 100
     PLACEHOLDER_VALUE = 255
+    TRACKING_CODE = 6
 
 
 class ModuleErrorPrefix:
@@ -54,6 +55,7 @@ class ModuleErrorPrefix:
     GAME = "GAM"
     QNA = "QNA"
     FACT = "FACT"
+    LOCATION = "LOC"
 
 
 class UserRolesType(BaseIntEnum):
@@ -106,4 +108,10 @@ class AnswerInstructionType(BaseIntEnum):
     CLOSER_TO_LINE = 6
     POLYGON_LOCATION = 7
 
+
     NO_INSTRUCTION = 99
+
+
+class ClientType(BaseIntEnum):
+    OWNTRACS = 1
+    QYAAR = 2

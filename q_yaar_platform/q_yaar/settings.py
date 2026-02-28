@@ -78,6 +78,7 @@ PROJECT_APPS = [
     "card_deck.apps.CardDeckConfig",
     "qna.apps.QnaConfig",
     "fact.apps.FactConfig",
+    "location.apps.LocationConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
