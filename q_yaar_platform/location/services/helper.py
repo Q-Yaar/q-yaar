@@ -150,3 +150,12 @@ def svc_location_helper_enable_sharing(setting: LocationSharingSetting, enable: 
         setting.tracking_code = get_unique_tracking_code()
     setting.save()
     return setting
+
+
+def svc_location_helper_reset_setting(setting: LocationSharingSetting) -> LocationSharingSetting:
+    logger.debug(f">> ARGS: {locals()}")
+    setting.is_sharing_enabled = False
+    setting.tracking_code = None
+    setting.save()
+    return setting
+

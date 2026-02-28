@@ -13,6 +13,7 @@ from location.services.core import (
     svc_location_get_last_location,
     svc_location_get_locations,
     svc_location_get_current_sharing_setting,
+    svc_location_reset_sharing_setting,
 )
 
 
@@ -56,4 +57,15 @@ class LocationSharingSettingView(generics.GenericAPIView):
     def post(self, request, **kwargs):
         error, response = svc_location_enable_sharing(kwargs["profile"], request.data)
         return get_standard_response(error, response)
+
+
+class LocationSharingSettingResetView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".LocationSharingSettingResetView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def post(self, request, **kwargs):
+        error, response = svc_location_reset_sharing_setting(kwargs["profile"])
+        return get_standard_response(error, response)
+
 

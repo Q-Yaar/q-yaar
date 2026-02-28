@@ -13,6 +13,7 @@ from .helper import (
     svc_location_helper_get_serialized_locations,
     svc_location_helper_get_serialized_setting,
     svc_location_helper_get_sharing_setting,
+    svc_location_helper_reset_setting,
     svc_location_helper_run_validations_to_add_location,
     svc_location_helper_run_validations_to_get_locations,
     svc_location_helper_update_tracking_code,
@@ -138,3 +139,16 @@ def svc_location_update_tracking_code(player: PlayerProfile, serialized: bool = 
         setting = svc_location_helper_get_serialized_setting(setting)
 
     return ErrorCode(ErrorCode.SUCCESS), setting
+
+
+def svc_location_reset_sharing_setting(player: PlayerProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    setting = svc_location_helper_get_sharing_setting(player)
+    setting = svc_location_helper_reset_setting(setting)
+
+    if serialized:
+        setting = svc_location_helper_get_serialized_setting(setting)
+
+    return ErrorCode(ErrorCode.SUCCESS), setting
+

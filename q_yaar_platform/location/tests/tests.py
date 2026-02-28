@@ -96,7 +96,27 @@ class LocationAPITests(APITestCase):
         self.assertTrue(setting.is_sharing_enabled)
         self.assertIsNotNone(setting.tracking_code)
 
+    def test_reset_sharing_and_tracking_code(self):
+        self.authenticate()
+
+        # First enable sharing to generate a tracking code
+        url = reverse("location:location-sharing-settings")
+        self.client.post(url, data={"is_sharing_enabled": True}, format="json")
+        setting = LocationSharingSetting.objects.get(player=self.profile)
+        self.assertTrue(setting.is_sharing_enabled)
+        self.assertIsNotNone(setting.tracking_code)
+        
+        # Now hit the reset endpoint
+        reset_url = reverse("location:location-sharing-reset")
+        reset_response = self.client.post(reset_url, format="json")
+        
+        self.assertEqual(reset_response.status_code, status.HTTP_200_OK)
+        setting.refresh_from_db()
+        self.assertFalse(setting.is_sharing_enabled)
+        self.assertIsNone(setting.tracking_code)
+
     def test_get_locations_success(self):
+
         # Create setting so filtering works
         setting, _ = LocationSharingSetting.objects.get_or_create(player=self.profile)
         setting.is_sharing_enabled = True
