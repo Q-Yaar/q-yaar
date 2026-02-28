@@ -36,7 +36,7 @@ IS_LOCAL = config("IS_LOCAL", default=False, cast=bool)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-p(ik-w@g&pzgae#3+h*v57&#trv7jskbmu%w3ha_5v%&qxb8r*"
 
-ALLOWED_HOSTS = ["game.crayfish-musical.ts.net", "game", "localhost", "game.moneydew.in"]
+ALLOWED_HOSTS = ["game.crayfish-musical.ts.net", "game", "localhost", "game.moneydew.in", "ubuntu"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://game.crayfish-musical.ts.net",
