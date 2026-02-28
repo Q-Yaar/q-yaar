@@ -40,7 +40,8 @@ class PlayerLastLocationView(generics.GenericAPIView):
 
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def get(self, request, player_id: uuid.UUID, **kwargs):
-        error, response = svc_location_get_last_location(player_id)
+        game_id = request.query_params.get("game_id")
+        error, response = svc_location_get_last_location(player_id, game_id=game_id)
         return get_standard_response(error, response)
 
 

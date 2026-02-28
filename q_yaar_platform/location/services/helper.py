@@ -96,9 +96,12 @@ def svc_location_helper_create_location_points(
     return locations
 
 
-def svc_location_helper_get_last_location(player: PlayerProfile) -> Location | None:
+def svc_location_helper_get_last_location(player: PlayerProfile, game: Game | None = None) -> Location | None:
     logger.debug(f">> ARGS: {locals()}")
-    return Location.objects.filter(player=player).order_by("-timestamp").first()
+    queryset = Location.objects.filter(player=player)
+    if game:
+        queryset = queryset.filter(game=game)
+    return queryset.order_by("-timestamp").first()
 
 
 def svc_location_helper_apply_filters(request_data: dict, locations):

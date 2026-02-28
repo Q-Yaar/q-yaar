@@ -59,7 +59,7 @@ def svc_location_add_location(player: PlayerProfile, request_data: dict, seriali
     return ErrorCode(ErrorCode.CREATED), locations
 
 
-def svc_location_get_last_location(player_id: str, serialized: bool = True):
+def svc_location_get_last_location(player_id: str, game_id: str | None = None, serialized: bool = True):
     logger.debug(f">> ARGS: {locals()}")
 
     error, player = svc_location_helper_get_player_by_id(player_id)
@@ -70,7 +70,14 @@ def svc_location_get_last_location(player_id: str, serialized: bool = True):
     if not setting.is_sharing_enabled:
         return ErrorCode(ErrorCode.LOCATION_SHARING_DISABLED), None
 
-    location = svc_location_helper_get_last_location(player)
+    if game_id:
+        error, game = svc_location_helper_validate_and_get_game(game_id)
+        if error:
+            return error, None
+    else:
+        game = None
+
+    location = svc_location_helper_get_last_location(player, game=game)
 
     if serialized and location:
         location = svc_location_helper_get_serialized_locations(location, many=False)
