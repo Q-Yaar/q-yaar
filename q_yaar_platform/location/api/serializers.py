@@ -26,6 +26,7 @@ class LocationCreateSerializer(serializers.Serializer):
 class LocationResponseSerializer(serializers.ModelSerializer):
     client = serializers.SerializerMethodField()
     player_id = serializers.UUIDField(source="player.external_id", read_only=True)
+    player_name = serializers.CharField(source="player.profile_name", read_only=True)
     game_id = serializers.UUIDField(source="game.external_id", read_only=True, allow_null=True)
     team_id = serializers.UUIDField(source="team.external_id", read_only=True, allow_null=True)
 
@@ -34,6 +35,7 @@ class LocationResponseSerializer(serializers.ModelSerializer):
         fields = (
             "external_id",
             "player_id",
+            "player_name",
             "game_id",
             "team_id",
             "lat",

@@ -10,7 +10,7 @@ from location.api.serializers import LocationCreateSerializer, LocationResponseS
 from location.services.core import (
     svc_location_add_location,
     svc_location_enable_sharing,
-    svc_location_get_last_location,
+    svc_location_get_last_locations,
     svc_location_get_locations,
     svc_location_get_current_sharing_setting,
     svc_location_reset_sharing_setting,
@@ -40,9 +40,15 @@ class PlayerLastLocationView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
-    def get(self, request, player_id: uuid.UUID, **kwargs):
+    def get(self, request, **kwargs):
+        player_ids_str = request.query_params.get("player_ids")
+        if not player_ids_str:
+            from location.services.error_codes import ErrorCode
+            return get_standard_response(ErrorCode(ErrorCode.MISSING_FILTER), None)
+            
+        player_ids = [pid.strip() for pid in player_ids_str.split(",") if pid.strip()]
         game_id = request.query_params.get("game_id")
-        error, response = svc_location_get_last_location(player_id, game_id=game_id)
+        error, response = svc_location_get_last_locations(player_ids, game_id=game_id)
         return get_standard_response(error, response)
 
 

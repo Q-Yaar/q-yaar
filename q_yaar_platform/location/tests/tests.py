@@ -177,8 +177,8 @@ class LocationAPITests(APITestCase):
         
         self.authenticate()
 
-        url = reverse("location:player-last-location", kwargs={"player_id": str(self.user.external_id)})
-        response = self.client.get(url)
+        url = reverse("location:player-last-location")
+        response = self.client.get(url, {"player_ids": str(self.profile.platform_user.external_id)})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
@@ -186,7 +186,8 @@ class LocationAPITests(APITestCase):
         if "data" in results:
             results = results["data"]
             
-        self.assertEqual(results["external_id"], str(loc.external_id))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["external_id"], str(loc.external_id))
         
     def test_get_last_location_sharing_disabled(self):
         self.authenticate()
@@ -196,7 +197,13 @@ class LocationAPITests(APITestCase):
         setting.is_sharing_enabled = False
         setting.save()
 
-        url = reverse("location:player-last-location", kwargs={"player_id": str(self.user.external_id)})
-        response = self.client.get(url)
+        url = reverse("location:player-last-location")
+        response = self.client.get(url, {"player_ids": str(self.profile.platform_user.external_id)})
         
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        results = response.data
+        if "data" in results:
+            results = results["data"]
+            
+        self.assertEqual(len(results), 0)

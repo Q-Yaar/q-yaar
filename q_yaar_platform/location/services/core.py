@@ -60,16 +60,11 @@ def svc_location_add_location(player: PlayerProfile, request_data: dict, seriali
     return ErrorCode(ErrorCode.CREATED), locations
 
 
-def svc_location_get_last_location(player_id: str, game_id: str | None = None, serialized: bool = True):
+def svc_location_get_last_locations(player_ids: list[str], game_id: str | None = None, serialized: bool = True):
     logger.debug(f">> ARGS: {locals()}")
 
-    error, player = svc_location_helper_get_player_by_id(player_id)
-    if error:
-        return error, None
-
-    setting = svc_location_helper_get_sharing_setting(player)
-    if not setting.is_sharing_enabled:
-        return ErrorCode(ErrorCode.LOCATION_SHARING_DISABLED), None
+    if not player_ids:
+        return ErrorCode(ErrorCode.SUCCESS), []
 
     if game_id:
         error, game = svc_location_helper_validate_and_get_game(game_id)
@@ -78,14 +73,24 @@ def svc_location_get_last_location(player_id: str, game_id: str | None = None, s
     else:
         game = None
 
-    location = svc_location_helper_get_last_location(player, game=game)
+    locations = []
+    for player_id in player_ids:
+        error, player = svc_location_helper_get_player_by_id(player_id)
+        if error:
+            continue
 
-    if serialized and location:
-        location = svc_location_helper_get_serialized_locations(location, many=False)
-    elif serialized and not location:
-        location = {}
+        setting = svc_location_helper_get_sharing_setting(player)
+        if not setting.is_sharing_enabled:
+            continue
 
-    return ErrorCode(ErrorCode.SUCCESS), location
+        location = svc_location_helper_get_last_location(player, game=game)
+        if location:
+            locations.append(location)
+
+    if serialized:
+        locations = svc_location_helper_get_serialized_locations(locations, many=True)
+
+    return ErrorCode(ErrorCode.SUCCESS), locations
 
 
 def svc_location_get_locations(request_data: dict, serialized: bool = True):
