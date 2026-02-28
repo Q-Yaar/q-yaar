@@ -237,10 +237,12 @@ class AskedQuestion(AbstractExternalFacing, AbstractTimeStamped):
         target: Team,
         chosen_placeholders: dict[str, str],
         question_meta: QuestionMetaConfig,
+        fact_meta: AnswerInstructionMeta,
     ) -> "AskedQuestion":
         asked_question = cls(game_question=game_question, target=target)
         asked_question._validate_placeholders(chosen_placeholders)
         asked_question.set_chosen_placeholders(chosen_placeholders)
         asked_question.set_question_meta(question_meta)
+        asked_question.set_fact_meta(fact_meta)
         asked_question.save()
         return asked_question

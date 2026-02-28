@@ -414,14 +414,19 @@ def svc_qna_helper_assign_question_to_game(game: Game, question_ids: list[str]):
 
 
 def svc_qna_helper_ask_question(
-    game_question: GameQuestion, target: Team, chosen_placeholders: dict, question_meta: dict
+    game_question: GameQuestion, target: Team, chosen_placeholders: dict, request_data: dict
 ):
     logger.debug(f">> ARGS: {locals()}")
 
     try:
-        question_meta = QuestionMetaConfig.from_json(question_meta)
+        question_meta = QuestionMetaConfig.from_json(request_data["question_meta"])
     except KeyError as e:
         return ErrorCode(ErrorCode.INVALID_QUESTION_META, error=repr(e)), None
+
+    try:
+        fact_meta = AnswerInstructionMeta.from_json(request_data.get("fact_meta", {}))
+    except KeyError as e:
+        return ErrorCode(ErrorCode.INVALID_FACT_META, error=repr(e)), None
 
     try:
         asked_question = AskedQuestion.create(
@@ -429,6 +434,7 @@ def svc_qna_helper_ask_question(
             target=target,
             chosen_placeholders=chosen_placeholders,
             question_meta=question_meta,
+            fact_meta=fact_meta,
         )
     except ValueError as e:
         return ErrorCode(ErrorCode.INVALID_CHOSEN_PLACEHOLDERS, error=str(e)), None

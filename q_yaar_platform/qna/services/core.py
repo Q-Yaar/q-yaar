@@ -224,7 +224,7 @@ def svc_qna_ask_question(game_id: uuid.UUID, question_id: uuid.UUID, request_dat
         return error, None
 
     error, asked_question = svc_qna_helper_ask_question(
-        game_question, target, request_data["chosen_placeholders"], request_data["question_meta"]
+        game_question, target, request_data["chosen_placeholders"], request_data
     )
     if error:
         return error, None
