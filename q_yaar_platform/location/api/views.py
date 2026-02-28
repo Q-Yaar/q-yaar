@@ -23,7 +23,7 @@ class LocationPingsView(generics.GenericAPIView):
 
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def get(self, request, **kwargs):
-        error, locations = svc_location_get_locations(request.query_params)
+        error, locations = svc_location_get_locations(request.query_params, serialized=False)
         return get_paginated_response(self, error, locations, LocationResponseSerializer)
 
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])

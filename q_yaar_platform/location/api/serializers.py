@@ -45,10 +45,11 @@ class LocationResponseSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_client(self, obj) -> str:
+        client = obj.get("client") if isinstance(obj, dict) else getattr(obj, "client", getattr(obj, "_client", None))
         try:
-            return LocationClientType(obj.client).name
+            return LocationClientType(client).name
         except ValueError:
-            return str(obj.client)
+            return str(client)
 
 
 class LocationSharingSettingSerializer(serializers.ModelSerializer):
