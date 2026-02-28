@@ -116,6 +116,18 @@ def svc_location_enable_sharing(player: PlayerProfile, request_data: dict, seria
     return ErrorCode(ErrorCode.SUCCESS), setting
 
 
+def svc_location_get_current_sharing_setting(player: PlayerProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    setting = svc_location_helper_get_sharing_setting(player)
+
+    if serialized:
+        setting = svc_location_helper_get_serialized_setting(setting)
+
+    return ErrorCode(ErrorCode.SUCCESS), setting
+
+
+
 def svc_location_update_tracking_code(player: PlayerProfile, serialized: bool = True):
     logger.debug(f">> ARGS: {locals()}")
 

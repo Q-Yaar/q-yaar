@@ -95,15 +95,6 @@ class LocationAPITests(APITestCase):
         setting = LocationSharingSetting.objects.get(player=self.profile)
         self.assertTrue(setting.is_sharing_enabled)
         self.assertIsNotNone(setting.tracking_code)
-        
-        old_tracking_code = setting.tracking_code
-
-        update_url = reverse("location:location-tracking-code-update")
-        update_response = self.client.patch(update_url, data={}, format="json")
-
-        self.assertEqual(update_response.status_code, status.HTTP_200_OK)
-        setting.refresh_from_db()
-        self.assertNotEqual(setting.tracking_code, old_tracking_code)
 
     def test_get_locations_success(self):
         # Create setting so filtering works

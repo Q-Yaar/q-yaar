@@ -6,13 +6,13 @@ from common.response import get_paginated_response, get_standard_response
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
-from location.api.serializers import LocationCreateSerializer, LocationResponseSerializer, LocationSharingSettingSerializer, LocationTrackingCodeUpdateSerializer
+from location.api.serializers import LocationCreateSerializer, LocationResponseSerializer, LocationSharingSettingSerializer
 from location.services.core import (
     svc_location_add_location,
     svc_location_enable_sharing,
     svc_location_get_last_location,
     svc_location_get_locations,
-    svc_location_update_tracking_code,
+    svc_location_get_current_sharing_setting,
 )
 
 
@@ -48,21 +48,12 @@ class LocationSharingSettingView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def get(self, request, **kwargs):
+        error, response = svc_location_get_current_sharing_setting(kwargs["profile"])
+        return get_standard_response(error, response)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def post(self, request, **kwargs):
         error, response = svc_location_enable_sharing(kwargs["profile"], request.data)
         return get_standard_response(error, response)
 
-    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
-    def patch(self, request, **kwargs):
-        error, response = svc_location_enable_sharing(kwargs["profile"], request.data)
-        return get_standard_response(error, response)
-
-
-class LocationTrackingCodeUpdateView(generics.GenericAPIView):
-    logger = logging.getLogger(__name__ + ".LocationTrackingCodeUpdateView")
-    permission_classes = (IsAuthenticated,)
-
-    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
-    def patch(self, request, **kwargs):
-        error, response = svc_location_update_tracking_code(kwargs["profile"])
-        return get_standard_response(error, response)
