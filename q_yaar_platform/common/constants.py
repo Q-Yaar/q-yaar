@@ -95,3 +95,15 @@ class FactType(BaseIntEnum):
     TEXT = 1
     IMAGE = 2
     GEO = 3
+
+
+class AnswerInstructionType(BaseIntEnum):
+    DRAW_CIRCLE_POINT_RADIUS = 1
+    DRAW_CIRCLE_2_POINTS = 2
+    SPLIT_BY_DIRECTION = 3
+    HOTTER_COLDER = 4
+    AREAS = 5
+    CLOSER_TO_LINE = 6
+    POLYGON_LOCATION = 7
+
+    NO_INSTRUCTION = 99
