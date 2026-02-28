@@ -1,6 +1,6 @@
 import pghistory
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped
-from common.constants import ClientType, Length
+from common.constants import LocationClientType, Length
 from django.db import models
 from game.models import Game, Team
 from profile_player.models import PlayerProfile
@@ -15,9 +15,9 @@ class Location(AbstractExternalFacing, AbstractTimeStamped):
     lat = models.DecimalField(max_digits=9, decimal_places=6)
     lon = models.DecimalField(max_digits=9, decimal_places=6)
     accuracy = models.FloatField(null=True, blank=True)
-    reported_time = models.DateTimeField()
+    timestamp = models.DateTimeField()
 
-    client = models.PositiveIntegerField(choices=ClientType.get_choices())
+    client = models.PositiveIntegerField(choices=LocationClientType.get_choices())
 
     class Meta:
         indexes = [
@@ -35,8 +35,8 @@ class Location(AbstractExternalFacing, AbstractTimeStamped):
         player: PlayerProfile,
         lat: float,
         lon: float,
-        reported_time,
-        client: ClientType,
+        timestamp,
+        client: LocationClientType,
         game: Game = None,
         team: Team = None,
         accuracy: float = None,
@@ -48,8 +48,8 @@ class Location(AbstractExternalFacing, AbstractTimeStamped):
             lat=lat,
             lon=lon,
             accuracy=accuracy,
-            reported_time=reported_time,
-            client=client.value if isinstance(client, ClientType) else ClientType.tokentype_from_string(client).value,
+            timestamp=timestamp,
+            client=client.value if isinstance(client, LocationClientType) else LocationClientType.tokentype_from_string(client).value,
         )
         location.save()
         return location
@@ -58,7 +58,7 @@ class Location(AbstractExternalFacing, AbstractTimeStamped):
 class LocationSharingSetting(AbstractTimeStamped):
     player = models.OneToOneField(PlayerProfile, on_delete=models.CASCADE, related_name="location_sharing_setting")
     is_sharing_enabled = models.BooleanField(default=False)
-    tracking_code = models.CharField(max_length=Length.TRACKING_CODE, blank=True, null=True, unique=True)
+    tracking_code = models.CharField(max_length=Length.LOCATION_TRACKING_CODE, blank=True, null=True, unique=True)
 
     class Meta:
         indexes = [models.Index(fields=["tracking_code"])]

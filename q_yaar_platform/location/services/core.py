@@ -95,7 +95,7 @@ def svc_location_get_locations(request_data: dict, serialized: bool = True):
     # Filter out locations for players who do not have sharing enabled
     locations = locations.filter(player__location_sharing_setting__is_sharing_enabled=True)
 
-    locations = locations.order_by("-reported_time")
+    locations = locations.order_by("-timestamp")
 
     if serialized:
         locations = svc_location_helper_get_serialized_locations(locations, many=True)

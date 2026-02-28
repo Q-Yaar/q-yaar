@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 from account.models import PlatformUser
 from profile_player.models import PlayerProfile
 from game.models import Game
-from common.constants import ClientType, GameType
+from common.constants import LocationClientType, GameType
 from location.models import Location, LocationSharingSetting
 
 
@@ -31,19 +31,19 @@ class LocationAPITests(APITestCase):
 
         self.valid_payload = {
             "game_id": str(self.game.external_id),
-            "client": ClientType.OWNTRACS.name,
+            "client": LocationClientType.WEB_APP.name,
             "locations": [
                 {
                     "lat": 12.345678,
                     "lon": 98.765432,
                     "accuracy": 10.5,
-                    "reported_time": "2026-02-28T10:00:00Z"
+                    "timestamp": "2026-02-28T10:00:00Z"
                 },
                 {
                     "lat": 12.345679,
                     "lon": 98.765433,
                     "accuracy": 5.0,
-                    "reported_time": "2026-02-28T10:01:00Z"
+                    "timestamp": "2026-02-28T10:01:00Z"
                 }
             ]
         }
@@ -114,11 +114,11 @@ class LocationAPITests(APITestCase):
         # Add some setup locations manually
         loc1 = Location.create(
             player=self.profile, game=self.game, team=None,
-            lat=10.0, lon=20.0, reported_time="2026-02-28T10:00:00Z", client=ClientType.QYAAR
+            lat=10.0, lon=20.0, timestamp="2026-02-28T10:00:00Z", client=LocationClientType.ANDROID
         )
         loc2 = Location.create(
             player=self.profile, game=self.game, team=None,
-            lat=11.0, lon=21.0, reported_time="2026-02-28T11:00:00Z", client=ClientType.QYAAR
+            lat=11.0, lon=21.0, timestamp="2026-02-28T11:00:00Z", client=LocationClientType.ANDROID
         )
         
         self.authenticate()
@@ -156,7 +156,7 @@ class LocationAPITests(APITestCase):
         # Create a location
         loc = Location.create(
             player=self.profile, game=self.game, team=None,
-            lat=22.0, lon=33.0, reported_time="2026-02-28T12:00:00Z", client=ClientType.QYAAR
+            lat=22.0, lon=33.0, timestamp="2026-02-28T12:00:00Z", client=LocationClientType.ANDROID
         )
         
         # Ensure sharing is ON

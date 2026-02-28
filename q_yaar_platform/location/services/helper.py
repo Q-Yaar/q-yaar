@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_tracking_code() -> str:
-    return "".join(random.choices(string.ascii_uppercase + string.digits, k=Length.TRACKING_CODE))
+    return "".join(random.choices(string.ascii_uppercase + string.digits, k=Length.LOCATION_TRACKING_CODE))
 
 
 def get_unique_tracking_code() -> str:
@@ -87,7 +87,7 @@ def svc_location_helper_create_location_points(
             team=team,
             lat=point.lat,
             lon=point.lon,
-            reported_time=point.reported_time,
+            timestamp=point.timestamp,
             accuracy=point.accuracy,
             client=location_data.client,
         )
@@ -98,7 +98,7 @@ def svc_location_helper_create_location_points(
 
 def svc_location_helper_get_last_location(player: PlayerProfile) -> Location | None:
     logger.debug(f">> ARGS: {locals()}")
-    return Location.objects.filter(player=player).order_by("-reported_time").first()
+    return Location.objects.filter(player=player).order_by("-timestamp").first()
 
 
 def svc_location_helper_apply_filters(request_data: dict, locations):

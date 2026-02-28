@@ -43,7 +43,7 @@ class Length:
     QUESTION_CATEGORY = 100
     PLACEHOLDER_NAME = 100
     PLACEHOLDER_VALUE = 255
-    TRACKING_CODE = 6
+    LOCATION_TRACKING_CODE = 6
 
 
 class ModuleErrorPrefix:
@@ -112,6 +112,8 @@ class AnswerInstructionType(BaseIntEnum):
     NO_INSTRUCTION = 99
 
 
-class ClientType(BaseIntEnum):
-    OWNTRACS = 1
-    QYAAR = 2
+class LocationClientType(BaseIntEnum):
+    WEB_APP = 1
+    ANDROID = 2
+    IOS = 3
+    EXTERNAL_TRACCAR = 4

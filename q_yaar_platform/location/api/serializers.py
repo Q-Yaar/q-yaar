@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
-from common.constants import ClientType
+from common.constants import LocationClientType
 from location.models import Location, LocationSharingSetting
 
 
 class LocationPointSerializer(serializers.Serializer):
     lat = serializers.DecimalField(max_digits=9, decimal_places=6, required=True)
     lon = serializers.DecimalField(max_digits=9, decimal_places=6, required=True)
-    reported_time = serializers.DateTimeField(required=True)
+    timestamp = serializers.DateTimeField(required=True)
     accuracy = serializers.FloatField(required=False, allow_null=True)
 
 
@@ -15,7 +15,7 @@ class LocationCreateSerializer(serializers.Serializer):
     game_id = serializers.UUIDField(required=False, allow_null=True)
     team_id = serializers.UUIDField(required=False, allow_null=True)
     client = serializers.ChoiceField(
-        choices=[(item.name, item.value) for item in ClientType],
+        choices=[(item.name, item.value) for item in LocationClientType],
         required=True
     )
     locations = serializers.ListField(
@@ -38,7 +38,7 @@ class LocationResponseSerializer(serializers.ModelSerializer):
             "lat",
             "lon",
             "accuracy",
-            "reported_time",
+            "timestamp",
             "client",
         )
         read_only_fields = fields

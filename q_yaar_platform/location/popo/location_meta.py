@@ -1,12 +1,12 @@
 import dataclasses
-from common.constants import ClientType
+from common.constants import LocationClientType
 
 
 @dataclasses.dataclass
 class LocationPointData:
     lat: float
     lon: float
-    reported_time: str
+    timestamp: str
     accuracy: float = None
 
 
@@ -14,5 +14,5 @@ class LocationPointData:
 class LocationAddData:
     game_id: str
     team_id: str
-    client: ClientType
+    client: LocationClientType
     locations: list[LocationPointData]
