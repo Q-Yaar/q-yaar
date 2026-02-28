@@ -1,10 +1,11 @@
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
-from common.constants import Length, QuestionRewardType
+from common.constants import AnswerInstructionType, Length, QuestionRewardType
 from common.models import FilteredModelManager
 from django.db import models
 from django.template import Context, Template
 from game.models import Game, Team
 from qna.popo.answer_meta.answer import AnswerConfig
+from qna.popo.instruction_meta import AnswerInstructionMeta
 from qna.popo.question_meta.question import QuestionMetaConfig
 from qna.popo.question_meta_type.geo_count import GeoCountConfig
 from qna.popo.reward_meta.reward import RewardConfig
@@ -68,6 +69,9 @@ class QuestionTemplate(AbstractExternalFacing, AbstractTimeStamped, AbstractVers
 
     template = models.TextField(help_text="Example: 'Are you within {{ distance }} metres of me?'")
     category = models.ForeignKey(QuestionCategory, on_delete=models.CASCADE, related_name="question_templates")
+    answer_instruction_type = models.PositiveIntegerField(
+        choices=AnswerInstructionType.get_choices(), default=AnswerInstructionType.NO_INSTRUCTION
+    )
 
     info = models.JSONField(default=dict, blank=True)
 
@@ -88,8 +92,14 @@ class QuestionTemplate(AbstractExternalFacing, AbstractTimeStamped, AbstractVers
         return self
 
     @classmethod
-    def create(cls, template: str, category: QuestionCategory, geo_count: GeoCountConfig) -> "QuestionTemplate":
-        question_template = cls(template=template, category=category)
+    def create(
+        cls,
+        template: str,
+        category: QuestionCategory,
+        answer_instruction_type: AnswerInstructionType,
+        geo_count: GeoCountConfig,
+    ) -> "QuestionTemplate":
+        question_template = cls(template=template, category=category, answer_instruction_type=answer_instruction_type)
         question_template.set_geo(geo_count)
         question_template.save()
         return question_template
@@ -150,6 +160,8 @@ class AskedQuestion(AbstractExternalFacing, AbstractTimeStamped):
     CONST_KEY_QUESTION_META = "question_meta"
     CONST_KEY_ANSWER_META = "answer_meta"
 
+    CONST_KEY_FACT_META = "fact_meta"
+
     game_question = models.ForeignKey(GameQuestion, on_delete=models.CASCADE, related_name="asked_questions")
     target = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="asked_questions")
 
@@ -191,6 +203,17 @@ class AskedQuestion(AbstractExternalFacing, AbstractTimeStamped):
             self.save()
         return self
 
+    def get_fact_meta(self) -> AnswerInstructionMeta:
+        return AnswerInstructionMeta.from_json(self.info.get(self.CONST_KEY_FACT_META, {}))
+
+    def set_fact_meta(self, fact_meta: AnswerInstructionMeta, save: bool = False) -> "AskedQuestion":
+        info = self.info
+        info[self.CONST_KEY_FACT_META] = fact_meta.to_json()
+        self.info = info
+        if save:
+            self.save()
+        return self
+
     def render(self) -> str:
         return Template(self.game_question.question_template.template).render(Context(self.get_chosen_placeholders()))
 
@@ -214,10 +237,12 @@ class AskedQuestion(AbstractExternalFacing, AbstractTimeStamped):
         target: Team,
         chosen_placeholders: dict[str, str],
         question_meta: QuestionMetaConfig,
+        fact_meta: AnswerInstructionMeta,
     ) -> "AskedQuestion":
         asked_question = cls(game_question=game_question, target=target)
         asked_question._validate_placeholders(chosen_placeholders)
         asked_question.set_chosen_placeholders(chosen_placeholders)
         asked_question.set_question_meta(question_meta)
+        asked_question.set_fact_meta(fact_meta)
         asked_question.save()
         return asked_question
