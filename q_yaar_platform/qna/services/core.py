@@ -154,7 +154,11 @@ def svc_qna_create_question(request_data: dict, category_id: uuid.UUID, serializ
         return error, None
 
     question = svc_qna_helper_create_question(
-        request_data["template"], request_data.get("placeholders", {}), category, request_data.get("geo", {})
+        request_data["template"],
+        request_data.get("placeholders", {}),
+        category,
+        request_data.get("answer_instruction_type"),
+        request_data.get("geo", {}),
     )
 
     if serialized:
@@ -220,7 +224,7 @@ def svc_qna_ask_question(game_id: uuid.UUID, question_id: uuid.UUID, request_dat
         return error, None
 
     error, asked_question = svc_qna_helper_ask_question(
-        game_question, target, request_data["chosen_placeholders"], request_data["question_meta"]
+        game_question, target, request_data["chosen_placeholders"], request_data
     )
     if error:
         return error, None
@@ -248,7 +252,7 @@ def svc_qna_update_asked_question(
     if not error:
         return ErrorCode(ErrorCode.ASSIGNEE_CANNOT_UPDATE_QUESTION), None
 
-    error, asked_question = svc_qna_helper_update_asked_question(asked_question, request_data["question_meta"])
+    error, asked_question = svc_qna_helper_update_asked_question(asked_question, request_data)
     if error:
         return error, None
 
