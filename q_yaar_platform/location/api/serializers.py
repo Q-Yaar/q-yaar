@@ -62,3 +62,22 @@ class LocationSharingSettingSerializer(serializers.ModelSerializer):
 class LocationTrackingCodeUpdateSerializer(serializers.Serializer):
     # Empty serializer since this will just be a POST/PATCH to generate a new code
     pass
+
+
+class WebhookTraccarCoordsSerializer(serializers.Serializer):
+    latitude = serializers.DecimalField(max_digits=12, decimal_places=8, required=True)
+    longitude = serializers.DecimalField(max_digits=12, decimal_places=8, required=True)
+    accuracy = serializers.FloatField(required=True)
+
+
+class WebhookTraccarLocationObjectSerializer(serializers.Serializer):
+    timestamp = serializers.DateTimeField(required=True)
+    coords = WebhookTraccarCoordsSerializer(required=True)
+
+
+class WebhookTraccarLocationSerializer(serializers.Serializer):
+    device_id = serializers.CharField(max_length=64, min_length=1, required=True)
+    location = WebhookTraccarLocationObjectSerializer(required=True)
+
+    def validate_device_id(self, value):
+        return value.strip()

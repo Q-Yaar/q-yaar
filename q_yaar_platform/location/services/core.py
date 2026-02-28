@@ -1,6 +1,6 @@
 import logging
 
-from location.popo.location_meta import LocationAddData
+from location.popo.location_meta import LocationAddData, LocationPointData
 from profile_player.models import PlayerProfile
 
 from .error_codes import ErrorCode
@@ -20,7 +20,8 @@ from .helper import (
     svc_location_helper_validate_and_get_game,
     svc_location_helper_validate_and_get_team,
 )
-from location.models import Location
+from location.models import Location, LocationSharingSetting
+from common.constants import LocationClientType
 
 
 logger = logging.getLogger(__name__)
@@ -158,4 +159,46 @@ def svc_location_reset_sharing_setting(player: PlayerProfile, serialized: bool =
         setting = svc_location_helper_get_serialized_setting(setting)
 
     return ErrorCode(ErrorCode.SUCCESS), setting
+
+
+def svc_location_process_webhook_traccar(request_data: dict, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+    
+    device_id = request_data.get("device_id")
+    
+    try:
+        setting = LocationSharingSetting.objects.get(tracking_code=device_id)
+    except LocationSharingSetting.DoesNotExist:
+        logger.warning(f"Webhook received for unknown tracking code (device_id): {device_id}")
+        return ErrorCode(ErrorCode.LOCATION_SHARING_DISABLED), None
+        
+    if not setting.is_sharing_enabled:
+        logger.warning(f"Webhook received for disabled tracking code: {device_id}")
+        return ErrorCode(ErrorCode.LOCATION_SHARING_DISABLED), None
+        
+    location_data_map = request_data.get("location", {})
+    coords = location_data_map.get("coords", {})
+    
+    location_add_data = LocationAddData(
+        game_id=None,
+        team_id=None,
+        client=LocationClientType.EXTERNAL_TRACCAR.name,
+        locations=[
+            LocationPointData(
+                lat=coords.get("latitude"),
+                lon=coords.get("longitude"),
+                accuracy=coords.get("accuracy"),
+                timestamp=location_data_map.get("timestamp"),
+            )
+        ]
+    )
+
+    locations = svc_location_helper_create_location_points(
+        player=setting.player, game=None, team=None, location_data=location_add_data
+    )
+
+    if serialized:
+        locations = svc_location_helper_get_serialized_locations(locations, many=True)
+
+    return ErrorCode(ErrorCode.CREATED), locations
 

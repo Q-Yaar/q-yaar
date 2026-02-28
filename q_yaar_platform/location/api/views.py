@@ -4,9 +4,9 @@ from common.constants import UserRolesType
 from common.decorators import validate_profile
 from common.response import get_paginated_response, get_standard_response
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from location.api.serializers import LocationCreateSerializer, LocationResponseSerializer, LocationSharingSettingSerializer
+from location.api.serializers import LocationCreateSerializer, LocationResponseSerializer, LocationSharingSettingSerializer, WebhookTraccarLocationSerializer
 from location.services.core import (
     svc_location_add_location,
     svc_location_enable_sharing,
@@ -14,6 +14,7 @@ from location.services.core import (
     svc_location_get_locations,
     svc_location_get_current_sharing_setting,
     svc_location_reset_sharing_setting,
+    svc_location_process_webhook_traccar,
 )
 
 
@@ -67,6 +68,17 @@ class LocationSharingSettingResetView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def post(self, request, **kwargs):
         error, response = svc_location_reset_sharing_setting(kwargs["profile"])
+        return get_standard_response(error, response)
+
+
+class LocationTraccarWebhookView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".LocationTraccarWebhookView")
+    permission_classes = (AllowAny,)
+    
+    def post(self, request, **kwargs):
+        serializer = WebhookTraccarLocationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        error, response = svc_location_process_webhook_traccar(serializer.validated_data)
         return get_standard_response(error, response)
 
 

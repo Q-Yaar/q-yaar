@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_tracking_code() -> str:
-    return "".join(random.choices(string.ascii_uppercase + string.digits, k=Length.LOCATION_TRACKING_CODE))
+    return "".join(random.choices(string.digits, k=Length.LOCATION_TRACKING_CODE))
 
 
 def get_unique_tracking_code() -> str:
