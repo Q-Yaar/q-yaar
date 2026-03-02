@@ -30,7 +30,7 @@ pathspec==0.12.1
 phonenumbers==8.13.42
 platformdirs==4.2.2
 prompt_toolkit==3.0.47
-psycopg2-binary==2.9.11
+psycopg2-binary==2.9.9
 PyJWT==1.7.1
 python-crontab==3.2.0
 python-dateutil==2.9.0.post0
