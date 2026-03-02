@@ -6,7 +6,6 @@ from game.models import Game, Team
 from profile_player.models import PlayerProfile
 
 
-@pghistory.track()
 class Location(AbstractExternalFacing, AbstractTimeStamped):
     player = models.ForeignKey(PlayerProfile, on_delete=models.CASCADE, related_name="locations")
     game = models.ForeignKey(Game, on_delete=models.SET_NULL, null=True, blank=True, related_name="locations")
