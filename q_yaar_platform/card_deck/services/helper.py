@@ -99,7 +99,7 @@ def svc_card_deck_helper_validate_input_for_team_deck_creation(request_data: dic
 def svc_card_deck_helper_validate_input_for_peek(request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
-    if not request_data.get("num_cards"):
+    if "num_cards" not in request_data:
         return ErrorCode(ErrorCode.MISSING_NUM_CARDS)
 
     return None
