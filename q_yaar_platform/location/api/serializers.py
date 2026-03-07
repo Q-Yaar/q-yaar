@@ -5,8 +5,8 @@ from location.models import Location, LocationSharingSetting
 
 
 class LocationPointSerializer(serializers.Serializer):
-    lat = serializers.DecimalField(max_digits=9, decimal_places=6, required=True)
-    lon = serializers.DecimalField(max_digits=9, decimal_places=6, required=True)
+    lat = serializers.DecimalField(max_digits=25, decimal_places=20, required=True)
+    lon = serializers.DecimalField(max_digits=25, decimal_places=20, required=True)
     timestamp = serializers.DateTimeField(required=True)
     accuracy = serializers.FloatField(required=False, allow_null=True)
 
@@ -67,8 +67,8 @@ class LocationTrackingCodeUpdateSerializer(serializers.Serializer):
 
 
 class WebhookTraccarCoordsSerializer(serializers.Serializer):
-    latitude = serializers.DecimalField(max_digits=12, decimal_places=8, required=True)
-    longitude = serializers.DecimalField(max_digits=12, decimal_places=8, required=True)
+    latitude = serializers.DecimalField(max_digits=25, decimal_places=20, required=True)
+    longitude = serializers.DecimalField(max_digits=25, decimal_places=20, required=True)
     accuracy = serializers.FloatField(required=True)
 
 
