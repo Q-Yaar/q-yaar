@@ -11,8 +11,8 @@ class Location(AbstractExternalFacing, AbstractTimeStamped):
     game = models.ForeignKey(Game, on_delete=models.SET_NULL, null=True, blank=True, related_name="locations")
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name="locations")
 
-    lat = models.DecimalField(max_digits=9, decimal_places=6)
-    lon = models.DecimalField(max_digits=9, decimal_places=6)
+    lat = models.DecimalField(max_digits=25, decimal_places=20)
+    lon = models.DecimalField(max_digits=25, decimal_places=20)
     accuracy = models.FloatField(null=True, blank=True)
     timestamp = models.DateTimeField()
 
