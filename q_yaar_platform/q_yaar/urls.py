@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
 
 from .forms import CustomAdminAuthenticationForm
 
@@ -36,4 +36,6 @@ urlpatterns = [
     path("api/v1/cards/", include("card_deck.api.urls")),
     path("api/v1/qna/", include("qna.api.urls")),
     path("api/v1/facts/", include("fact.api.urls")),
+    path("api/v1/live-location/", include("live_location.api.urls")),
+    path("wh/v1/live-location/", include("live_location.webhook.urls")),
 ]

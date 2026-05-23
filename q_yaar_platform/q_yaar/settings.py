@@ -57,6 +57,7 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
 ]
 
 THIRD_PARTY_APPS = [
@@ -78,6 +79,7 @@ PROJECT_APPS = [
     "card_deck.apps.CardDeckConfig",
     "qna.apps.QnaConfig",
     "fact.apps.FactConfig",
+    "live_location.apps.LiveLocationConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
