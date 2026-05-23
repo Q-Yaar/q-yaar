@@ -4,11 +4,11 @@ Base behaviours. Can be inherited by other models.
 
 from uuid import UUID
 
-from django.conf import settings
-from django.db import models
-
 from common.constants import Length
 from common.uuid import unique_uuid4
+from django.conf import settings
+from django.contrib.gis.db import models as gis_models
+from django.db import models
 
 
 class AbstractExternalFacing(models.Model):
@@ -97,3 +97,24 @@ class AbstractUserProfile(models.Model):
         if save:
             self.save()
         return self
+
+
+class AbstractLocationPoint(models.Model):
+    """
+    Implemented by models that has a location point
+    Provides location_pnt field
+    """
+
+    location_pnt = gis_models.PointField()
+
+    class Meta:
+        abstract = True
+
+    def get_location_point(self):
+        return self.location_pnt
+    
+    def get_location_point_dict(self):
+        return {
+            "lat": self.location_pnt.y,
+            "lng": self.location_pnt.x,
+        }

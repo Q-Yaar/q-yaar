@@ -107,3 +107,10 @@ class AnswerInstructionType(BaseIntEnum):
     POLYGON_LOCATION = 7
 
     NO_INSTRUCTION = 99
+
+
+class LocationClientType(BaseIntEnum):
+    WEB_APP = 1
+    ANDROID = 2
+    IOS = 3
+    TRACCAR = 4
