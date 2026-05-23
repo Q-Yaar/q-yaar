@@ -37,5 +37,5 @@ urlpatterns = [
     path("api/v1/qna/", include("qna.api.urls")),
     path("api/v1/facts/", include("fact.api.urls")),
     path("api/v1/live-location/", include("live_location.api.urls")),
-    path("wh/v1/live-location/", include("live_location.webhook.urls")),
+    path("api/v1/wh/live-location/", include("live_location.webhook.urls")),
 ]

@@ -47,4 +47,4 @@ class LocationSettingsSerializer(serializers.ModelSerializer):
         return PlayerProfileSerializer(obj.player, many=False).data
 
     def get_tracking_endpoint(self, obj: LocationSharingSetting) -> str:
-        return f"/wh/v1/live-location/<location_client>/track/{str(obj.get_external_id())}"
+        return f"/api/v1/wh/live-location/<location_client>/track/{str(obj.get_external_id())}"
