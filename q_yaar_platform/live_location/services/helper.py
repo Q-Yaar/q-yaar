@@ -39,7 +39,9 @@ def svc_live_location_helper_get_player_locations_for_game(game: Game):
     logger.debug(f">> ARGS: {locals()}")
 
     return (
-        LiveLocation.objects.filter(player__teamplayerrelation__game=game)
+        LiveLocation.objects.filter(
+            player__teamplayerrelation__game=game, player__location_sharing_setting__is_sharing_enabled=True
+        )
         .order_by("player_id", "-created")
         .distinct("player_id")
     )
