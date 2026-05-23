@@ -34,13 +34,17 @@ class LiveLocationSerializer(serializers.ModelSerializer):
 class LocationSettingsSerializer(serializers.ModelSerializer):
     tracking_id = serializers.SerializerMethodField()
     player = serializers.SerializerMethodField()
+    tracking_endpoint = serializers.SerializerMethodField()
 
     class Meta:
         model = LocationSharingSetting
-        fields = ("tracking_id", "player", "is_sharing_enabled", "created", "modified")
+        fields = ("tracking_id", "player", "is_sharing_enabled", "tracking_endpoint", "created", "modified")
 
     def get_tracking_id(self, obj: LocationSharingSetting) -> str:
         return str(obj.get_external_id())
 
     def get_player(self, obj: LocationSharingSetting) -> str:
         return PlayerProfileSerializer(obj.player, many=False).data
+
+    def get_tracking_endpoint(self, obj: LocationSharingSetting) -> str:
+        return f"/wh/v1/live-location/<location_client>/track/{str(obj.get_external_id())}"
