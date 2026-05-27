@@ -18,6 +18,7 @@ services:
       bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
 
   fast_worker:
+    restart: always
     build:
       context: ./../q_yaar_platform
       dockerfile: ./../q_yaar_platform/Dockerfile-dev
@@ -27,6 +28,7 @@ services:
       - backend
 
   slow_worker:
+    restart: always
     build:
       context: ./../q_yaar_platform
       dockerfile: ./../q_yaar_platform/Dockerfile-dev
@@ -36,6 +38,7 @@ services:
       - backend
 
   celery_beat:
+    restart: always
     build:
       context: ./../q_yaar_platform
       dockerfile: ./../q_yaar_platform/Dockerfile-dev
@@ -49,6 +52,7 @@ services:
 
   db:
     image: postgis/postgis:latest
+    platform: linux/amd64
     restart: always
     env_file: ./../q_yaar_platform/.env_docker
     ports:

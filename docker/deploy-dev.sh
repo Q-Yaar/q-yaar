@@ -19,8 +19,6 @@ echo "Setting variables"
 docker compose -f $PROJECT_HOME/docker/docker-compose-dev.yml build
 docker compose -f $PROJECT_HOME/docker/docker-compose-dev.yml up -d
 
-docker compose -f $PROJECT_HOME/docker/docker-compose-dev.yml exec q_yaar_core python manage.py migrate
-
 if [ "$collectstatic" = "true" ]; then
   docker compose -f $PROJECT_HOME/docker/docker-compose-dev.yml exec q_yaar_core mkdir -p static
   docker compose -f $PROJECT_HOME/docker/docker-compose-dev.yml exec q_yaar_core python manage.py collectstatic --noinput
