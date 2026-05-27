@@ -60,7 +60,7 @@ services:
     expose:
       - "5436"
     volumes:
-      - ./postgres:/var/lib/postgresql
+      - dbdata:/var/lib/postgresql/data
     networks:
       - backend
 
@@ -71,7 +71,7 @@ services:
     expose:
       - "6380"
     volumes:
-      - ./redis:/data
+      - redisdata:/data
     command: [ "redis-server", "--port", "6380", "--loadmodule", "/usr/lib/redis/modules/redisearch.so", "--appendonly", "yes", "--aof-use-rdb-preamble", "yes" ]
     networks:
       - backend
