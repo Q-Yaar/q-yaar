@@ -1,8 +1,7 @@
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped
 from common.constants import GameStatus, GameType, Length
-from django.db import models
-
 from common.uuid import unique_uuid4
+from django.db import models
 from game.popo.game_master_info import GameMasterInfoConfig
 from profile_game_master.models import GameMasterProfile
 from profile_player.models import PlayerProfile
