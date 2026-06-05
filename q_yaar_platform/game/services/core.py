@@ -13,11 +13,14 @@ from game.services.helper import (
     svc_game_helper_get_game_type_from_request_data,
     svc_game_helper_get_games_for_game_master,
     svc_game_helper_get_players_from_request_data,
+    svc_game_helper_get_team_by_id,
     svc_game_helper_get_teams_for_game,
     svc_game_helper_get_teams_for_player,
     svc_game_helper_run_validations_for_game_creation,
     svc_game_helper_run_validations_for_team_creation,
+    svc_game_helper_run_validations_for_team_update,
     svc_game_helper_start_game,
+    svc_game_helper_update_team,
 )
 from profile_game_master.models import GameMasterProfile
 from profile_player.models import PlayerProfile
@@ -152,6 +155,29 @@ def svc_game_get_team_for_player(game_id: str, player: PlayerProfile, serialized
     error, team = svc_game_helper_get_teams_for_player(game=game, player=player)
     if error:
         return error, None
+
+    if serialized:
+        team = TeamSerializer(team, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), team
+
+
+def svc_game_update_team(game_id: str, team_id: str, request_data: dict, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    error = svc_game_helper_run_validations_for_team_update(game=game)
+    if error:
+        return error, None
+
+    error, team = svc_game_helper_get_team_by_id(team_id=team_id)
+    if error:
+        return error, None
+
+    team = svc_game_helper_update_team(team=team, request_data=request_data)
 
     if serialized:
         team = TeamSerializer(team, many=False).data

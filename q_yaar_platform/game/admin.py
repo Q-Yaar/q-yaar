@@ -15,7 +15,7 @@ admin.site.register(Game, GameAdmin)
 
 class TeamAdmin(admin.ModelAdmin):
     list_display = ("game", "team_name", "team_colour")
-    search_fields = ["game__game_code"]
+    search_fields = ["game__game_code", "external_id"]
     readonly_fields = ("game",)
 
 

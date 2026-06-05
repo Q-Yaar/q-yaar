@@ -48,6 +48,17 @@ def svc_game_helper_run_validations_for_team_creation(request_data: dict) -> Err
     return None
 
 
+def svc_game_helper_run_validations_for_team_update(game: Game) -> ErrorCode | None:
+    logger.debug(f">> ARGS: {locals()}")
+
+    if game.game_status != GameStatus.PENDING.value:
+        return ErrorCode(
+            ErrorCode.INVALID_GAME_STATE, game_state=GameStatus.get_string_for_type(GameStatus(game.game_status))
+        )
+
+    return None
+
+
 def svc_game_helper_get_game_type_from_request_data(request_data: dict) -> GameType:
     logger.debug(f">> ARGS: {locals()}")
 
@@ -204,3 +215,17 @@ def svc_game_helper_verify_player_belongs_to_game(player: PlayerProfile, game: G
         )
 
     return None
+
+
+def svc_game_helper_update_team(team: Team, request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if request_data.get("team_name"):
+        team.team_name = request_data["team_name"]
+
+    if request_data.get("team_colour"):
+        team.team_colour = request_data["team_colour"]
+
+    team.save()
+
+    return team
