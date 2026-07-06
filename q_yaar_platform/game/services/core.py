@@ -9,9 +9,10 @@ from game.services.helper import (
     svc_game_helper_create_team,
     svc_game_helper_end_game,
     svc_game_helper_get_game_by_id,
-    svc_game_helper_get_game_for_player,
     svc_game_helper_get_game_type_from_request_data,
+    svc_game_helper_get_game_visibility_mode_from_request_data,
     svc_game_helper_get_games_for_game_master,
+    svc_game_helper_get_game_for_player,
     svc_game_helper_get_players_from_request_data,
     svc_game_helper_get_team_by_id,
     svc_game_helper_get_teams_for_game,
@@ -19,8 +20,10 @@ from game.services.helper import (
     svc_game_helper_run_validations_for_game_creation,
     svc_game_helper_run_validations_for_team_creation,
     svc_game_helper_run_validations_for_team_update,
+    svc_game_helper_run_validations_for_game_update,
     svc_game_helper_start_game,
     svc_game_helper_update_team,
+    svc_game_helper_update_game,
 )
 from profile_game_master.models import GameMasterProfile
 from profile_player.models import PlayerProfile
@@ -36,9 +39,14 @@ def svc_game_create_game(request_data: dict, profile: GameMasterProfile, seriali
         return error, None
 
     game_type = svc_game_helper_get_game_type_from_request_data(request_data=request_data)
+    game_visibility_mode = svc_game_helper_get_game_visibility_mode_from_request_data(request_data=request_data)
 
     game = svc_game_helper_create_game(
-        game_type=game_type, name=request_data["name"], description=request_data["description"], created_by=profile
+        game_type=game_type,
+        game_visibility_mode=game_visibility_mode,
+        name=request_data["name"],
+        description=request_data["description"],
+        created_by=profile,
     )
 
     if serialized:
@@ -183,3 +191,22 @@ def svc_game_update_team(game_id: str, team_id: str, request_data: dict, seriali
         team = TeamSerializer(team, many=False).data
 
     return ErrorCode(ErrorCode.SUCCESS), team
+
+
+def svc_game_update_game(game_id: str, request_data: dict, profile: GameMasterProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    error = svc_game_helper_run_validations_for_game_update(game=game, profile=profile)
+    if error:
+        return error, None
+
+    game = svc_game_helper_update_game(game=game, request_data=request_data)
+
+    if serialized:
+        game = GameSerializer(game, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), game

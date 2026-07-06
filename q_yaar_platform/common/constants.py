@@ -65,6 +65,11 @@ class GameType(BaseIntEnum):
     HIDE_N_SEEK = 1
 
 
+class GameVisibilityMode(BaseIntEnum):
+    PUBLIC = 1
+    PRIVATE = 2
+
+
 class GameStatus(BaseIntEnum):
     PENDING = 1
     IN_PROGRESS = 2

@@ -1,9 +1,10 @@
 import logging
 import uuid
 
-from common.constants import GameStatus, GameType
+from common.constants import GameStatus, GameType, GameVisibilityMode
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from game.models import Game, Team, TeamPlayerRelation
 from game.services.error_codes import ErrorCode
 from profile_game_master.models import GameMasterProfile
@@ -19,6 +20,9 @@ def svc_game_helper_run_validations_for_game_creation(request_data: dict) -> Err
     if not request_data.get("game_type"):
         return ErrorCode(ErrorCode.MISSING_GAME_TYPE)
 
+    if not request_data.get("game_visibility_mode"):
+        return ErrorCode(ErrorCode.MISSING_GAME_VISIBILITY_MODE)
+
     if not request_data.get("name"):
         return ErrorCode(ErrorCode.MISSING_NAME)
 
@@ -30,6 +34,12 @@ def svc_game_helper_run_validations_for_game_creation(request_data: dict) -> Err
     except KeyError:
         return ErrorCode(ErrorCode.INVALID_GAME_TYPE, game_type=request_data["game_type"])
 
+    try:
+        GameVisibilityMode.tokentype_from_string(request_data["game_visibility_mode"])
+    except KeyError:
+        return ErrorCode(
+            ErrorCode.INVALID_GAME_VISIBILITY_MODE, game_visibility_mode=request_data["game_visibility_mode"]
+        )
     return None
 
 
@@ -59,10 +69,29 @@ def svc_game_helper_run_validations_for_team_update(game: Game) -> ErrorCode | N
     return None
 
 
+def svc_game_helper_run_validations_for_game_update(game: Game, profile: GameMasterProfile) -> ErrorCode | None:
+    logger.debug(f">> ARGS: {locals()}")
+
+    if game.game_status != GameStatus.PENDING.value:
+        return ErrorCode(
+            ErrorCode.INVALID_GAME_STATE, game_state=GameStatus.get_string_for_type(GameStatus(game.game_status))
+        )
+    if game.created_by != profile:
+        return ErrorCode(ErrorCode.INVALID_GAME_UPDATER)
+
+    return None
+
+
 def svc_game_helper_get_game_type_from_request_data(request_data: dict) -> GameType:
     logger.debug(f">> ARGS: {locals()}")
 
     return GameType.tokentype_from_string(request_data["game_type"])
+
+
+def svc_game_helper_get_game_visibility_mode_from_request_data(request_data: dict) -> GameVisibilityMode:
+    logger.debug(f">> ARGS: {locals()}")
+
+    return GameVisibilityMode.tokentype_from_string(request_data["game_visibility_mode"])
 
 
 def svc_game_helper_get_players_from_request_data(request_data: dict):
@@ -73,17 +102,31 @@ def svc_game_helper_get_players_from_request_data(request_data: dict):
 
 # Collisions are rare so this should never go into long/infinite loop
 def svc_game_helper_create_game(
-    game_type: GameType, name: str, description: str, created_by: GameMasterProfile
+    game_type: GameType,
+    game_visibility_mode: GameVisibilityMode,
+    name: str,
+    description: str,
+    created_by: GameMasterProfile,
 ) -> Game:
     logger.debug(f">> ARGS: {locals()}")
 
     try:
-        game = Game.create(game_type=game_type, name=name, description=description, created_by=created_by)
+        game = Game.create(
+            game_type=game_type,
+            game_visibility_mode=game_visibility_mode,
+            name=name,
+            description=description,
+            created_by=created_by,
+        )
         return game
     except IntegrityError:
         logger.warning(f"Duplicate game code generated while creating game for name: {name}")
         return svc_game_helper_create_game(
-            game_type=game_type, name=name, description=description, created_by=created_by
+            game_type=game_type,
+            game_visibility_mode=game_visibility_mode,
+            name=name,
+            description=description,
+            created_by=created_by,
         )
 
 
@@ -229,3 +272,20 @@ def svc_game_helper_update_team(team: Team, request_data: dict):
     team.save()
 
     return team
+
+
+def svc_game_helper_update_game(game: Game, request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if request_data.get("game_name"):
+        game.name = request_data["game_name"]
+
+    if request_data.get("game_description"):
+        game.description = request_data["game_description"]
+
+    if request_data.get("game_visibility_mode"):
+        game.game_visibility_mode = svc_game_helper_get_game_visibility_mode_from_request_data(request_data)
+
+    game.save()
+
+    return game

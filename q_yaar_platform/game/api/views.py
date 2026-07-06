@@ -15,6 +15,7 @@ from game.services.core import (
     svc_game_get_teams_for_game,
     svc_game_start_game,
     svc_game_update_team,
+    svc_game_update_game,
 )
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -42,6 +43,11 @@ class GameDetailView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
     def get(self, request, game_id: uuid.UUID, **kwargs):
         error, response = svc_game_get_game_by_id(game_id)
+        return get_standard_response(error, response)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    def patch(self, request, game_id: uuid.UUID, **kwargs):
+        error, response = svc_game_update_game(game_id, request.data, kwargs["profile"])
         return get_standard_response(error, response)
 
 
