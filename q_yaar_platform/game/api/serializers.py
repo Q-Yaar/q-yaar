@@ -1,4 +1,4 @@
-from common.constants import GameStatus, GameType
+from common.constants import GameStatus, GameType, GameVisibilityMode
 from game.models import Game, Team, TeamPlayerRelation
 from rest_framework import serializers
 
@@ -9,6 +9,7 @@ from profile_player.models import PlayerProfile
 class GameSerializer(serializers.ModelSerializer):
     game_id = serializers.SerializerMethodField()
     game_type = serializers.SerializerMethodField()
+    game_visibility_mode = serializers.SerializerMethodField()
     game_status = serializers.SerializerMethodField()
     game_master = serializers.SerializerMethodField()
 
@@ -18,6 +19,7 @@ class GameSerializer(serializers.ModelSerializer):
             "game_id",
             "game_code",
             "game_type",
+            "game_visibility_mode",
             "name",
             "description",
             "game_status",
@@ -31,6 +33,9 @@ class GameSerializer(serializers.ModelSerializer):
 
     def get_game_type(self, obj: Game) -> str:
         return GameType.get_string_for_type(GameType(obj.game_type))
+
+    def get_game_visibility_mode(self, obj: Game) -> str:
+        return GameVisibilityMode.get_string_for_type(GameVisibilityMode(obj.game_visibility_mode))
 
     def get_game_status(self, obj: Game) -> str:
         return GameStatus.get_string_for_type(GameStatus(obj.game_status))

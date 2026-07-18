@@ -4,9 +4,9 @@ from .models import Game, Team, TeamPlayerRelation
 
 
 class GameAdmin(admin.ModelAdmin):
-    list_display = ("game_code", "game_type", "name", "game_status")
-    list_filter = ("game_type", "game_status")
-    search_fields = ["name"]  # Also searches by tags, as done in the overriden method
+    list_display = ("game_code", "game_type", "name", "game_status", "game_visibility_mode")
+    list_filter = ("game_type", "game_status", "game_visibility_mode")
+    search_fields = ["name", "external_id"]  # Also searches by tags, as done in the overriden method
     readonly_fields = ("created_by",)
 
 

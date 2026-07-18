@@ -8,3 +8,4 @@ docker/redis/
 docker/postgres/
 .venv/
 build_meta
+.DS_Store

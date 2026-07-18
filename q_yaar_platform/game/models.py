@@ -1,5 +1,5 @@
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped
-from common.constants import GameStatus, GameType, Length
+from common.constants import GameStatus, GameType, Length, GameVisibilityMode
 from common.uuid import unique_uuid4
 from django.db import models
 from game.popo.game_master_info import GameMasterInfoConfig
@@ -13,6 +13,9 @@ class Game(AbstractExternalFacing, AbstractTimeStamped):
 
     game_code = models.CharField(max_length=Length.GAME_CODE, unique=True)
     game_type = models.PositiveIntegerField(choices=GameType.get_choices())
+    game_visibility_mode = models.PositiveIntegerField(
+        choices=GameVisibilityMode.get_choices(), default=GameVisibilityMode.PRIVATE.value
+    )
     name = models.CharField(max_length=Length.GAME_NAME)
     description = models.TextField()
     game_status = models.PositiveSmallIntegerField(choices=GameStatus.get_choices(), default=GameStatus.PENDING.value)
@@ -44,13 +47,19 @@ class Game(AbstractExternalFacing, AbstractTimeStamped):
     def create(
         cls,
         game_type: GameType,
+        game_visibility_mode: GameVisibilityMode,
         name: str,
         description: str,
         created_by: GameMasterProfile,
     ) -> "Game":
         game_code = str(unique_uuid4())[:6]
         game = cls(
-            game_type=game_type.value, game_code=game_code, name=name, description=description, created_by=created_by
+            game_type=game_type.value,
+            game_visibility_mode=game_visibility_mode.value,
+            game_code=game_code,
+            name=name,
+            description=description,
+            created_by=created_by,
         )
         game.set_game_master_info(
             GameMasterInfoConfig.from_json(
