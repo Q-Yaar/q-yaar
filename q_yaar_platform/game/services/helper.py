@@ -69,7 +69,9 @@ def svc_game_helper_run_validations_for_team_update(game: Game) -> ErrorCode | N
     return None
 
 
-def svc_game_helper_run_validations_for_game_update(game: Game, profile: GameMasterProfile) -> ErrorCode | None:
+def svc_game_helper_run_validations_for_game_update(
+    game: Game, profile: GameMasterProfile, request_data: dict
+) -> ErrorCode | None:
     logger.debug(f">> ARGS: {locals()}")
 
     if game.game_status != GameStatus.PENDING.value:
@@ -79,6 +81,13 @@ def svc_game_helper_run_validations_for_game_update(game: Game, profile: GameMas
     if game.created_by != profile:
         return ErrorCode(ErrorCode.INVALID_GAME_UPDATER)
 
+    if "game_visibility_mode" in request_data:
+        try:
+            GameVisibilityMode.tokentype_from_string(request_data["game_visibility_mode"])
+        except KeyError:
+            return ErrorCode(
+                ErrorCode.INVALID_GAME_VISIBILITY_MODE, game_visibility_mode=request_data["game_visibility_mode"]
+            )
     return None
 
 

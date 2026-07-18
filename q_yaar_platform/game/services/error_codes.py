@@ -23,6 +23,7 @@ class ErrorCode(BaseErrorCode):
 
     # Key Errors - 2 Series
     INVALID_GAME_TYPE = "201"
+    INVALID_GAME_VISIBILITY_MODE = "202"
 
     # Object Does Not Exist Errors - 3 series
     INVALID_GAME_ID = "301"
@@ -45,6 +46,7 @@ class ErrorCode(BaseErrorCode):
         NOT_GAME_CREATOR: status.HTTP_403_FORBIDDEN,
         INVALID_GAME_UPDATER: status.HTTP_403_FORBIDDEN,
         INVALID_GAME_TYPE: status.HTTP_400_BAD_REQUEST,
+        INVALID_GAME_VISIBILITY_MODE: status.HTTP_400_BAD_REQUEST,
         INVALID_GAME_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_TEAM_ID: status.HTTP_400_BAD_REQUEST,
         PLAYER_DOES_NOT_BELONG_TO_TEAM: status.HTTP_400_BAD_REQUEST,
@@ -80,6 +82,9 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_invalid_game_type(kwargs: dict):
         return f"Invalid game_type: {kwargs.get('game_type')}"
 
+    def get_string_for_invalid_game_visibility_mode(kwargs: dict):
+        return f"Invalid game_visibility_mode: {kwargs.get('game_visibility_mode')}"
+
     def get_string_for_invalid_game_id(kwargs: dict):
         return f"Invalid game ID: {kwargs.get('game_id')}"
 
@@ -111,6 +116,7 @@ class ErrorCode(BaseErrorCode):
         INVALID_GAME_STATE: get_string_for_invalid_game_state,
         NOT_GAME_CREATOR: get_string_for_not_game_creator,
         INVALID_GAME_TYPE: get_string_for_invalid_game_type,
+        INVALID_GAME_VISIBILITY_MODE: get_string_for_invalid_game_visibility_mode,
         INVALID_GAME_ID: get_string_for_invalid_game_id,
         INVALID_TEAM_ID: get_string_for_invalid_team_id,
         PLAYER_DOES_NOT_BELONG_TO_TEAM: get_string_for_player_does_not_belong_to_team,

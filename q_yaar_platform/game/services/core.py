@@ -9,21 +9,21 @@ from game.services.helper import (
     svc_game_helper_create_team,
     svc_game_helper_end_game,
     svc_game_helper_get_game_by_id,
+    svc_game_helper_get_game_for_player,
     svc_game_helper_get_game_type_from_request_data,
     svc_game_helper_get_game_visibility_mode_from_request_data,
     svc_game_helper_get_games_for_game_master,
-    svc_game_helper_get_game_for_player,
     svc_game_helper_get_players_from_request_data,
     svc_game_helper_get_team_by_id,
     svc_game_helper_get_teams_for_game,
     svc_game_helper_get_teams_for_player,
     svc_game_helper_run_validations_for_game_creation,
+    svc_game_helper_run_validations_for_game_update,
     svc_game_helper_run_validations_for_team_creation,
     svc_game_helper_run_validations_for_team_update,
-    svc_game_helper_run_validations_for_game_update,
     svc_game_helper_start_game,
-    svc_game_helper_update_team,
     svc_game_helper_update_game,
+    svc_game_helper_update_team,
 )
 from profile_game_master.models import GameMasterProfile
 from profile_player.models import PlayerProfile
@@ -200,7 +200,7 @@ def svc_game_update_game(game_id: str, request_data: dict, profile: GameMasterPr
     if error:
         return error, None
 
-    error = svc_game_helper_run_validations_for_game_update(game=game, profile=profile)
+    error = svc_game_helper_run_validations_for_game_update(game=game, profile=profile, request_data=request_data)
     if error:
         return error, None
 
