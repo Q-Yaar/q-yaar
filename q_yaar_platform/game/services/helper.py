@@ -4,6 +4,7 @@ import uuid
 from common.constants import GameStatus, GameType, GameVisibilityMode, TeamType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError, transaction
+from django.db.models import Q, QuerySet
 from game.models import Game, Team, TeamPlayerRelation
 from game.services.error_codes import ErrorCode
 from profile_game_master.models import GameMasterProfile
@@ -11,6 +12,30 @@ from profile_player.models import PlayerProfile
 from profile_player.services.interfacer import svc_player_get_player_list_by_platform_user_ids
 
 logger = logging.getLogger(__name__)
+
+
+def _svc_apply_filters_for_game_explore(games: QuerySet[Game], request_data: dict) -> QuerySet[Game]:
+    logger.debug(f">> ARGS: {locals()}")
+
+    if request_data.get("search"):
+        search_query = request_data["search"]
+        games = games.filter(Q(name__icontains=search_query) | Q(game_code__icontains=search_query))
+
+    if request_data.get("game_type"):
+        try:
+            game_type = GameType.tokentype_from_string(request_data["game_type"])
+            games = games.filter(game_type=game_type)
+        except KeyError:
+            pass
+
+    if request_data.get("game_status"):
+        try:
+            game_status = GameStatus.tokentype_from_string(request_data["game_status"])
+            games = games.filter(game_status=game_status)
+        except KeyError:
+            pass
+
+    return games
 
 
 def svc_game_helper_run_validations_for_game_creation(request_data: dict) -> ErrorCode | None:
@@ -159,6 +184,21 @@ def svc_game_helper_get_game_for_player(player: PlayerProfile):
 
     game_ids = TeamPlayerRelation.objects.filter(player=player).values_list("game", flat=True)
     games = Game.objects.filter(id__in=game_ids).order_by("-created")
+
+    return games
+
+
+def svc_game_helper_explore_games(player: PlayerProfile, request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    game_ids = TeamPlayerRelation.objects.filter(player=player).values_list("game", flat=True)
+    games = (
+        Game.objects.filter(game_visibility_mode=GameVisibilityMode.PUBLIC.value)
+        .exclude(id__in=game_ids)
+        .order_by("-created")
+    )
+
+    games = _svc_apply_filters_for_game_explore(games, request_data)
 
     return games
 

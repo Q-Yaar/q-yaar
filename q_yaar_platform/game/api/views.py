@@ -11,6 +11,7 @@ from game.services.core import (
     svc_game_end_game,
     svc_game_get_game_by_id,
     svc_game_get_games,
+    svc_game_explore_games,
     svc_game_get_team_for_player,
     svc_game_get_teams_for_game,
     svc_game_start_game,
@@ -36,6 +37,16 @@ class GameListView(generics.GenericAPIView):
     def post(self, request, **kwargs):
         error, response = svc_game_create_game(request.data, kwargs["profile"])
         return get_standard_response(error, response)
+
+
+class GameExploreView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".GameExploreView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def get(self, request, **kwargs):
+        error, games = svc_game_explore_games(kwargs["profile"], request.query_params)
+        return get_paginated_response(self, error, games, GameSerializer)
 
 
 class GameDetailView(generics.GenericAPIView):
