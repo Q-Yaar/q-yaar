@@ -24,6 +24,7 @@ from game.services.helper import (
     svc_game_helper_start_game,
     svc_game_helper_update_game,
     svc_game_helper_update_team,
+    svc_game_helper_join_team,
 )
 from profile_game_master.models import GameMasterProfile
 from profile_player.models import PlayerProfile
@@ -210,3 +211,26 @@ def svc_game_update_game(game_id: str, request_data: dict, profile: GameMasterPr
         game = GameDetailSerializer(game, many=False).data
 
     return ErrorCode(ErrorCode.SUCCESS), game
+
+
+def svc_game_join_team(game_id: str, team_id: str, player: PlayerProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    error, team = svc_game_helper_get_team_by_id(team_id=team_id)
+    if error:
+        return error, None
+
+    if team.game != game:
+        return ErrorCode(ErrorCode.INVALID_TEAM_ID, team_id=team_id), None
+
+    svc_game_helper_join_team(game=game, team=team, player=player)
+
+    if serialized:
+        game = GameDetailSerializer(game, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), game
+

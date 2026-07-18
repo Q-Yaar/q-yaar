@@ -47,6 +47,7 @@ class GameDetailSerializer(GameSerializer):
     teams = serializers.SerializerMethodField()
 
     class Meta:
+        model = Game
         fields = GameSerializer.Meta.fields + ("teams",)
 
     def get_teams(self, obj: Game) -> list[dict]:

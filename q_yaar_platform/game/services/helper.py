@@ -300,3 +300,13 @@ def svc_game_helper_update_game(game: Game, request_data: dict):
     game.save()
 
     return game
+
+
+def svc_game_helper_join_team(game: Game, team: Team, player: PlayerProfile):
+    logger.debug(f">> ARGS: {locals()}")
+
+    with transaction.atomic():
+        TeamPlayerRelation.objects.filter(game=game, player=player).delete()
+        team_player_relation = TeamPlayerRelation.create(team=team, player=player)
+
+    return team_player_relation
