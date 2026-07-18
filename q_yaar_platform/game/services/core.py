@@ -14,7 +14,6 @@ from game.services.helper import (
     svc_game_helper_get_game_type_from_request_data,
     svc_game_helper_get_game_visibility_mode_from_request_data,
     svc_game_helper_get_games_for_game_master,
-    svc_game_helper_get_players_from_request_data,
     svc_game_helper_get_spectator_team,
     svc_game_helper_get_team_by_id,
     svc_game_helper_get_teams_for_game,
@@ -139,13 +138,7 @@ def svc_game_create_team(game_id: str, request_data: dict, serialized: bool = Tr
     if error:
         return error, None
 
-    error, players = svc_game_helper_get_players_from_request_data(request_data)
-    if error:
-        return error, None
-
-    error, team = svc_game_helper_create_team(game, request_data["team_name"], request_data["team_colour"], players)
-    if error:
-        return error, None
+    team = svc_game_helper_create_team(game, request_data["team_name"], request_data["team_colour"])
 
     if serialized:
         team = TeamSerializer(team, many=False).data

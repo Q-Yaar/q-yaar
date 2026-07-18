@@ -9,7 +9,6 @@ from game.models import Game, Team, TeamPlayerRelation
 from game.services.error_codes import ErrorCode
 from profile_game_master.models import GameMasterProfile
 from profile_player.models import PlayerProfile
-from profile_player.services.interfacer import svc_player_get_player_list_by_platform_user_ids
 
 logger = logging.getLogger(__name__)
 
@@ -73,11 +72,8 @@ def svc_game_helper_run_validations_for_team_creation(request_data: dict) -> Err
     if not request_data.get("team_name"):
         return ErrorCode(ErrorCode.MISSING_TEAM_NAME)
 
-    if not request_data.get("player_ids"):
-        return ErrorCode(ErrorCode.MISSING_PLAYER_IDS)
-
-    if not isinstance(request_data["player_ids"], list) or len(request_data["player_ids"]) == 0:
-        return ErrorCode(ErrorCode.MISSING_PLAYER_IDS)
+    if not request_data.get("team_colour"):
+        return ErrorCode(ErrorCode.MISSING_TEAM_COLOUR)
 
     return None
 
@@ -136,12 +132,6 @@ def svc_game_helper_get_game_visibility_mode_from_request_data(request_data: dic
     logger.debug(f">> ARGS: {locals()}")
 
     return GameVisibilityMode.tokentype_from_string(request_data["game_visibility_mode"])
-
-
-def svc_game_helper_get_players_from_request_data(request_data: dict):
-    logger.debug(f">> ARGS: {locals()}")
-
-    return svc_player_get_player_list_by_platform_user_ids(request_data["player_ids"])
 
 
 # Collisions are rare so this should never go into long/infinite loop
@@ -258,19 +248,10 @@ def svc_game_helper_end_game(game: Game):
     return None, game
 
 
-def svc_game_helper_create_team(game: Game, team_name: str, team_colour: str, players: list[PlayerProfile]):
+def svc_game_helper_create_team(game: Game, team_name: str, team_colour: str):
     logger.debug(f">> ARGS: {locals()}")
 
-    with transaction.atomic():
-        try:
-            team = Team.create(game=game, team_name=team_name, team_colour=team_colour, team_type=TeamType.PLAYER)
-
-            for player in players:
-                TeamPlayerRelation.create(team=team, player=player)
-        except IntegrityError as e:
-            return ErrorCode(ErrorCode.ERROR_CREATING_TEAM, error=str(e)), None
-
-    return None, team
+    return Team.create(game=game, team_name=team_name, team_colour=team_colour, team_type=TeamType.PLAYER)
 
 
 def svc_game_helper_get_teams_for_game(game: Game):
