@@ -126,6 +126,9 @@ def svc_game_helper_create_game(
             description=description,
             created_by=created_by,
         )
+
+        Team.create(game=game, team_name="SPECTATORS", team_colour="Grey", team_type=TeamType.SPECTATOR)
+
         return game
     except IntegrityError:
         logger.warning(f"Duplicate game code generated while creating game for name: {name}")
