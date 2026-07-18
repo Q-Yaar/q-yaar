@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from common.constants import UserRolesType
-from game.api.serializers import GameSerializer, TeamSerializer
+from game.api.serializers import GameDetailSerializer, TeamSerializer
 from game.services.error_codes import ErrorCode
 from game.services.helper import (
     svc_game_helper_create_game,
@@ -50,7 +50,7 @@ def svc_game_create_game(request_data: dict, profile: GameMasterProfile, seriali
     )
 
     if serialized:
-        game = GameSerializer(game, many=False).data
+        game = GameDetailSerializer(game, many=False).data
 
     return ErrorCode(ErrorCode.CREATED), game
 
@@ -74,7 +74,7 @@ def svc_game_get_game_by_id(game_id: uuid.UUID, serialized: bool = True):
         return error, None
 
     if serialized:
-        game = GameSerializer(game, many=False).data
+        game = GameDetailSerializer(game, many=False).data
 
     return ErrorCode(ErrorCode.SUCCESS), game
 
@@ -91,7 +91,7 @@ def svc_game_start_game(game_id: uuid.UUID, serialized: bool = True):
         return error, None
 
     if serialized:
-        game = GameSerializer(game, many=False).data
+        game = GameDetailSerializer(game, many=False).data
 
     return ErrorCode(ErrorCode.SUCCESS), game
 
@@ -108,7 +108,7 @@ def svc_game_end_game(game_id: uuid.UUID, serialized: bool = True):
         return error, None
 
     if serialized:
-        game = GameSerializer(game, many=False).data
+        game = GameDetailSerializer(game, many=False).data
 
     return ErrorCode(ErrorCode.SUCCESS), game
 
@@ -207,6 +207,6 @@ def svc_game_update_game(game_id: str, request_data: dict, profile: GameMasterPr
     game = svc_game_helper_update_game(game=game, request_data=request_data)
 
     if serialized:
-        game = GameSerializer(game, many=False).data
+        game = GameDetailSerializer(game, many=False).data
 
     return ErrorCode(ErrorCode.SUCCESS), game

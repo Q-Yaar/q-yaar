@@ -1,9 +1,8 @@
-from common.constants import GameStatus, GameType, GameVisibilityMode
-from game.models import Game, Team, TeamPlayerRelation
-from rest_framework import serializers
-
+from common.constants import GameStatus, GameType, GameVisibilityMode, TeamType
+from game.models import Game, Team
 from profile_player.api.serializers import PlayerProfileSerializer
 from profile_player.models import PlayerProfile
+from rest_framework import serializers
 
 
 class GameSerializer(serializers.ModelSerializer):
@@ -44,20 +43,35 @@ class GameSerializer(serializers.ModelSerializer):
         return obj.get_game_master_info().to_json()
 
 
+class GameDetailSerializer(GameSerializer):
+    teams = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = GameSerializer.Meta.fields + ("teams",)
+
+    def get_teams(self, obj: Game) -> list[dict]:
+        teams = Team.objects.filter(game=obj).order_by("team_type")
+        return TeamSerializer(teams, many=True).data
+
+
 class TeamSerializer(serializers.ModelSerializer):
     team_id = serializers.SerializerMethodField()
     game_id = serializers.SerializerMethodField()
+    team_type = serializers.SerializerMethodField()
     players = serializers.SerializerMethodField()
 
     class Meta:
         model = Team
-        fields = ("team_id", "game_id", "team_name", "team_colour", "players", "created", "modified")
+        fields = ("team_id", "game_id", "team_name", "team_colour", "team_type", "players", "created", "modified")
 
     def get_team_id(self, obj: Team) -> str:
         return str(obj.get_external_id())
 
     def get_game_id(self, obj: Team) -> str:
         return str(obj.game.get_external_id())
+
+    def get_team_type(self, obj: Team) -> str:
+        return TeamType.get_string_for_type(TeamType(obj.team_type))
 
     def get_players(self, obj: Team) -> list[dict]:
         players = PlayerProfile.objects.filter(teamplayerrelation__team=obj)
