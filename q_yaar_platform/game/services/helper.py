@@ -93,6 +93,17 @@ def svc_game_helper_run_validations_for_team_update(game: Game) -> ErrorCode | N
     return None
 
 
+def svc_game_helper_run_validations_for_player_join(game: Game) -> ErrorCode | None:
+    logger.debug(f">> ARGS: {locals()}")
+
+    if game.game_status != GameStatus.PENDING.value:
+        return ErrorCode(
+            ErrorCode.INVALID_GAME_STATE, game_state=GameStatus.get_string_for_type(GameStatus(game.game_status))
+        )
+
+    return None
+
+
 def svc_game_helper_run_validations_for_game_update(
     game: Game, profile: GameMasterProfile, request_data: dict
 ) -> ErrorCode | None:

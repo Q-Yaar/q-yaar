@@ -22,6 +22,7 @@ from game.services.helper import (
     svc_game_helper_join_team,
     svc_game_helper_run_validations_for_game_creation,
     svc_game_helper_run_validations_for_game_update,
+    svc_game_helper_run_validations_for_player_join,
     svc_game_helper_run_validations_for_team_creation,
     svc_game_helper_run_validations_for_team_update,
     svc_game_helper_start_game,
@@ -230,6 +231,10 @@ def svc_game_join_team(game_id: str, team_id: str, player: PlayerProfile, serial
     logger.debug(f">> ARGS: {locals()}")
 
     error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    error = svc_game_helper_run_validations_for_player_join(game=game)
     if error:
         return error, None
 
