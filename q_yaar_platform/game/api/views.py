@@ -17,6 +17,7 @@ from game.services.core import (
     svc_game_update_team,
     svc_game_update_game,
     svc_game_join_team,
+    svc_game_join_game,
 )
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -114,4 +115,14 @@ class PlayerTeamJoinView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def post(self, request, game_id: uuid.UUID, team_id: uuid.UUID, **kwargs):
         error, response = svc_game_join_team(game_id, team_id, kwargs["profile"])
+        return get_standard_response(error, response)
+
+
+class PlayerGameJoinView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".PlayerGameJoinView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def post(self, request, game_id: uuid.UUID, **kwargs):
+        error, response = svc_game_join_game(game_id, kwargs["profile"])
         return get_standard_response(error, response)

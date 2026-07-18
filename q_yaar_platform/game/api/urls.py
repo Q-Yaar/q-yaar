@@ -12,5 +12,6 @@ urlpatterns = [
     path(r"<uuid:game_id>/team/<uuid:team_id>", views.TeamDetailView.as_view(), name="handler-team-detail"),
     path(r"<uuid:game_id>/team/<uuid:team_id>/join", views.PlayerTeamJoinView.as_view(), name="handler-player-team-join"),
     path(r"<uuid:game_id>/team/me", views.PlayerTeamView.as_view(), name="handler-player-team"),
+    path(r"<uuid:game_id>/join", views.PlayerGameJoinView.as_view(), name="handler-player-game-join"),
     path(r"<uuid:game_id>", views.GameDetailView.as_view(), name="handler-game-detail"),
 ]

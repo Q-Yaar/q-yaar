@@ -310,3 +310,13 @@ def svc_game_helper_join_team(game: Game, team: Team, player: PlayerProfile):
         team_player_relation = TeamPlayerRelation.create(team=team, player=player)
 
     return team_player_relation
+
+
+def svc_game_helper_get_spectator_team(game: Game):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        team = Team.objects.get(game=game, team_type=TeamType.SPECTATOR.value)
+        return None, team
+    except Team.DoesNotExist:
+        return ErrorCode(ErrorCode.INVALID_TEAM_ID, team_id="spectator"), None

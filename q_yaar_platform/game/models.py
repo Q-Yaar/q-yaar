@@ -84,6 +84,13 @@ class Team(AbstractExternalFacing, AbstractTimeStamped):
     class Meta:
         indexes = [models.Index(fields=["team_name"]), models.Index(fields=["game", "team_name"])]
         unique_together = (("game", "team_name"),)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["game"],
+                condition=models.Q(team_type=TeamType.SPECTATOR.value),
+                name="unique_spectator_team_per_game",
+            )
+        ]
 
     def __str__(self):
         return self.team_name
