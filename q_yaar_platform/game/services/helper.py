@@ -1,10 +1,9 @@
 import logging
 import uuid
 
-from common.constants import GameStatus, GameType, GameVisibilityMode
+from common.constants import GameStatus, GameType, GameVisibilityMode, TeamType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError, transaction
-from django.db.models import Q
 from game.models import Game, Team, TeamPlayerRelation
 from game.services.error_codes import ErrorCode
 from profile_game_master.models import GameMasterProfile
@@ -210,7 +209,7 @@ def svc_game_helper_create_team(game: Game, team_name: str, team_colour: str, pl
 
     with transaction.atomic():
         try:
-            team = Team.create(game=game, team_name=team_name, team_colour=team_colour)
+            team = Team.create(game=game, team_name=team_name, team_colour=team_colour, team_type=TeamType.PLAYER)
 
             for player in players:
                 TeamPlayerRelation.create(team=team, player=player)
