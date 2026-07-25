@@ -214,6 +214,16 @@ def svc_game_helper_get_game_by_id(game_id: str):
         return ErrorCode(ErrorCode.INVALID_GAME_ID, game_id=game_id), None
 
 
+def svc_game_helper_get_game_by_code(game_code: str):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        game = Game.objects.get(game_code=game_code)
+        return None, game
+    except Game.DoesNotExist:
+        return ErrorCode(ErrorCode.INVALID_GAME_ID, game_id=game_code), None
+
+
 def svc_game_helper_start_game(game: Game):
     logger.debug(f">> ARGS: {locals()}")
 

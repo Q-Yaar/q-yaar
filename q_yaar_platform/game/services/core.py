@@ -9,6 +9,7 @@ from game.services.helper import (
     svc_game_helper_create_team,
     svc_game_helper_end_game,
     svc_game_helper_explore_games,
+    svc_game_helper_get_game_by_code,
     svc_game_helper_get_game_by_id,
     svc_game_helper_get_game_for_player,
     svc_game_helper_get_game_type_from_request_data,
@@ -84,6 +85,19 @@ def svc_game_get_game_by_id(game_id: uuid.UUID, serialized: bool = True):
     logger.debug(f">> ARGS: {locals()}")
 
     error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    if serialized:
+        game = GameDetailSerializer(game, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), game
+
+
+def svc_game_get_game_by_code(game_code: str, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_code(game_code=game_code)
     if error:
         return error, None
 
