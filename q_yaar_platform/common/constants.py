@@ -76,6 +76,11 @@ class GameStatus(BaseIntEnum):
     COMPLETED = 3
 
 
+class TeamType(BaseIntEnum):
+    PLAYER = 1
+    SPECTATOR = 2
+
+
 class CardType(BaseIntEnum):
     CURSE = 1
     POWERUP = 2

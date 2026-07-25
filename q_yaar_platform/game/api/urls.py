@@ -6,10 +6,14 @@ app_name = "game"
 
 urlpatterns = [
     path(r"", views.GameListView.as_view(), name="handler-game-list"),
+    path(r"explore", views.GameExploreView.as_view(), name="handler-game-explore"),
+    path(r"code/<str:game_code>", views.GameCodeView.as_view(), name="handler-game-code"),
     path(r"<uuid:game_id>/start", views.GameStartView.as_view(), name="handler-game-start"),
     path(r"<uuid:game_id>/end", views.GameEndView.as_view(), name="handler-game-end"),
     path(r"<uuid:game_id>/team/", views.TeamListView.as_view(), name="handler-team-list"),
     path(r"<uuid:game_id>/team/<uuid:team_id>", views.TeamDetailView.as_view(), name="handler-team-detail"),
+    path(r"<uuid:game_id>/team/<uuid:team_id>/join", views.PlayerTeamJoinView.as_view(), name="handler-player-team-join"),
     path(r"<uuid:game_id>/team/me", views.PlayerTeamView.as_view(), name="handler-player-team"),
+    path(r"<uuid:game_id>/join", views.PlayerGameJoinView.as_view(), name="handler-player-game-join"),
     path(r"<uuid:game_id>", views.GameDetailView.as_view(), name="handler-game-detail"),
 ]

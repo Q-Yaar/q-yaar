@@ -1,17 +1,40 @@
 import logging
 import uuid
 
-from common.constants import GameStatus, GameType, GameVisibilityMode
+from common.constants import GameStatus, GameType, GameVisibilityMode, TeamType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError, transaction
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from game.models import Game, Team, TeamPlayerRelation
 from game.services.error_codes import ErrorCode
 from profile_game_master.models import GameMasterProfile
 from profile_player.models import PlayerProfile
-from profile_player.services.interfacer import svc_player_get_player_list_by_platform_user_ids
 
 logger = logging.getLogger(__name__)
+
+
+def _svc_apply_filters_for_game_explore(games: QuerySet[Game], request_data: dict) -> QuerySet[Game]:
+    logger.debug(f">> ARGS: {locals()}")
+
+    if request_data.get("search"):
+        search_query = request_data["search"]
+        games = games.filter(Q(name__icontains=search_query) | Q(game_code__icontains=search_query))
+
+    if request_data.get("game_type"):
+        try:
+            game_type = GameType.tokentype_from_string(request_data["game_type"])
+            games = games.filter(game_type=game_type)
+        except KeyError:
+            pass
+
+    if request_data.get("game_status"):
+        try:
+            game_status = GameStatus.tokentype_from_string(request_data["game_status"])
+            games = games.filter(game_status=game_status)
+        except KeyError:
+            pass
+
+    return games
 
 
 def svc_game_helper_run_validations_for_game_creation(request_data: dict) -> ErrorCode | None:
@@ -49,16 +72,24 @@ def svc_game_helper_run_validations_for_team_creation(request_data: dict) -> Err
     if not request_data.get("team_name"):
         return ErrorCode(ErrorCode.MISSING_TEAM_NAME)
 
-    if not request_data.get("player_ids"):
-        return ErrorCode(ErrorCode.MISSING_PLAYER_IDS)
-
-    if not isinstance(request_data["player_ids"], list) or len(request_data["player_ids"]) == 0:
-        return ErrorCode(ErrorCode.MISSING_PLAYER_IDS)
+    if not request_data.get("team_colour"):
+        return ErrorCode(ErrorCode.MISSING_TEAM_COLOUR)
 
     return None
 
 
 def svc_game_helper_run_validations_for_team_update(game: Game) -> ErrorCode | None:
+    logger.debug(f">> ARGS: {locals()}")
+
+    if game.game_status != GameStatus.PENDING.value:
+        return ErrorCode(
+            ErrorCode.INVALID_GAME_STATE, game_state=GameStatus.get_string_for_type(GameStatus(game.game_status))
+        )
+
+    return None
+
+
+def svc_game_helper_run_validations_for_player_join(game: Game) -> ErrorCode | None:
     logger.debug(f">> ARGS: {locals()}")
 
     if game.game_status != GameStatus.PENDING.value:
@@ -103,12 +134,6 @@ def svc_game_helper_get_game_visibility_mode_from_request_data(request_data: dic
     return GameVisibilityMode.tokentype_from_string(request_data["game_visibility_mode"])
 
 
-def svc_game_helper_get_players_from_request_data(request_data: dict):
-    logger.debug(f">> ARGS: {locals()}")
-
-    return svc_player_get_player_list_by_platform_user_ids(request_data["player_ids"])
-
-
 # Collisions are rare so this should never go into long/infinite loop
 def svc_game_helper_create_game(
     game_type: GameType,
@@ -127,6 +152,9 @@ def svc_game_helper_create_game(
             description=description,
             created_by=created_by,
         )
+
+        Team.create(game=game, team_name="SPECTATORS", team_colour="Grey", team_type=TeamType.SPECTATOR)
+
         return game
     except IntegrityError:
         logger.warning(f"Duplicate game code generated while creating game for name: {name}")
@@ -161,6 +189,21 @@ def svc_game_helper_get_game_for_player(player: PlayerProfile):
     return games
 
 
+def svc_game_helper_explore_games(player: PlayerProfile, request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    game_ids = TeamPlayerRelation.objects.filter(player=player).values_list("game", flat=True)
+    games = (
+        Game.objects.filter(game_visibility_mode=GameVisibilityMode.PUBLIC.value)
+        .exclude(id__in=game_ids)
+        .order_by("-created")
+    )
+
+    games = _svc_apply_filters_for_game_explore(games, request_data)
+
+    return games
+
+
 def svc_game_helper_get_game_by_id(game_id: str):
     logger.debug(f">> ARGS: {locals()}")
 
@@ -169,6 +212,16 @@ def svc_game_helper_get_game_by_id(game_id: str):
         return None, game
     except Game.DoesNotExist:
         return ErrorCode(ErrorCode.INVALID_GAME_ID, game_id=game_id), None
+
+
+def svc_game_helper_get_game_by_code(game_code: str):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        game = Game.objects.get(game_code=game_code)
+        return None, game
+    except Game.DoesNotExist:
+        return ErrorCode(ErrorCode.INVALID_GAME_ID, game_id=game_code), None
 
 
 def svc_game_helper_start_game(game: Game):
@@ -205,19 +258,10 @@ def svc_game_helper_end_game(game: Game):
     return None, game
 
 
-def svc_game_helper_create_team(game: Game, team_name: str, team_colour: str, players: list[PlayerProfile]):
+def svc_game_helper_create_team(game: Game, team_name: str, team_colour: str):
     logger.debug(f">> ARGS: {locals()}")
 
-    with transaction.atomic():
-        try:
-            team = Team.create(game=game, team_name=team_name, team_colour=team_colour)
-
-            for player in players:
-                TeamPlayerRelation.create(team=team, player=player)
-        except IntegrityError as e:
-            return ErrorCode(ErrorCode.ERROR_CREATING_TEAM, error=str(e)), None
-
-    return None, team
+    return Team.create(game=game, team_name=team_name, team_colour=team_colour, team_type=TeamType.PLAYER)
 
 
 def svc_game_helper_get_teams_for_game(game: Game):
@@ -298,3 +342,23 @@ def svc_game_helper_update_game(game: Game, request_data: dict):
     game.save()
 
     return game
+
+
+def svc_game_helper_join_team(game: Game, team: Team, player: PlayerProfile):
+    logger.debug(f">> ARGS: {locals()}")
+
+    with transaction.atomic():
+        TeamPlayerRelation.objects.filter(game=game, player=player).delete()
+        team_player_relation = TeamPlayerRelation.create(team=team, player=player)
+
+    return team_player_relation
+
+
+def svc_game_helper_get_spectator_team(game: Game):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        team = Team.objects.get(game=game, team_type=TeamType.SPECTATOR.value)
+        return None, team
+    except Team.DoesNotExist:
+        return ErrorCode(ErrorCode.INVALID_TEAM_ID, team_id="spectator"), None

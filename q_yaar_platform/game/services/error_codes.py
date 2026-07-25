@@ -13,7 +13,7 @@ class ErrorCode(BaseErrorCode):
     MISSING_NAME = "002"
     MISSING_DESCRIPTION = "003"
     MISSING_TEAM_NAME = "004"
-    MISSING_PLAYER_IDS = "005"
+    MISSING_TEAM_COLOUR = "005"
     MISSING_GAME_VISIBILITY_MODE = "006"
 
     # Permission Errors - 1 Series
@@ -40,7 +40,7 @@ class ErrorCode(BaseErrorCode):
         MISSING_NAME: status.HTTP_400_BAD_REQUEST,
         MISSING_DESCRIPTION: status.HTTP_400_BAD_REQUEST,
         MISSING_TEAM_NAME: status.HTTP_400_BAD_REQUEST,
-        MISSING_PLAYER_IDS: status.HTTP_400_BAD_REQUEST,
+        MISSING_TEAM_COLOUR: status.HTTP_400_BAD_REQUEST,
         MISSING_GAME_VISIBILITY_MODE: status.HTTP_400_BAD_REQUEST,
         INVALID_GAME_STATE: status.HTTP_403_FORBIDDEN,
         NOT_GAME_CREATOR: status.HTTP_403_FORBIDDEN,
@@ -70,8 +70,8 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_missing_team_name(kwargs: dict):
         return "Missing team_name"
 
-    def get_string_for_missing_player_ids(kwargs: dict):
-        return "Missing player_ids"
+    def get_string_for_missing_team_colour(kwargs: dict):
+        return "Missing team_colour"
 
     def get_string_for_invalid_game_state(kwargs: dict):
         return f"Invalid game state for operation: {kwargs.get('game_state')}"
@@ -111,7 +111,7 @@ class ErrorCode(BaseErrorCode):
         MISSING_NAME: get_string_for_missing_name,
         MISSING_DESCRIPTION: get_string_for_missing_description,
         MISSING_TEAM_NAME: get_string_for_missing_team_name,
-        MISSING_PLAYER_IDS: get_string_for_missing_player_ids,
+        MISSING_TEAM_COLOUR: get_string_for_missing_team_colour,
         MISSING_GAME_VISIBILITY_MODE: get_string_for_missing_game_visibility_mode,
         INVALID_GAME_STATE: get_string_for_invalid_game_state,
         NOT_GAME_CREATOR: get_string_for_not_game_creator,

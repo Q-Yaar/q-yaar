@@ -1,5 +1,5 @@
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped
-from common.constants import GameStatus, GameType, Length, GameVisibilityMode
+from common.constants import GameStatus, GameType, GameVisibilityMode, Length, TeamType
 from common.uuid import unique_uuid4
 from django.db import models
 from game.popo.game_master_info import GameMasterInfoConfig
@@ -79,17 +79,25 @@ class Team(AbstractExternalFacing, AbstractTimeStamped):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="teams")
     team_name = models.CharField(max_length=Length.TEAM_NAME)
     team_colour = models.CharField(max_length=Length.TEAM_COLOUR)
+    team_type = models.PositiveIntegerField(choices=TeamType.get_choices(), default=TeamType.PLAYER.value)
 
     class Meta:
         indexes = [models.Index(fields=["team_name"]), models.Index(fields=["game", "team_name"])]
         unique_together = (("game", "team_name"),)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["game"],
+                condition=models.Q(team_type=TeamType.SPECTATOR.value),
+                name="unique_spectator_team_per_game",
+            )
+        ]
 
     def __str__(self):
         return self.team_name
 
     @classmethod
-    def create(cls, game: Game, team_name: str, team_colour: str) -> "Team":
-        team = cls(game=game, team_name=team_name, team_colour=team_colour)
+    def create(cls, game: Game, team_name: str, team_colour: str, team_type: TeamType) -> "Team":
+        team = cls(game=game, team_name=team_name, team_colour=team_colour, team_type=team_type.value)
         team.save()
         return team
 
