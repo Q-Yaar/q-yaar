@@ -58,6 +58,9 @@ def _apply_filters_for_questions(questions: QuerySet[QuestionTemplate], request_
     if request_data.get("category_id"):
         questions = questions.filter(category__external_id=request_data["category_id"])
 
+    if request_data.get("game_id"):
+        questions = questions.filter(game_questions__game__external_id=request_data["game_id"])
+
     return questions
 
 
