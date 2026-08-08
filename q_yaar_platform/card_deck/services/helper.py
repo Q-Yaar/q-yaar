@@ -28,7 +28,7 @@ def svc_card_deck_helper_validate_and_get_request_data(request_data: dict):
     return None, request_data
 
 
-def svc_card_deck_helper_get_cards_by_tag(request_data: dict):
+def svc_card_deck_helper_get_cards(request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
     cards = Card.objects.all()
