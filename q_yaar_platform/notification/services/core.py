@@ -24,7 +24,7 @@ def svc_notification_subscribe(request_data: dict, profile: PlayerProfile):
 
     svc_notification_helper_save_subscription_info(request_data, profile.platform_user)
 
-    return ErrorCode.SUCCESS, {"status": "subscribed"}
+    return ErrorCode(ErrorCode.SUCCESS), {"status": "subscribed"}
 
 
 def svc_notification_get_notifications(profile: PlayerProfile, serialized: bool = False):
@@ -35,7 +35,7 @@ def svc_notification_get_notifications(profile: PlayerProfile, serialized: bool 
     if serialized:
         notifications = svc_notification_helper_get_serialized_notifications(notifications, many=True)
 
-    return ErrorCode.SUCCESS, notifications
+    return ErrorCode(ErrorCode.SUCCESS), notifications
 
 
 def svc_notification_mark_notification_read(notification_id: str):
@@ -47,4 +47,4 @@ def svc_notification_mark_notification_read(notification_id: str):
 
     svc_notification_helper_mark_notification_read(notification)
 
-    return ErrorCode.NO_CONTENT, None
+    return ErrorCode(ErrorCode.NO_CONTENT), None
