@@ -9,7 +9,7 @@ from card_deck.services.core import (
     svc_card_deck_discard_card,
     svc_card_deck_draw_card,
     svc_card_deck_get_card_stats,
-    svc_card_deck_get_cards_by_tag,
+    svc_card_deck_get_cards,
     svc_card_deck_get_deck_for_team,
     svc_card_deck_get_list_of_tags,
     svc_card_deck_peek_cards,
@@ -31,7 +31,7 @@ class CardsListView(generics.GenericAPIView):
 
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER, UserRolesType.GAME_MASTER])
     def get(self, request, **kwargs):
-        error, cards = svc_card_deck_get_cards_by_tag(request.query_params)
+        error, cards = svc_card_deck_get_cards(request.query_params)
         return get_paginated_response(self, error, cards, CardSerializer)
 
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])

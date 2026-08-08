@@ -4,6 +4,7 @@ import uuid
 from common.constants import AnswerInstructionType, QuestionRewardType, UserRolesType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
+from django.db.models import QuerySet
 from django.db.utils import IntegrityError
 from game.models import Game, Team
 from game.services.interfacer import (
@@ -49,6 +50,15 @@ def _apply_filters_to_rewards(rewards: list[QuestionReward], request_data: dict)
         )
 
     return rewards
+
+
+def _apply_filters_for_questions(questions: QuerySet[QuestionTemplate], request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if request_data.get("category_id"):
+        questions = questions.filter(category__external_id=request_data["category_id"])
+
+    return questions
 
 
 def _apply_filters_to_asked_questions(asked_questions: list[AskedQuestion], request_data: dict):
@@ -337,6 +347,16 @@ def svc_qna_helper_create_category(category_name: str, reward: QuestionReward, p
     logger.debug(f">> ARGS: {locals()}")
 
     return QuestionCategory.create(category_name=category_name, reward=reward, priority=priority)
+
+
+def svc_qna_helper_get_questions(request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    questions = QuestionTemplate.objects.all()
+
+    questions = _apply_filters_for_questions(questions, request_data)
+
+    return questions.order_by("created")
 
 
 def svc_qna_helper_get_questions_for_category(

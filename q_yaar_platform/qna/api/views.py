@@ -21,6 +21,7 @@ from qna.services.core import (
     svc_qna_get_asked_questions_for_game,
     svc_qna_get_categories,
     svc_qna_get_question_by_id,
+    svc_qna_get_questions,
     svc_qna_get_questions_for_category,
     svc_qna_get_rewards,
     svc_qna_update_asked_question,
@@ -57,6 +58,17 @@ class CategoriesListView(generics.GenericAPIView):
     def post(self, request, **kwargs):
         error, response = svc_qna_create_cateogory(request.data)
         return get_standard_response(error, response)
+
+
+# Bad name, couldn't think of something better
+class QuestionDirectListView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".QuestionDirectListView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    def get(self, request, **kwargs):
+        error, questions = svc_qna_get_questions(request.query_params)
+        return get_paginated_response(self, error, questions, QuestionSerializer)
 
 
 class QuestionListView(generics.GenericAPIView):

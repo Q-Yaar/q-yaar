@@ -5,6 +5,7 @@ from card_deck.models import Card, CardInstance, CardTag
 from card_deck.services.error_codes import ErrorCode
 from common.constants import CardPile
 from django.db import IntegrityError, transaction
+from django.db.models import QuerySet
 from game.models import Team
 from game.services.interfacer import svc_game_get_team_by_id, svc_game_verify_player_belongs_to_team
 from profile_player.models import PlayerProfile
@@ -12,19 +13,29 @@ from profile_player.models import PlayerProfile
 logger = logging.getLogger(__name__)
 
 
+def _apply_filters_to_get_cards(cards: QuerySet[Card], request_data: dict) -> QuerySet[Card]:
+    if request_data.get("tag_name"):
+        cards = cards.filter(tags__name__icontains=request_data["tag_name"])
+
+    return cards
+
+
 def svc_card_deck_helper_validate_and_get_request_data(request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
-    if not request_data.get("tag_name"):
-        return ErrorCode(ErrorCode.MISSING_TAG_NAME), None
+    # TODO: Add request data validations
 
     return None, request_data
 
 
-def svc_card_deck_helper_get_cards_by_tag(tag_name: str):
+def svc_card_deck_helper_get_cards(request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
-    return Card.objects.filter(tags__name__icontains=tag_name).order_by("-created")
+    cards = Card.objects.all()
+
+    cards = _apply_filters_to_get_cards(cards=cards, request_data=request_data)
+
+    return cards.order_by("-created")
 
 
 def svc_card_deck_helper_validate_input_for_bulk_create(cards_data: list[dict]):

@@ -16,6 +16,7 @@ from qna.services.helper import (
     svc_qna_helper_get_category_by_id,
     svc_qna_helper_get_question_by_id,
     svc_qna_helper_get_question_for_category_by_id,
+    svc_qna_helper_get_questions,
     svc_qna_helper_get_questions_for_category,
     svc_qna_helper_get_reward_by_id,
     svc_qna_helper_get_rewards,
@@ -108,6 +109,17 @@ def svc_qna_create_cateogory(request_data: dict, serialized: bool = True):
         category = svc_qna_helper_get_serialized_categories(category, many=False)
 
     return ErrorCode(ErrorCode.CREATED), category
+
+
+def svc_qna_get_questions(request_data: dict, serialized: bool = False):
+    logger.debug(f">> ARGS: {locals()}")
+
+    questions = svc_qna_helper_get_questions(request_data)
+
+    if serialized:
+        questions = svc_qna_helper_get_serialized_questions(questions, many=True)
+
+    return ErrorCode(ErrorCode.SUCCESS), questions
 
 
 def svc_qna_get_questions_for_category(
