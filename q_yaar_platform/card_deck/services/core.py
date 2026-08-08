@@ -34,6 +34,7 @@ from profile_player.models import PlayerProfile
 logger = logging.getLogger(__name__)
 
 
+# Function is called get cards by tag but tag name is optional (added later). It is just a get cards function now.
 def svc_card_deck_get_cards_by_tag(request_data: dict, serialized: bool = False):
     logger.debug(f">> ARGS: {locals()}")
 
@@ -41,7 +42,7 @@ def svc_card_deck_get_cards_by_tag(request_data: dict, serialized: bool = False)
     if error:
         return error, None
 
-    cards = svc_card_deck_helper_get_cards_by_tag(tag_name=request_data["tag_name"])
+    cards = svc_card_deck_helper_get_cards_by_tag(request_data=request_data)
 
     if serialized:
         cards = CardSerializer(cards, many=True).data
