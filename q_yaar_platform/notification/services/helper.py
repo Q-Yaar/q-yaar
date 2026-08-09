@@ -41,7 +41,7 @@ def svc_notification_helper_save_subscription_info(request_data: dict, user: Pla
     endpoint = request_data["endpoint"]
     p256dh = request_data["keys"]["p256dh"]
     auth = request_data["keys"]["auth"]
-    browser = request_data.get("browser", "")
+    browser = request_data.get("browser", "")[:100]
     group_name = request_data.get("group", "")
 
     sub, created = SubscriptionInfo.objects.get_or_create(
