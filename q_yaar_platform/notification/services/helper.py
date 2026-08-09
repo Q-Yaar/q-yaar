@@ -2,6 +2,7 @@ import logging
 import uuid
 
 from account.models import PlatformUser
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from notification.api.serializers import NotificationSerializer
 from notification.models import PushNotificationHistory
@@ -10,6 +11,10 @@ from webpush.models import Group, PushInformation, SubscriptionInfo
 from .error_codes import ErrorCode
 
 logger = logging.getLogger(__name__)
+
+
+def svc_notification_helper_get_vapid_public_key():
+    return settings.VAPID_PUBLIC_KEY
 
 
 def svc_notification_helper_validate_subscription_request_data(request_data: dict):

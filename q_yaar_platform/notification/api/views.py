@@ -7,12 +7,20 @@ from common.response import get_paginated_response, get_standard_response
 from notification.api.serializers import NotificationSerializer
 from notification.services.core import (
     svc_notification_get_notifications,
+    svc_notification_get_webpush_keys,
     svc_notification_mark_notification_read,
     svc_notification_subscribe,
 )
 from rest_framework import generics
 
 logger = logging.getLogger(__name__)
+
+
+class WebPushKeysView(generics.GenericAPIView):
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def get(self, request, **kwargs):
+        error, response = svc_notification_get_webpush_keys()
+        return get_standard_response(error, response)
 
 
 class WebPushSubscribeView(generics.GenericAPIView):

@@ -371,8 +371,12 @@ SKIP_NOTIFICATIONS = config("SKIP_NOTIFICATIONS", default=False, cast=bool)
 
 # WebPush
 
+VAPID_PUBLIC_KEY = config("VAPID_PUBLIC_KEY", default="")
+VAPID_PRIVATE_KEY = config("VAPID_PRIVATE_KEY", default="")
+VAPID_ADMIN_EMAIL = config("VAPID_ADMIN_EMAIL", default="")
+
 WEBPUSH_SETTINGS = {
-    "VAPID_PUBLIC_KEY": config("VAPID_PUBLIC_KEY", default=""),
-    "VAPID_PRIVATE_KEY": config("VAPID_PRIVATE_KEY", default=""),
-    "VAPID_ADMIN_EMAIL": config("VAPID_ADMIN_EMAIL", default=""),
+    "VAPID_PUBLIC_KEY": VAPID_PUBLIC_KEY,
+    "VAPID_PRIVATE_KEY": VAPID_PRIVATE_KEY,
+    "VAPID_ADMIN_EMAIL": VAPID_ADMIN_EMAIL,
 }
