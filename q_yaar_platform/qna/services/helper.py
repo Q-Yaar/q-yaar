@@ -9,10 +9,14 @@ from django.db.utils import IntegrityError
 from game.models import Game, Team
 from game.services.interfacer import (
     svc_game_get_game_by_id,
+    svc_game_get_player_ids_for_team,
+    svc_game_get_player_ids_for_teams,
+    svc_game_get_player_teams_for_game,
     svc_game_get_team_by_id,
     svc_game_verify_player_belongs_to_game,
     svc_game_verify_player_belongs_to_team,
 )
+from notification.tasks import send_notification
 from profile_player.models import PlayerProfile
 from qna.api.serializers import (
     AskedQuestionDetailSerializer,
@@ -462,6 +466,16 @@ def svc_qna_helper_ask_question(
     except ValueError as e:
         return ErrorCode(ErrorCode.INVALID_CHOSEN_PLACEHOLDERS, error=str(e)), None
 
+    target_player_ids = svc_game_get_player_ids_for_team(team=target)
+
+    for player_id in target_player_ids:
+        send_notification.delay(
+            user_id=str(player_id),
+            title=f"New Question Alert",
+            message=f"A new question has been asked to your team.",
+            payload={},
+        )
+
     return None, asked_question
 
 
@@ -486,6 +500,16 @@ def svc_qna_helper_update_asked_question(asked_question: AskedQuestion, request_
     asked_question.set_fact_meta(fact_meta)
 
     asked_question.save()
+
+    target_player_ids = svc_game_get_player_ids_for_team(team=asked_question.target)
+
+    for player_id in target_player_ids:
+        send_notification.delay(
+            user_id=str(player_id),
+            title=f"Question Updated",
+            message=f"The details of an asked question have been updated.",
+            payload={},
+        )
 
     return None, asked_question
 
@@ -522,6 +546,19 @@ def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, answer_m
 
     asked_question.set_answer_meta(answer_meta, save=True)
 
+    teams = svc_game_get_player_teams_for_game(game=asked_question.game_question.game)
+
+    opponent_teams = teams.exclude(pk=asked_question.target.pk)
+    player_ids = svc_game_get_player_ids_for_teams(teams=opponent_teams)
+
+    for player_id in player_ids:
+        send_notification.delay(
+            user_id=str(player_id),
+            title=f"Question Answered",
+            message=f"The answer to your question has been submitted.",
+            payload={},
+        )
+
     return None, asked_question
 
 
@@ -537,5 +574,15 @@ def svc_qna_helper_accept_answered_question(asked_question: AskedQuestion):
     asked_question.accepted = True
 
     asked_question.save()
+
+    target_player_ids = svc_game_get_player_ids_for_team(team=asked_question.target)
+
+    for player_id in target_player_ids:
+        send_notification.delay(
+            user_id=str(player_id),
+            title=f"Answer Accepted",
+            message=f"Your answer to the question has been accepted.",
+            payload={},
+        )
 
     return None, asked_question

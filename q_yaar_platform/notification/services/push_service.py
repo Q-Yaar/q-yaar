@@ -9,10 +9,14 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-def send_push_notification(user: PlatformUser, title: str, message: str, payload: dict) -> PushNotificationHistory:
+def create_notification(user: PlatformUser, title: str, message: str, payload: dict) -> PushNotificationHistory:
     logger.debug(f">> ARGS: {locals()}")
 
-    notification = PushNotificationHistory.create(user=user, title=title, message=message, payload=payload)
+    return PushNotificationHistory.create(user=user, title=title, message=message, payload=payload)
+
+
+def send_push_notification(user: PlatformUser, title: str, message: str, payload: dict) -> PushNotificationHistory:
+    logger.debug(f">> ARGS: {locals()}")
 
     push_payload = {"head": title, "body": message, **payload}
 
@@ -21,7 +25,7 @@ def send_push_notification(user: PlatformUser, title: str, message: str, payload
     except Exception as e:
         logger.error(f"Failed to send webpush notification to user {user.email}: {e}")
 
-    return notification
+    return
 
 
 # TODO: Not scalable currently, need to design group notifications properly later.

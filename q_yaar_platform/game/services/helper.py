@@ -7,6 +7,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q, QuerySet
 from game.models import Game, Team, TeamPlayerRelation
 from game.services.error_codes import ErrorCode
+from notification.tasks import send_notification
 from profile_game_master.models import GameMasterProfile
 from profile_player.models import PlayerProfile
 
@@ -35,6 +36,45 @@ def _svc_apply_filters_for_game_explore(games: QuerySet[Game], request_data: dic
             pass
 
     return games
+
+
+def _svc_apply_filters_for_teams(teams: QuerySet[Team], request_data: dict) -> QuerySet[Team]:
+    logger.debug(f">> ARGS: {locals()}")
+
+    if request_data.get("team_type"):
+        try:
+            team_type = TeamType.tokentype_from_string(request_data["team_type"])
+            teams = teams.filter(team_type=team_type)
+        except KeyError:
+            pass
+
+    return teams
+
+
+def svc_game_helper_get_player_ids_for_game(game: Game):
+    logger.debug(f">> ARGS: {locals()}")
+
+    return list(
+        TeamPlayerRelation.objects.filter(game=game, team__team_type=TeamType.PLAYER.value).values_list(
+            "player__platform_user__external_id", flat=True
+        )
+    )
+
+
+def svc_game_helper_get_player_ids_for_team(team: Team):
+    logger.debug(f">> ARGS: {locals()}")
+
+    return list(
+        TeamPlayerRelation.objects.filter(team=team).values_list("player__platform_user__external_id", flat=True)
+    )
+
+
+def svc_game_helper_get_player_ids_for_teams(teams: QuerySet[Team]):
+    logger.debug(f">> ARGS: {locals()}")
+
+    return list(
+        TeamPlayerRelation.objects.filter(team__in=teams).values_list("player__platform_user__external_id", flat=True)
+    )
 
 
 def svc_game_helper_run_validations_for_game_creation(request_data: dict) -> ErrorCode | None:
@@ -238,6 +278,16 @@ def svc_game_helper_start_game(game: Game):
     game.game_status = GameStatus.IN_PROGRESS.value
     game.save()
 
+    player_ids = svc_game_helper_get_player_ids_for_game(game=game)
+
+    for player_id in player_ids:
+        send_notification.delay(
+            user_id=str(player_id),
+            title=f"Game #{game.game_code} Started",
+            message=f"Game {game.name} has started",
+            payload={},
+        )
+
     return None, game
 
 
@@ -255,6 +305,16 @@ def svc_game_helper_end_game(game: Game):
     game.game_status = GameStatus.COMPLETED.value
     game.save()
 
+    player_ids = svc_game_helper_get_player_ids_for_game(game=game)
+
+    for player_id in player_ids:
+        send_notification.delay(
+            user_id=str(player_id),
+            title=f"Game #{game.game_code} Completed",
+            message=f"Game {game.name} has ended",
+            payload={},
+        )
+
     return None, game
 
 
@@ -264,10 +324,13 @@ def svc_game_helper_create_team(game: Game, team_name: str, team_colour: str):
     return Team.create(game=game, team_name=team_name, team_colour=team_colour, team_type=TeamType.PLAYER)
 
 
-def svc_game_helper_get_teams_for_game(game: Game):
+def svc_game_helper_get_teams_for_game(game: Game, request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
     teams = Team.objects.filter(game=game)
+
+    teams = _svc_apply_filters_for_teams(teams, request_data)
+
     return teams
 
 
@@ -350,6 +413,16 @@ def svc_game_helper_join_team(game: Game, team: Team, player: PlayerProfile):
     with transaction.atomic():
         TeamPlayerRelation.objects.filter(game=game, player=player).delete()
         team_player_relation = TeamPlayerRelation.create(team=team, player=player)
+
+    player_ids = svc_game_helper_get_player_ids_for_team(team=team)
+
+    for player_id in player_ids:
+        send_notification.delay(
+            user_id=str(player_id),
+            title=f"New Teammate Alert",
+            message=f"{player.profile_name} has joined your team in {game.name}",
+            payload={},
+        )
 
     return team_player_relation
 
