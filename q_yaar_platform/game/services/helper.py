@@ -415,6 +415,7 @@ def svc_game_helper_join_team(game: Game, team: Team, player: PlayerProfile):
         team_player_relation = TeamPlayerRelation.create(team=team, player=player)
 
     player_ids = svc_game_helper_get_player_ids_for_team(team=team)
+    player_ids.remove(player.get_external_id())
 
     for player_id in player_ids:
         send_notification.delay(
