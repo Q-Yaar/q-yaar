@@ -13,6 +13,9 @@ class PushNotificationHistory(AbstractExternalFacing, AbstractTimeStamped):
     def __str__(self):
         return f"{self.user} - {self.title}"
 
+    class Meta:
+        indexes = [models.Index(fields=["user", "-created"]), models.Index(fields=["user", "is_read", "-created"])]
+
     @classmethod
     def create(cls, user: PlatformUser, title: str, message: str, payload: dict) -> "PushNotificationHistory":
         notification = cls(user=user, title=title, message=message, payload=payload)

@@ -36,10 +36,10 @@ def svc_notification_subscribe(request_data: dict, profile: PlayerProfile):
     return ErrorCode(ErrorCode.SUCCESS), {"status": "subscribed"}
 
 
-def svc_notification_get_notifications(profile: PlayerProfile, serialized: bool = False):
+def svc_notification_get_notifications(profile: PlayerProfile, request_data: dict, serialized: bool = False):
     logger.debug(f">> ARGS: {locals()}")
 
-    notifications = svc_notification_helper_get_notification_list(profile.platform_user)
+    notifications = svc_notification_helper_get_notification_list(profile.platform_user, request_data)
 
     if serialized:
         notifications = svc_notification_helper_get_serialized_notifications(notifications, many=True)

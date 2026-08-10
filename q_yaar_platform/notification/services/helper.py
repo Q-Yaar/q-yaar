@@ -4,6 +4,7 @@ import uuid
 from account.models import PlatformUser
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import QuerySet
 from notification.api.serializers import NotificationSerializer
 from notification.models import PushNotificationHistory
 from webpush.models import Group, PushInformation, SubscriptionInfo
@@ -11,6 +12,18 @@ from webpush.models import Group, PushInformation, SubscriptionInfo
 from .error_codes import ErrorCode
 
 logger = logging.getLogger(__name__)
+
+
+def _svc_apply_filters_for_notification(
+    notifications: QuerySet[PushNotificationHistory], request_data: dict
+) -> QuerySet[PushNotificationHistory]:
+    logger.debug(f">> ARGS: {locals()}")
+
+    if request_data.get("is_read"):
+        is_read = request_data["is_read"].lower() == "true"
+        notifications = notifications.filter(is_read=is_read)
+
+    return notifications
 
 
 def svc_notification_helper_get_vapid_public_key():
@@ -67,10 +80,13 @@ def svc_notification_helper_save_subscription_info(request_data: dict, user: Pla
         push_info.save()
 
 
-def svc_notification_helper_get_notification_list(user: PlatformUser):
+def svc_notification_helper_get_notification_list(user: PlatformUser, request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
     notifications = PushNotificationHistory.objects.filter(user=user).order_by("-created")
+
+    notifications = _svc_apply_filters_for_notification(notifications, request_data)
+
     return notifications
 
 

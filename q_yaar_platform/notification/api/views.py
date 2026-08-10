@@ -33,7 +33,7 @@ class WebPushSubscribeView(generics.GenericAPIView):
 class NotificationListView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def get(self, request, **kwargs):
-        error, notifications = svc_notification_get_notifications(kwargs["profile"])
+        error, notifications = svc_notification_get_notifications(kwargs["profile"], request.query_params)
         return get_paginated_response(self, error, notifications, NotificationSerializer)
 
 
