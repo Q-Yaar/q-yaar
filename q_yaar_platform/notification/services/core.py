@@ -5,6 +5,7 @@ from notification.services.helper import (
     svc_notification_helper_get_notification_list,
     svc_notification_helper_get_serialized_notifications,
     svc_notification_helper_get_vapid_public_key,
+    svc_notification_helper_mark_all_notifications_read,
     svc_notification_helper_mark_notification_read,
     svc_notification_helper_save_subscription_info,
     svc_notification_helper_validate_subscription_request_data,
@@ -55,5 +56,13 @@ def svc_notification_mark_notification_read(notification_id: str):
         return error, None
 
     svc_notification_helper_mark_notification_read(notification)
+
+    return ErrorCode(ErrorCode.NO_CONTENT), None
+
+
+def svc_notification_mark_all_notifications_read(profile: PlayerProfile):
+    logger.debug(f">> ARGS: {locals()}")
+
+    svc_notification_helper_mark_all_notifications_read(profile.platform_user)
 
     return ErrorCode(ErrorCode.NO_CONTENT), None

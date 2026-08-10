@@ -6,5 +6,6 @@ urlpatterns = [
     path(r"webpush/keys", views.WebPushKeysView.as_view(), name="webpush-keys"),
     path(r"webpush/subscribe", views.WebPushSubscribeView.as_view(), name="webpush-subscribe"),
     path(r"<uuid:notification_id>/read", views.NotificationReadView.as_view(), name="notification-read"),
+    path(r"read-all", views.NotificationReadAllView.as_view(), name="notification-read-all"),
     path(r"", views.NotificationListView.as_view(), name="notification-history"),
 ]

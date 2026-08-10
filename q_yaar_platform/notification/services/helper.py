@@ -113,3 +113,10 @@ def svc_notification_helper_mark_notification_read(notification: PushNotificatio
     notification.is_read = True
     notification.save()
     return None
+
+
+def svc_notification_helper_mark_all_notifications_read(user: PlatformUser):
+    logger.debug(f">> ARGS: {locals()}")
+
+    PushNotificationHistory.objects.filter(user=user, is_read=False).update(is_read=True)
+    return None
