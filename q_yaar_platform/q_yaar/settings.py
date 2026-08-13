@@ -68,6 +68,7 @@ THIRD_PARTY_APPS = [
     "pgtrigger",  # Django audit trail - trigger
     "pgconnection",  # Django audit trail - connection
     "rest_framework_simplejwt",  # Django Simple JWT
+    "webpush",
 ]
 
 PROJECT_APPS = [
@@ -80,6 +81,7 @@ PROJECT_APPS = [
     "qna.apps.QnaConfig",
     "fact.apps.FactConfig",
     "live_location.apps.LiveLocationConfig",
+    "notification.apps.NotificationConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
@@ -272,7 +274,7 @@ CELERY_QUEUES = (
     # Slow Queues
     Queue("default", Exchange("default"), routing_key="default"),
     # Fast Queues
-    Queue("example", Exchange("example"), routing_key="example"),
+    Queue("notification", Exchange("notification"), routing_key="notification"),
 )
 
 CELERY_DEFAULT_QUEUE = "default"
@@ -357,4 +359,24 @@ LOGGING = {
         },
     },
     "loggers": {**DJANGO_DEFAULT_LOGGERS, **APPLICATION_LOGGERS},
+}
+
+#######################################################################################################################
+
+# Env Based Configs
+
+SKIP_NOTIFICATIONS = config("SKIP_NOTIFICATIONS", default=False, cast=bool)
+
+#######################################################################################################################
+
+# WebPush
+
+VAPID_PUBLIC_KEY = config("VAPID_PUBLIC_KEY", default="")
+VAPID_PRIVATE_KEY = config("VAPID_PRIVATE_KEY", default="")
+VAPID_ADMIN_EMAIL = config("VAPID_ADMIN_EMAIL", default="")
+
+WEBPUSH_SETTINGS = {
+    "VAPID_PUBLIC_KEY": VAPID_PUBLIC_KEY,
+    "VAPID_PRIVATE_KEY": VAPID_PRIVATE_KEY,
+    "VAPID_ADMIN_EMAIL": VAPID_ADMIN_EMAIL,
 }

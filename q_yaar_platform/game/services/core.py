@@ -160,14 +160,14 @@ def svc_game_create_team(game_id: str, request_data: dict, serialized: bool = Tr
     return ErrorCode(ErrorCode.CREATED), team
 
 
-def svc_game_get_teams_for_game(game_id: str, serialized: bool = True):
+def svc_game_get_teams_for_game(game_id: str, request_data: dict, serialized: bool = True):
     logger.debug(f">> ARGS: {locals()}")
 
     error, game = svc_game_helper_get_game_by_id(game_id=game_id)
     if error:
         return error, None
 
-    teams = svc_game_helper_get_teams_for_game(game)
+    teams = svc_game_helper_get_teams_for_game(game, request_data)
 
     if serialized:
         teams = TeamSerializer(teams, many=True).data
