@@ -18,5 +18,6 @@ urlpatterns = [
     path(r"<uuid:game_id>/team/me", views.PlayerTeamView.as_view(), name="handler-player-team"),
     path(r"<uuid:game_id>/join", views.PlayerGameJoinView.as_view(), name="handler-player-game-join"),
     path(r"<uuid:game_id>/leave", views.PlayerGameLeaveView.as_view(), name="handler-player-game-leave"),
+    path(r"<uuid:game_id>/kick", views.GameKickPlayerView.as_view(), name="handler-game-kick-player"),
     path(r"<uuid:game_id>", views.GameDetailView.as_view(), name="handler-game-detail"),
 ]
