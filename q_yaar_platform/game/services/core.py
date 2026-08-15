@@ -20,6 +20,7 @@ from game.services.helper import (
     svc_game_helper_get_teams_for_game,
     svc_game_helper_get_teams_for_player,
     svc_game_helper_join_team,
+    svc_game_helper_leave_game,
     svc_game_helper_run_validations_for_game_creation,
     svc_game_helper_run_validations_for_game_update,
     svc_game_helper_run_validations_for_player_join,
@@ -272,6 +273,23 @@ def svc_game_join_game(game_id: str, player: PlayerProfile, serialized: bool = T
         return error, None
 
     svc_game_helper_join_team(game=game, team=spectator_team, player=player)
+
+    if serialized:
+        game = GameDetailSerializer(game, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), game
+
+
+def svc_game_leave_game(game_id: str, player: PlayerProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    error, _ = svc_game_helper_leave_game(game=game, player=player)
+    if error:
+        return error, None
 
     if serialized:
         game = GameDetailSerializer(game, many=False).data

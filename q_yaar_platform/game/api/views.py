@@ -17,6 +17,7 @@ from game.services.core import (
     svc_game_get_teams_for_game,
     svc_game_join_game,
     svc_game_join_team,
+    svc_game_leave_game,
     svc_game_start_game,
     svc_game_update_game,
     svc_game_update_team,
@@ -147,4 +148,14 @@ class PlayerGameJoinView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
     def post(self, request, game_id: uuid.UUID, **kwargs):
         error, response = svc_game_join_game(game_id, kwargs["profile"])
+        return get_standard_response(error, response)
+
+
+class PlayerGameLeaveView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".PlayerGameLeaveView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def post(self, request, game_id: uuid.UUID, **kwargs):
+        error, response = svc_game_leave_game(game_id, kwargs["profile"])
         return get_standard_response(error, response)
