@@ -162,6 +162,15 @@ def svc_game_helper_run_validations_for_game_update(
     return None
 
 
+def svc_game_helper_run_validations_for_kick_player(request_data: dict) -> ErrorCode | None:
+    logger.debug(f">> ARGS: {locals()}")
+
+    if not request_data.get("player_id"):
+        return ErrorCode(ErrorCode.MISSING_PLAYER_ID)
+
+    return None
+
+
 def svc_game_helper_get_game_type_from_request_data(request_data: dict) -> GameType:
     logger.debug(f">> ARGS: {locals()}")
 
@@ -436,3 +445,44 @@ def svc_game_helper_get_spectator_team(game: Game):
         return None, team
     except Team.DoesNotExist:
         return ErrorCode(ErrorCode.INVALID_TEAM_ID, team_id="spectator"), None
+
+
+def svc_game_helper_leave_game(game: Game, player: PlayerProfile):
+    logger.debug(f">> ARGS: {locals()}")
+
+    try:
+        relation = TeamPlayerRelation.objects.get(game=game, player=player)
+    except TeamPlayerRelation.DoesNotExist:
+        return ErrorCode(
+            ErrorCode.PLAYER_DOES_NOT_BELONG_TO_GAME, profile_name=player.profile_name, game_name=game.name
+        ), None
+
+    if relation.team.team_type == TeamType.PLAYER.value:
+        if game.game_status != GameStatus.PENDING.value:
+            return ErrorCode(
+                ErrorCode.INVALID_GAME_STATE, game_state=GameStatus.get_string_for_type(GameStatus(game.game_status))
+            ), None
+
+    relation.delete()
+    return None, None
+
+
+def svc_game_helper_kick_player(game: Game, player: PlayerProfile, profile: GameMasterProfile):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if game.created_by != profile:
+        return ErrorCode(ErrorCode.INVALID_GAME_UPDATER), None
+
+    try:
+        relation = TeamPlayerRelation.objects.get(game=game, player=player)
+    except TeamPlayerRelation.DoesNotExist:
+        return ErrorCode(
+            ErrorCode.PLAYER_DOES_NOT_BELONG_TO_GAME, profile_name=player.profile_name, game_name=game.name
+        ), None
+
+    if relation.team.team_type == TeamType.SPECTATOR.value:
+        return ErrorCode(ErrorCode.INVALID_TEAM_ID, team_id="Cannot kick spectator"), None
+
+    relation.delete()
+    return None, None
+

@@ -20,8 +20,11 @@ from game.services.helper import (
     svc_game_helper_get_teams_for_game,
     svc_game_helper_get_teams_for_player,
     svc_game_helper_join_team,
+    svc_game_helper_kick_player,
+    svc_game_helper_leave_game,
     svc_game_helper_run_validations_for_game_creation,
     svc_game_helper_run_validations_for_game_update,
+    svc_game_helper_run_validations_for_kick_player,
     svc_game_helper_run_validations_for_player_join,
     svc_game_helper_run_validations_for_team_creation,
     svc_game_helper_run_validations_for_team_update,
@@ -31,6 +34,7 @@ from game.services.helper import (
 )
 from profile_game_master.models import GameMasterProfile
 from profile_player.models import PlayerProfile
+from profile_player.services.interfacer import svc_player_get_player_by_platform_user_id
 
 logger = logging.getLogger(__name__)
 
@@ -272,6 +276,49 @@ def svc_game_join_game(game_id: str, player: PlayerProfile, serialized: bool = T
         return error, None
 
     svc_game_helper_join_team(game=game, team=spectator_team, player=player)
+
+    if serialized:
+        game = GameDetailSerializer(game, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), game
+
+
+def svc_game_leave_game(game_id: str, player: PlayerProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    error, _ = svc_game_helper_leave_game(game=game, player=player)
+    if error:
+        return error, None
+
+    if serialized:
+        game = GameDetailSerializer(game, many=False).data
+
+    return ErrorCode(ErrorCode.SUCCESS), game
+
+
+def svc_game_kick_player(game_id: str, request_data: dict, profile: GameMasterProfile, serialized: bool = True):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error = svc_game_helper_run_validations_for_kick_player(request_data=request_data)
+    if error:
+        return error, None
+
+    error, game = svc_game_helper_get_game_by_id(game_id=game_id)
+    if error:
+        return error, None
+
+    # Fetch player
+    error, player = svc_player_get_player_by_platform_user_id(user_id=request_data["player_id"])
+    if error:
+        return error, None
+
+    error, _ = svc_game_helper_kick_player(game=game, player=player, profile=profile)
+    if error:
+        return error, None
 
     if serialized:
         game = GameDetailSerializer(game, many=False).data
