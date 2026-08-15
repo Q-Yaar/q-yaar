@@ -525,7 +525,7 @@ def svc_qna_helper_get_serialized_asked_questions(
 def svc_qna_helper_get_asked_questions_for_game(game: Game, request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
-    asked_questions = AskedQuestion.objects.filter(game_question__game=game).order_by("created")
+    asked_questions = AskedQuestion.objects.filter(game_question__game=game).order_by("-created")
     asked_questions = _apply_filters_to_asked_questions(asked_questions, request_data)
 
     return asked_questions
