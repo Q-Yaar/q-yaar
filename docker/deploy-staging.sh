@@ -1,7 +1,7 @@
 git_pull="true"
 collectstatic="false"
 
-PROJECT_HOME="/home/game/q_yaar_backend/q-yaar"
+PROJECT_HOME="/home/captain/q_yaar_backend/q-yaar"
 
 for i in $*; do
   if [ "$i" = "--help" ]; then
@@ -25,14 +25,14 @@ if [ "$git_pull" = "true" ]; then
   git -C $PROJECT_HOME/ pull
 fi
 
-sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml build
-sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml up -d
+docker compose -p q-yaar-staging -f $PROJECT_HOME/docker/docker-compose-staging.yml build
+docker compose -p q-yaar-staging -f $PROJECT_HOME/docker/docker-compose-staging.yml up -d
 
 if [ "$collectstatic" = "true" ]; then
-  sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core mkdir static
-  sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py collectstatic --noinput
+  docker compose -p q-yaar-staging -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core mkdir static
+  docker compose -p q-yaar-staging -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py collectstatic --noinput
 fi
 
 # if [ "$git_pull" = "true" ]; then
-#   sudo docker compose -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py migrate
+#   docker compose -p q-yaar-staging -f $PROJECT_HOME/docker/docker-compose-staging.yml exec q_yaar_core python manage.py migrate
 # fi

@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # --- Configuration ---
-CONTAINER_NAME="docker-db-1"
-DB_USER="<DB_USERNAME>"
-DB_PASSWORD="<DB_PASSWORD>"
-DB_NAME="<DB_NAME>"
-BACKUP_DIR="/home/game/postgres_backups"
+CONTAINER_NAME="staging-db"
+DB_USER="q_yaar_prod_user"
+DB_PASSWORD="<PROD_DB_PASSWORD>"
+DB_NAME="q_yaar_prod_db"
+BACKUP_DIR="/home/captain/postgres_backups"
 RETENTION_DAYS=7
 
 # Generate a timestamp for the filename
