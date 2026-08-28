@@ -25,12 +25,12 @@ Refer backup.sh for the script.
 #!/bin/bash
 
 # --- Configuration ---
-CONTAINER_NAME="docker-db-1"
-DB_USER="<DB_USERNAME>"
-DB_PASSWORD="<DB_PASSWORD>"
-DB_NAME="<DB_NAME>"
+CONTAINER_NAME="staging-db"
+DB_USER="q_yaar_prod_user"
+DB_PASSWORD="<PROD_DB_PASSWORD>"
+DB_NAME="q_yaar_prod_db"
 # IMPORTANT: Use the absolute path to your backup directory
-BACKUP_DIR="/home/game/postgres_backups"
+BACKUP_DIR="/home/captain/postgres_backups"
 RETENTION_DAYS=7
 
 # Generate a timestamp for the filename
@@ -87,7 +87,7 @@ crontab -e
 Add the following line at the bottom. Adjust the paths if your username is different:
 
 ```bash
-0 2 * * * /home/game/postgres_backups/backup.sh >> /home/game/postgres_backups/backup.log 2>&1
+0 2 * * * /home/captain/postgres_backups/backup.sh >> /home/captain/postgres_backups/backup.log 2>&1
 
 ```
 
@@ -96,7 +96,7 @@ Add the following line at the bottom. Adjust the paths if your username is diffe
 To restore your database from a generated `.dump` file, ensure your Postgres container is running. Use the following command from your host machine, replacing the timestamped filename with the backup you want to restore:
 
 ```bash
-docker exec -i -e PGPASSWORD="<DB_PASSWORD>" docker-db-1 pg_restore -U <DB_USERNAMW> -d <DB_NAME> --clean --if-exists < /home/game/postgres_backups/db_backup_YYYYMMDD_HHMMSS.dump
+docker exec -i -e PGPASSWORD="<PROD_DB_PASSWORD>" staging-db pg_restore -U q_yaar_prod_user -d q_yaar_prod_db --clean --if-exists < /home/captain/postgres_backups/db_backup_YYYYMMDD_HHMMSS.dump
 
 ```
 
