@@ -2,9 +2,9 @@
 
 # --- Configuration ---
 CONTAINER_NAME="staging-db"
-DB_USER="q_yaar_prod_user"
-DB_PASSWORD="<PROD_DB_PASSWORD>"
-DB_NAME="q_yaar_prod_db"
+DB_USER="<DB_USERNAME>"
+DB_PASSWORD="<DB_PASSWORD>"
+DB_NAME="<DB_NAME>"
 BACKUP_DIR="/home/captain/postgres_backups"
 RETENTION_DAYS=7
 
