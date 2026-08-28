@@ -1,7 +1,7 @@
 git_pull="true"
 collectstatic="false"
 
-PROJECT_HOME="/home/game/q_yaar_backend/q-yaar"
+PROJECT_HOME="/home/captain/q_yaar_backend/q-yaar"
 
 for i in $*; do
   if [ "$i" = "--help" ]; then
