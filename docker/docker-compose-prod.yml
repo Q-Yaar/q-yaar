@@ -1,73 +1,75 @@
 services:
   q_yaar_core:
-    container_name: staging-django
+    container_name: prod-django
     restart: always
     build:
       context: ./../q_yaar_platform
-      dockerfile: ./../q_yaar_platform/Dockerfile-staging
+      dockerfile: ./../q_yaar_platform/Dockerfile-prod
     extra_hosts:
       # For ubuntu docker to access host machine services
       - "host.docker.internal:host-gateway"
-    env_file: ./../build_meta/.env_staging
+    env_file: ./../build_meta/.env_prod
     ports:
-      - "8000:8000"
+      - "8001:8000" # Changed from 8000 to 8001 to avoid conflict with staging
     networks:
       - backend
     depends_on:
-      - db
+      # - db # Commented out since we'll use staging's db
       - redis
     command: >
       bash -c "python manage.py migrate && gunicorn q_yaar.wsgi:application --bind 0.0.0.0:8000 --workers 5"
 
   fast_worker:
-    container_name: staging-celery-fast
+    container_name: prod-celery-fast
     build:
       context: ./../q_yaar_platform
-      dockerfile: ./../q_yaar_platform/Dockerfile-staging
+      dockerfile: ./../q_yaar_platform/Dockerfile-prod
     command: celery -A q_yaar worker -E -l info --concurrency=8 --pool=prefork -n fast_worker@qyaar.com  -Q notification
-    env_file: ./../build_meta/.env_staging
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file: ./../build_meta/.env_prod
     networks:
       - backend
 
   # slow_worker:
-  #   container_name: staging-celery-slow
+  #   container_name: prod-celery-slow
   #   build:
   #     context: ./../q_yaar_platform
-  #     dockerfile: ./../q_yaar_platform/Dockerfile-staging
+  #     dockerfile: ./../q_yaar_platform/Dockerfile-prod
   #   command: celery -A q_yaar worker -E -l info --concurrency=8 --pool=prefork -n slow_worker@qyaar.com  -Q default
-  #   env_file: ./../build_meta/.env_staging
+  #   env_file: ./../build_meta/.env_prod
   #   networks:
   #     - backend
 
   # celery_beat:
-  #   container_name: staging-celery-beat
+  #   container_name: prod-celery-beat
   #   build:
   #     context: ./../q_yaar_platform
-  #     dockerfile: ./../q_yaar_platform/Dockerfile-staging
+  #     dockerfile: ./../q_yaar_platform/Dockerfile-prod
   #   extra_hosts:
   #     # For ubuntu docker to access host machine services
   #     - "host.docker.internal:host-gateway"
   #   command: celery -A q_yaar beat -l debug
-  #   env_file: ./../build_meta/.env_staging
+  #   env_file: ./../build_meta/.env_prod
   #   networks:
   #     - backend
 
-  db:
-    container_name: staging-db
-    image: postgis/postgis:latest
-    restart: always
-    env_file: ./../build_meta/.env_staging
-    ports:
-      - "5432:5432"
-    expose:
-      - "5432"
-    volumes:
-      - ./postgres:/var/lib/postgresql
-    networks:
-      - backend
+  # db:
+  #   container_name: prod-db
+  #   image: postgis/postgis:latest
+  #   restart: always
+  #   env_file: ./../build_meta/.env_prod
+  #   ports:
+  #     - "5432:5432"
+  #   expose:
+  #     - "5432"
+  #   volumes:
+  #     - ./postgres:/var/lib/postgresql
+  #   networks:
+  #     - backend
 
   redis:
-    container_name: staging-redis
+    container_name: prod-redis
     image: redis:7.4-alpine
     restart: always
     volumes:
@@ -83,4 +85,4 @@ networks:
 
 volumes:
   redis:
-  postgres:
+  # postgres:
