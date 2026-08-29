@@ -22,9 +22,6 @@ class ErrorCode(BaseErrorCode):
     MISSING_GAME_ID = "011"
     MISSING_TARGET_TEAM_ID = "012"
     MISSING_CHOSEN_PLACEHOLDERS = "013"
-    MISSING_QUESTION_META = "014"
-    MISSING_ANSWER_META = "015"
-    MISSING_ANSWER_INSTRUCTION_TYPE = "016"
 
     # Permission Errors - 1 Series
     QUESTION_ANSWER_ALREADY_ACCEPTED = "101"
@@ -35,11 +32,6 @@ class ErrorCode(BaseErrorCode):
 
     # Key Errors - 2 Series
     INVALID_REWARD_TYPE = "201"
-    INVALID_QUESTION_META = "202"
-    INVALID_ANSWER_META = "203"
-    INVALID_GEO_COUNT = "204"
-    INVALID_ANSWER_INSTRUCTION_TYPE = "205"
-    INVALID_FACT_META = "206"
 
     # Object Does Not Exist Errors - 3 series
     INVALID_REWARD_ID = "301"
@@ -65,20 +57,12 @@ class ErrorCode(BaseErrorCode):
         MISSING_GAME_ID: status.HTTP_400_BAD_REQUEST,
         MISSING_TARGET_TEAM_ID: status.HTTP_400_BAD_REQUEST,
         MISSING_CHOSEN_PLACEHOLDERS: status.HTTP_400_BAD_REQUEST,
-        MISSING_QUESTION_META: status.HTTP_400_BAD_REQUEST,
-        MISSING_ANSWER_META: status.HTTP_400_BAD_REQUEST,
-        MISSING_ANSWER_INSTRUCTION_TYPE: status.HTTP_400_BAD_REQUEST,
         QUESTION_ANSWER_ALREADY_ACCEPTED: status.HTTP_400_BAD_REQUEST,
         ASSIGNEE_CANNOT_ACCEPT_ANSWER: status.HTTP_400_BAD_REQUEST,
         QUESTION_ANSWER_NOT_ANSWERED: status.HTTP_400_BAD_REQUEST,
         QUESTION_ALREADY_ANSWERED: status.HTTP_400_BAD_REQUEST,
         ASSIGNEE_CANNOT_UPDATE_QUESTION: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_TYPE: status.HTTP_400_BAD_REQUEST,
-        INVALID_QUESTION_META: status.HTTP_400_BAD_REQUEST,
-        INVALID_ANSWER_META: status.HTTP_400_BAD_REQUEST,
-        INVALID_GEO_COUNT: status.HTTP_400_BAD_REQUEST,
-        INVALID_ANSWER_INSTRUCTION_TYPE: status.HTTP_400_BAD_REQUEST,
-        INVALID_FACT_META: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_CATEGORY_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_QUESTION_ID: status.HTTP_400_BAD_REQUEST,
@@ -126,15 +110,6 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_missing_chosen_placeholders(kwargs: dict):
         return "Missing chosen_placeholders"
 
-    def get_string_for_missing_question_meta(kwargs: dict):
-        return "Missing question_meta"
-
-    def get_string_for_missing_answer_meta(kwargs: dict):
-        return "Missing answer_meta"
-
-    def get_string_for_missing_answer_instruction_type(kwargs: dict):
-        return "Missing answer_instruction_type"
-
     def get_string_for_question_answer_already_accepted(kwargs: dict):
         return "Question cannot be answered after it is accepted"
 
@@ -152,21 +127,6 @@ class ErrorCode(BaseErrorCode):
 
     def get_string_for_invalid_reward_type(kwargs: dict):
         return f"Invalid reward_type: {kwargs.get('reward_type')}"
-
-    def get_string_for_invalid_question_meta(kwargs: dict):
-        return f"Invalid question_meta: {kwargs.get('error')}"
-
-    def get_string_for_invalid_answer_meta(kwargs: dict):
-        return f"Invalid answer_meta: {kwargs.get('error')}"
-
-    def get_string_for_invalid_geo_count(kwargs: dict):
-        return f"Invalid geo_count: {kwargs.get('error')}"
-
-    def get_string_for_invalid_answer_instruction_type(kwargs: dict):
-        return f"Invalid answer_instruction_type: {kwargs.get('answer_instruction_type')}"
-
-    def get_string_for_invalid_fact_meta(kwargs: dict):
-        return f"Invalid fact_meta: {kwargs.get('error')}"
 
     def get_string_for_invalid_reward_id(kwargs: dict):
         return f"Invalid reward_id: {kwargs.get('reward_id')}"
@@ -200,20 +160,12 @@ class ErrorCode(BaseErrorCode):
         MISSING_GAME_ID: get_string_for_missing_game_id,
         MISSING_TARGET_TEAM_ID: get_string_for_missing_target_team_id,
         MISSING_CHOSEN_PLACEHOLDERS: get_string_for_missing_chosen_placeholders,
-        MISSING_QUESTION_META: get_string_for_missing_question_meta,
-        MISSING_ANSWER_META: get_string_for_missing_answer_meta,
-        MISSING_ANSWER_INSTRUCTION_TYPE: get_string_for_missing_answer_instruction_type,
         QUESTION_ANSWER_ALREADY_ACCEPTED: get_string_for_question_answer_already_accepted,
         ASSIGNEE_CANNOT_ACCEPT_ANSWER: get_string_for_assignee_cannot_accept_answer,
         QUESTION_ANSWER_NOT_ANSWERED: get_string_for_question_answer_not_answered,
         QUESTION_ALREADY_ANSWERED: get_string_for_question_already_answered,
         ASSIGNEE_CANNOT_UPDATE_QUESTION: get_string_for_assignee_cannot_update_question,
         INVALID_REWARD_TYPE: get_string_for_invalid_reward_type,
-        INVALID_QUESTION_META: get_string_for_invalid_question_meta,
-        INVALID_ANSWER_META: get_string_for_invalid_answer_meta,
-        INVALID_GEO_COUNT: get_string_for_invalid_geo_count,
-        INVALID_ANSWER_INSTRUCTION_TYPE: get_string_for_invalid_answer_instruction_type,
-        INVALID_FACT_META: get_string_for_invalid_fact_meta,
         INVALID_REWARD_ID: get_string_for_invalid_reward_id,
         INVALID_CATEGORY_ID: get_string_for_invalid_category_id,
         INVALID_QUESTION_ID: get_string_for_invalid_question_id,

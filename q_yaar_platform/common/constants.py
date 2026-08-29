@@ -107,7 +107,7 @@ class FactType(BaseIntEnum):
     GEO = 3
 
 
-class AnswerInstructionType(BaseIntEnum):
+class AnswerInstructionType(BaseIntEnum):  # TODO: Remove. This is deprecated.
     DRAW_CIRCLE_POINT_RADIUS = 1
     DRAW_CIRCLE_2_POINTS = 2
     SPLIT_BY_DIRECTION = 3

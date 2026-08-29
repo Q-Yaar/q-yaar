@@ -169,8 +169,7 @@ def svc_qna_create_question(request_data: dict, category_id: uuid.UUID, serializ
         request_data["template"],
         request_data.get("placeholders", {}),
         category,
-        request_data.get("answer_instruction_type"),
-        request_data.get("geo", {}),
+        request_data.get("answer_instruction_meta"),
     )
 
     if serialized:
@@ -306,7 +305,7 @@ def svc_qna_answer_asked_question(
     if error:
         return error, None
 
-    error, asked_question = svc_qna_helper_answer_asked_question(asked_question, request_data["answer_meta"])
+    error, asked_question = svc_qna_helper_answer_asked_question(asked_question, request_data.get("answer_meta", {}))
     if error:
         return error, None
 
