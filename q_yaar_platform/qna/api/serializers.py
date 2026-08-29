@@ -56,21 +56,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         return obj.get_answer_instruction_meta()
 
 
-class QuestionDetailSerializer(QuestionSerializer):
-    placeholders = serializers.SerializerMethodField()
-
-    class Meta:
-        model = QuestionTemplate
-        fields = QuestionSerializer.Meta.fields + ("placeholders",)
-
-    def get_placeholders(self, obj: QuestionTemplate) -> dict:
-        placeholders_data = {}
-        for placeholder in obj.placeholders.all():
-            placeholders_data[placeholder.placeholder_name] = {
-                "required": placeholder.required,
-                "allowed_values": [allowed_value.value for allowed_value in placeholder.allowed_values.all()],
-            }
-        return placeholders_data
+QuestionDetailSerializer = QuestionSerializer
 
 
 class AskedQuestionDetailSerializer(serializers.ModelSerializer):

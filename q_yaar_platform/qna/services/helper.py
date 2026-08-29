@@ -21,15 +21,12 @@ from profile_player.models import PlayerProfile
 from qna.api.serializers import (
     AskedQuestionDetailSerializer,
     QuestionCategorySerializer,
-    QuestionDetailSerializer,
     QuestionRewardSerializer,
     QuestionSerializer,
 )
 from qna.models import (
     AskedQuestion,
     GameQuestion,
-    Placeholder,
-    PlaceholderAllowedValue,
     QuestionCategory,
     QuestionReward,
     QuestionTemplate,
@@ -133,9 +130,6 @@ def svc_qna_helper_run_validations_to_create_question(request_data: dict):
     if not request_data.get("template"):
         return ErrorCode(ErrorCode.MISSING_TEMPLATE)
 
-    if not request_data.get("placeholders"):
-        return ErrorCode(ErrorCode.MISSING_PLACEHOLDERS)
-
     return None
 
 
@@ -162,9 +156,6 @@ def svc_qna_helper_run_validations_to_ask_question(request_data: dict):
 
     if not request_data.get("target_team_id"):
         return ErrorCode(ErrorCode.MISSING_TARGET_TEAM_ID)
-
-    if not request_data.get("chosen_placeholders"):
-        return ErrorCode(ErrorCode.MISSING_CHOSEN_PLACEHOLDERS)
 
     return None
 
@@ -364,7 +355,6 @@ def svc_qna_helper_get_questions_for_category(
 
 def svc_qna_helper_create_question(
     template: str,
-    placeholders: dict[str, dict],
     category: QuestionCategory,
     answer_instruction_meta: dict = None,
 ) -> QuestionTemplate:
@@ -376,12 +366,6 @@ def svc_qna_helper_create_question(
         answer_instruction_meta=answer_instruction_meta,
     )
 
-    for key, value in placeholders.items():
-        placeholder = Placeholder.create(question=question_template, placeholder_name=key, required=value["required"])
-        if value.get("allowed_values"):
-            for allowed_value in value["allowed_values"]:
-                PlaceholderAllowedValue.create(placeholder=placeholder, value=allowed_value)
-
     return question_template
 
 
@@ -390,10 +374,7 @@ def svc_qna_helper_get_serialized_questions(
 ) -> dict | list[dict]:
     logger.debug(f">> ARGS: {locals()}")
 
-    if many:
-        return QuestionSerializer(questions, many=True).data
-
-    return QuestionDetailSerializer(questions, many=False).data
+    return QuestionSerializer(questions, many=many).data
 
 
 def svc_qna_helper_assign_question_to_game(game: Game, question_ids: list[str]):
@@ -411,20 +392,16 @@ def svc_qna_helper_assign_question_to_game(game: Game, question_ids: list[str]):
 
 
 def svc_qna_helper_ask_question(
-    game_question: GameQuestion, target: Team, chosen_placeholders: dict, request_data: dict
+    game_question: GameQuestion, target: Team, request_data: dict
 ):
     logger.debug(f">> ARGS: {locals()}")
 
-    try:
-        asked_question = AskedQuestion.create(
-            game_question=game_question,
-            target=target,
-            chosen_placeholders=chosen_placeholders,
-            question_meta=request_data.get("question_meta", {}),
-            fact_meta=request_data.get("fact_meta", {}),
-        )
-    except ValueError as e:
-        return ErrorCode(ErrorCode.INVALID_CHOSEN_PLACEHOLDERS, error=str(e)), None
+    asked_question = AskedQuestion.create(
+        game_question=game_question,
+        target=target,
+        question_meta=request_data.get("question_meta", {}),
+        fact_meta=request_data.get("fact_meta", {}),
+    )
 
     target_player_ids = svc_game_get_player_ids_for_team(team=target)
 

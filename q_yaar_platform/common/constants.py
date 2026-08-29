@@ -41,8 +41,8 @@ class Length:
     CARD_IMAGE_URL = 200
     REWARD_NAME = 100
     QUESTION_CATEGORY = 100
-    PLACEHOLDER_NAME = 100
-    PLACEHOLDER_VALUE = 255
+    PLACEHOLDER_NAME = 100  # TODO: Remove. This is deprecated.
+    PLACEHOLDER_VALUE = 255  # TODO: Remove. This is deprecated.
 
 
 class ModuleErrorPrefix:

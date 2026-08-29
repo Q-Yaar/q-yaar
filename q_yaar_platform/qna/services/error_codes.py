@@ -17,11 +17,9 @@ class ErrorCode(BaseErrorCode):
     MISSING_REWARD_ID = "006"
     MISSING_PRIORITY = "007"
     MISSING_TEMPLATE = "008"
-    MISSING_PLACEHOLDERS = "009"
     MISSING_QUESTION_IDS = "010"
     MISSING_GAME_ID = "011"
     MISSING_TARGET_TEAM_ID = "012"
-    MISSING_CHOSEN_PLACEHOLDERS = "013"
 
     # Permission Errors - 1 Series
     QUESTION_ANSWER_ALREADY_ACCEPTED = "101"
@@ -38,7 +36,6 @@ class ErrorCode(BaseErrorCode):
     INVALID_CATEGORY_ID = "302"
     INVALID_QUESTION_ID = "303"
     INVALID_QUESTION_IDS = "304"
-    INVALID_CHOSEN_PLACEHOLDERS = "305"
     QUESTION_NOT_ASSIGNED_TO_GAME = "306"
 
     # Integrity Errors - 4 Series
@@ -52,11 +49,9 @@ class ErrorCode(BaseErrorCode):
         MISSING_REWARD_ID: status.HTTP_400_BAD_REQUEST,
         MISSING_PRIORITY: status.HTTP_400_BAD_REQUEST,
         MISSING_TEMPLATE: status.HTTP_400_BAD_REQUEST,
-        MISSING_PLACEHOLDERS: status.HTTP_400_BAD_REQUEST,
         MISSING_QUESTION_IDS: status.HTTP_400_BAD_REQUEST,
         MISSING_GAME_ID: status.HTTP_400_BAD_REQUEST,
         MISSING_TARGET_TEAM_ID: status.HTTP_400_BAD_REQUEST,
-        MISSING_CHOSEN_PLACEHOLDERS: status.HTTP_400_BAD_REQUEST,
         QUESTION_ANSWER_ALREADY_ACCEPTED: status.HTTP_400_BAD_REQUEST,
         ASSIGNEE_CANNOT_ACCEPT_ANSWER: status.HTTP_400_BAD_REQUEST,
         QUESTION_ANSWER_NOT_ANSWERED: status.HTTP_400_BAD_REQUEST,
@@ -67,7 +62,6 @@ class ErrorCode(BaseErrorCode):
         INVALID_CATEGORY_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_QUESTION_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_QUESTION_IDS: status.HTTP_400_BAD_REQUEST,
-        INVALID_CHOSEN_PLACEHOLDERS: status.HTTP_400_BAD_REQUEST,
         QUESTION_NOT_ASSIGNED_TO_GAME: status.HTTP_400_BAD_REQUEST,
     }
 
@@ -95,9 +89,6 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_missing_template(kwargs: dict):
         return "Missing template"
 
-    def get_string_for_missing_placeholders(kwargs: dict):
-        return "Missing placeholders"
-
     def get_string_for_missing_question_ids(kwargs: dict):
         return "Missing question_ids"
 
@@ -106,9 +97,6 @@ class ErrorCode(BaseErrorCode):
 
     def get_string_for_missing_target_team_id(kwargs: dict):
         return "Missing target_team_id"
-
-    def get_string_for_missing_chosen_placeholders(kwargs: dict):
-        return "Missing chosen_placeholders"
 
     def get_string_for_question_answer_already_accepted(kwargs: dict):
         return "Question cannot be answered after it is accepted"
@@ -140,9 +128,6 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_invalid_question_ids(kwargs: dict):
         return f"Invalid question_ids: {kwargs.get('question_ids')}"
 
-    def get_string_for_invalid_chosen_placeholders(kwargs: dict):
-        return f"Invalid chosen_placeholders: {kwargs.get('error')}"
-
     def get_string_for_question_not_assigned_to_game(kwargs: dict):
         return f"Question {kwargs.get('question_id')} is not assigned to game {kwargs.get('game_id')}"
 
@@ -155,11 +140,9 @@ class ErrorCode(BaseErrorCode):
         MISSING_REWARD_ID: get_string_for_missing_reward_id,
         MISSING_PRIORITY: get_string_for_missing_priority,
         MISSING_TEMPLATE: get_string_for_missing_template,
-        MISSING_PLACEHOLDERS: get_string_for_missing_placeholders,
         MISSING_QUESTION_IDS: get_string_for_missing_question_ids,
         MISSING_GAME_ID: get_string_for_missing_game_id,
         MISSING_TARGET_TEAM_ID: get_string_for_missing_target_team_id,
-        MISSING_CHOSEN_PLACEHOLDERS: get_string_for_missing_chosen_placeholders,
         QUESTION_ANSWER_ALREADY_ACCEPTED: get_string_for_question_answer_already_accepted,
         ASSIGNEE_CANNOT_ACCEPT_ANSWER: get_string_for_assignee_cannot_accept_answer,
         QUESTION_ANSWER_NOT_ANSWERED: get_string_for_question_answer_not_answered,
@@ -170,7 +153,6 @@ class ErrorCode(BaseErrorCode):
         INVALID_CATEGORY_ID: get_string_for_invalid_category_id,
         INVALID_QUESTION_ID: get_string_for_invalid_question_id,
         INVALID_QUESTION_IDS: get_string_for_invalid_question_ids,
-        INVALID_CHOSEN_PLACEHOLDERS: get_string_for_invalid_chosen_placeholders,
         QUESTION_NOT_ASSIGNED_TO_GAME: get_string_for_question_not_assigned_to_game,
     }
 

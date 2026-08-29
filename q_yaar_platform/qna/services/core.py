@@ -167,7 +167,6 @@ def svc_qna_create_question(request_data: dict, category_id: uuid.UUID, serializ
 
     question = svc_qna_helper_create_question(
         request_data["template"],
-        request_data.get("placeholders", {}),
         category,
         request_data.get("answer_instruction_meta"),
     )
@@ -235,7 +234,7 @@ def svc_qna_ask_question(game_id: uuid.UUID, question_id: uuid.UUID, request_dat
         return error, None
 
     error, asked_question = svc_qna_helper_ask_question(
-        game_question, target, request_data["chosen_placeholders"], request_data
+        game_question, target, request_data
     )
     if error:
         return error, None
