@@ -163,6 +163,23 @@ LAST_LOGIN_CACHE_TTL = 24 * 60 * 60  # (24 hours)
 
 #######################################################################################################################
 
+# Object storage (S3-compatible, e.g. Deuxfleurs/Garage)
+
+# Access keys are read from the environment so they are never committed.
+# Set AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY in the deployment env file.
+S3_ENDPOINT_URL = config("S3_ENDPOINT_URL", default="")
+S3_REGION = config("S3_REGION", default="us-east-1")
+S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID", default="")
+S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY", default="")
+S3_BUCKET_NAME = config("S3_BUCKET_NAME", default="q-yaar")
+S3_SECURE = config("S3_SECURE", default=True, cast=bool)
+
+# Lifetime of presigned URLs issued to clients (seconds).
+S3_PRESIGN_GET_EXPIRY = config("S3_PRESIGN_GET_EXPIRY", default=7 * 24 * 60 * 60, cast=int)  # 7 days
+S3_PRESIGN_PUT_EXPIRY = config("S3_PRESIGN_PUT_EXPIRY", default=15 * 60, cast=int)  # 15 minutes
+
+#######################################################################################################################
+
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 

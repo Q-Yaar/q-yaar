@@ -37,6 +37,11 @@ urlpatterns = [
         name="handler-game-questions-answer",
     ),
     path(
+        r"game/<uuid:game_id>/asked-questions/<uuid:asked_question_id>/upload-url",
+        views.GameQuestionsAttachmentUploadView.as_view(),
+        name="handler-game-questions-attachment-upload-url",
+    ),
+    path(
         r"game/<uuid:game_id>/asked-questions/<uuid:asked_question_id>/accept",
         views.GameQuestionsAnswerAcceptView.as_view(),
         name="handler-game-questions-answer-accept",

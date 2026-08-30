@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import (
     AskedQuestion,
+    Attachment,
     GameQuestion,
     Placeholder,
     PlaceholderAllowedValue,
@@ -101,3 +102,13 @@ class AskedQuestionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AskedQuestion, AskedQuestionAdmin)
+
+
+class AttachmentAdmin(admin.ModelAdmin):
+    list_display = ("external_id", "asked_question", "status", "file_name", "content_type")
+    search_fields = ["external_id", "object_key", "asked_question__external_id"]
+    list_filter = ("status",)
+    readonly_fields = ("asked_question", "uploaded_by", "object_key", "file_name", "content_type", "status")
+
+
+admin.site.register(Attachment, AttachmentAdmin)

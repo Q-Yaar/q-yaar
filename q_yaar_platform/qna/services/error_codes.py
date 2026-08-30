@@ -25,6 +25,7 @@ class ErrorCode(BaseErrorCode):
     MISSING_QUESTION_META = "014"
     MISSING_ANSWER_META = "015"
     MISSING_ANSWER_INSTRUCTION_TYPE = "016"
+    MISSING_FILE_NAME = "017"
 
     # Permission Errors - 1 Series
     QUESTION_ANSWER_ALREADY_ACCEPTED = "101"
@@ -32,6 +33,8 @@ class ErrorCode(BaseErrorCode):
     QUESTION_ANSWER_NOT_ANSWERED = "103"
     QUESTION_ALREADY_ANSWERED = "104"
     ASSIGNEE_CANNOT_UPDATE_QUESTION = "105"
+    ATTACHMENT_NOT_UPLOADED = "106"
+    ATTACHMENT_ALREADY_COMMITTED = "107"
 
     # Key Errors - 2 Series
     INVALID_REWARD_TYPE = "201"
@@ -48,6 +51,7 @@ class ErrorCode(BaseErrorCode):
     INVALID_QUESTION_IDS = "304"
     INVALID_CHOSEN_PLACEHOLDERS = "305"
     QUESTION_NOT_ASSIGNED_TO_GAME = "306"
+    INVALID_ATTACHMENT_ID = "307"
 
     # Integrity Errors - 4 Series
 
@@ -68,11 +72,14 @@ class ErrorCode(BaseErrorCode):
         MISSING_QUESTION_META: status.HTTP_400_BAD_REQUEST,
         MISSING_ANSWER_META: status.HTTP_400_BAD_REQUEST,
         MISSING_ANSWER_INSTRUCTION_TYPE: status.HTTP_400_BAD_REQUEST,
+        MISSING_FILE_NAME: status.HTTP_400_BAD_REQUEST,
         QUESTION_ANSWER_ALREADY_ACCEPTED: status.HTTP_400_BAD_REQUEST,
         ASSIGNEE_CANNOT_ACCEPT_ANSWER: status.HTTP_400_BAD_REQUEST,
         QUESTION_ANSWER_NOT_ANSWERED: status.HTTP_400_BAD_REQUEST,
         QUESTION_ALREADY_ANSWERED: status.HTTP_400_BAD_REQUEST,
         ASSIGNEE_CANNOT_UPDATE_QUESTION: status.HTTP_400_BAD_REQUEST,
+        ATTACHMENT_NOT_UPLOADED: status.HTTP_400_BAD_REQUEST,
+        ATTACHMENT_ALREADY_COMMITTED: status.HTTP_400_BAD_REQUEST,
         INVALID_REWARD_TYPE: status.HTTP_400_BAD_REQUEST,
         INVALID_QUESTION_META: status.HTTP_400_BAD_REQUEST,
         INVALID_ANSWER_META: status.HTTP_400_BAD_REQUEST,
@@ -85,6 +92,7 @@ class ErrorCode(BaseErrorCode):
         INVALID_QUESTION_IDS: status.HTTP_400_BAD_REQUEST,
         INVALID_CHOSEN_PLACEHOLDERS: status.HTTP_400_BAD_REQUEST,
         QUESTION_NOT_ASSIGNED_TO_GAME: status.HTTP_400_BAD_REQUEST,
+        INVALID_ATTACHMENT_ID: status.HTTP_400_BAD_REQUEST,
     }
 
     def get_string_for_missing_reward_name(kwargs: dict):
@@ -135,6 +143,9 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_missing_answer_instruction_type(kwargs: dict):
         return "Missing answer_instruction_type"
 
+    def get_string_for_missing_file_name(kwargs: dict):
+        return "Missing file_name"
+
     def get_string_for_question_answer_already_accepted(kwargs: dict):
         return "Question cannot be answered after it is accepted"
 
@@ -149,6 +160,12 @@ class ErrorCode(BaseErrorCode):
 
     def get_string_for_assignee_cannot_update_question(kwargs: dict):
         return "Assignee cannot update the question"
+
+    def get_string_for_attachment_not_uploaded(kwargs: dict):
+        return f"Attachment {kwargs.get('attachment_id')} has no uploaded object in storage"
+
+    def get_string_for_attachment_already_committed(kwargs: dict):
+        return f"Attachment {kwargs.get('attachment_id')} is already committed to an answer"
 
     def get_string_for_invalid_reward_type(kwargs: dict):
         return f"Invalid reward_type: {kwargs.get('reward_type')}"
@@ -186,6 +203,9 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_question_not_assigned_to_game(kwargs: dict):
         return f"Question {kwargs.get('question_id')} is not assigned to game {kwargs.get('game_id')}"
 
+    def get_string_for_invalid_attachment_id(kwargs: dict):
+        return f"Invalid attachment_id: {kwargs.get('attachment_id')}"
+
     CODE_MESSAGE_MAP = {
         MISSING_REWARD_NAME: get_string_for_missing_reward_name,
         MISSING_REWARD_TYPE: get_string_for_missing_reward_type,
@@ -203,11 +223,14 @@ class ErrorCode(BaseErrorCode):
         MISSING_QUESTION_META: get_string_for_missing_question_meta,
         MISSING_ANSWER_META: get_string_for_missing_answer_meta,
         MISSING_ANSWER_INSTRUCTION_TYPE: get_string_for_missing_answer_instruction_type,
+        MISSING_FILE_NAME: get_string_for_missing_file_name,
         QUESTION_ANSWER_ALREADY_ACCEPTED: get_string_for_question_answer_already_accepted,
         ASSIGNEE_CANNOT_ACCEPT_ANSWER: get_string_for_assignee_cannot_accept_answer,
         QUESTION_ANSWER_NOT_ANSWERED: get_string_for_question_answer_not_answered,
         QUESTION_ALREADY_ANSWERED: get_string_for_question_already_answered,
         ASSIGNEE_CANNOT_UPDATE_QUESTION: get_string_for_assignee_cannot_update_question,
+        ATTACHMENT_NOT_UPLOADED: get_string_for_attachment_not_uploaded,
+        ATTACHMENT_ALREADY_COMMITTED: get_string_for_attachment_already_committed,
         INVALID_REWARD_TYPE: get_string_for_invalid_reward_type,
         INVALID_QUESTION_META: get_string_for_invalid_question_meta,
         INVALID_ANSWER_META: get_string_for_invalid_answer_meta,
@@ -220,6 +243,7 @@ class ErrorCode(BaseErrorCode):
         INVALID_QUESTION_IDS: get_string_for_invalid_question_ids,
         INVALID_CHOSEN_PLACEHOLDERS: get_string_for_invalid_chosen_placeholders,
         QUESTION_NOT_ASSIGNED_TO_GAME: get_string_for_question_not_assigned_to_game,
+        INVALID_ATTACHMENT_ID: get_string_for_invalid_attachment_id,
     }
 
     def __init__(self, code, **kwargs) -> None:

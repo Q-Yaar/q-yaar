@@ -42,6 +42,10 @@ from qna.services.helper import (
     svc_qna_helper_verify_player_belongs_to_team,
 )
 
+from .attachment import (
+    svc_attachment_request_upload,
+    svc_attachment_run_validations_to_request_upload,
+)
 from .error_codes import ErrorCode
 
 logger = logging.getLogger(__name__)
@@ -306,7 +310,9 @@ def svc_qna_answer_asked_question(
     if error:
         return error, None
 
-    error, asked_question = svc_qna_helper_answer_asked_question(asked_question, request_data["answer_meta"])
+    error, asked_question = svc_qna_helper_answer_asked_question(
+        asked_question, request_data["answer_meta"], request_data.get("attachment_ids") or []
+    )
     if error:
         return error, None
 
@@ -314,6 +320,28 @@ def svc_qna_answer_asked_question(
         asked_question = svc_qna_helper_get_serialized_asked_questions(asked_question, many=False)
 
     return ErrorCode(ErrorCode.SUCCESS), asked_question
+
+
+def svc_qna_request_attachment_upload(
+    asked_question_id: uuid.UUID, request_data: dict, player: PlayerProfile
+):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error = svc_attachment_run_validations_to_request_upload(request_data)
+    if error:
+        return error, None
+
+    error, asked_question = svc_qna_helper_validate_and_get_asked_question(asked_question_id)
+    if error:
+        return error, None
+
+    error = svc_qna_helper_verify_player_belongs_to_team(player, asked_question.target)
+    if error:
+        return error, None
+
+    response = svc_attachment_request_upload(asked_question, player, request_data)
+
+    return ErrorCode(ErrorCode.CREATED), response
 
 
 def svc_qna_accept_answered_question(asked_question_id: uuid.UUID, player: PlayerProfile, serialized: bool = True):

@@ -1,9 +1,10 @@
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
-from common.constants import AnswerInstructionType, Length, QuestionRewardType
+from common.constants import AnswerInstructionType, AttachmentStatus, Length, QuestionRewardType
 from common.models import FilteredModelManager
 from django.db import models
 from django.template import Context, Template
 from game.models import Game, Team
+from profile_player.models import PlayerProfile
 from qna.popo.answer_meta.answer import AnswerConfig
 from qna.popo.instruction_meta import AnswerInstructionMeta
 from qna.popo.question_meta.question import QuestionMetaConfig
@@ -246,3 +247,47 @@ class AskedQuestion(AbstractExternalFacing, AbstractTimeStamped):
         asked_question.set_fact_meta(fact_meta)
         asked_question.save()
         return asked_question
+
+
+class Attachment(AbstractExternalFacing, AbstractTimeStamped):
+    # Object keys are namespaced per game so a game's files can be exported/listed by prefix.
+    SCOPE_ANSWERS = "answers"
+
+    asked_question = models.ForeignKey(AskedQuestion, on_delete=models.CASCADE, related_name="attachments")
+    uploaded_by = models.ForeignKey(PlayerProfile, on_delete=models.SET_NULL, null=True, related_name="attachments")
+
+    object_key = models.CharField(max_length=Length.ATTACHMENT_OBJECT_KEY)
+    file_name = models.CharField(max_length=Length.ATTACHMENT_FILE_NAME, blank=True, default="")
+    content_type = models.CharField(max_length=Length.ATTACHMENT_CONTENT_TYPE, blank=True, default="")
+
+    status = models.PositiveIntegerField(
+        choices=AttachmentStatus.get_choices(), default=AttachmentStatus.PENDING.value
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        indexes = [models.Index(fields=["asked_question"]), models.Index(fields=["status"])]
+
+    def __str__(self):
+        return self.object_key
+
+    @classmethod
+    def create(
+        cls,
+        asked_question: AskedQuestion,
+        uploaded_by: PlayerProfile,
+        object_key: str,
+        file_name: str = "",
+        content_type: str = "",
+    ) -> "Attachment":
+        attachment = cls(
+            asked_question=asked_question,
+            uploaded_by=uploaded_by,
+            object_key=object_key,
+            file_name=file_name,
+            content_type=content_type,
+            status=AttachmentStatus.PENDING.value,
+        )
+        attachment.save()
+        return attachment

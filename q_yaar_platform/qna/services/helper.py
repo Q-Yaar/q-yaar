@@ -40,6 +40,7 @@ from qna.popo.question_meta.question import QuestionMetaConfig
 from qna.popo.question_meta_type.geo_count import GeoCountConfig
 from qna.popo.reward_meta.reward_types_map import REWARD_TYPE_MAP
 
+from .attachment import svc_attachment_commit
 from .error_codes import ErrorCode
 
 logger = logging.getLogger(__name__)
@@ -531,7 +532,7 @@ def svc_qna_helper_get_asked_questions_for_game(game: Game, request_data: dict):
     return asked_questions
 
 
-def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, answer_meta: dict):
+def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, answer_meta: dict, attachment_ids: list[str]):
     logger.debug(f">> ARGS: {locals()}")
 
     if asked_question.accepted:
@@ -541,6 +542,13 @@ def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, answer_m
         answer_meta = AnswerConfig.from_json(answer_meta)
     except KeyError as e:
         return ErrorCode(ErrorCode.INVALID_ANSWER_META, error=repr(e)), None
+
+    # Commit attachments (verify ownership + object presence) before marking the
+    # question answered, so a failed upload leaves the question unanswered.
+    if attachment_ids:
+        error, _ = svc_attachment_commit(asked_question, attachment_ids)
+        if error:
+            return error, None
 
     asked_question.answered = True
 

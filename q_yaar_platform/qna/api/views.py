@@ -24,6 +24,7 @@ from qna.services.core import (
     svc_qna_get_questions,
     svc_qna_get_questions_for_category,
     svc_qna_get_rewards,
+    svc_qna_request_attachment_upload,
     svc_qna_update_asked_question,
 )
 from rest_framework import generics
@@ -146,6 +147,17 @@ class GameQuestionsAnswerView(generics.GenericAPIView):
     def patch(self, request, game_id: uuid.UUID, asked_question_id: uuid.UUID, **kwargs):
         profile = kwargs["profile"]
         error, response = svc_qna_answer_asked_question(asked_question_id, request.data, profile)
+        return get_standard_response(error, response)
+
+
+class GameQuestionsAttachmentUploadView(generics.GenericAPIView):
+    logger = logging.getLogger(__name__ + ".GameQuestionsAttachmentUploadView")
+    permission_classes = (IsAuthenticated,)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.PLAYER])
+    def post(self, request, game_id: uuid.UUID, asked_question_id: uuid.UUID, **kwargs):
+        profile = kwargs["profile"]
+        error, response = svc_qna_request_attachment_upload(asked_question_id, request.data, profile)
         return get_standard_response(error, response)
 
 
