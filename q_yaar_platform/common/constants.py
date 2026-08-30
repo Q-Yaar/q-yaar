@@ -43,6 +43,9 @@ class Length:
     QUESTION_CATEGORY = 100
     PLACEHOLDER_NAME = 100  # TODO: Remove. This is deprecated.
     PLACEHOLDER_VALUE = 255  # TODO: Remove. This is deprecated.
+    ASSET_OBJECT_KEY = 512
+    ASSET_NAME = 255
+    ASSET_CONTENT_TYPE = 100
 
 
 class ModuleErrorPrefix:
@@ -54,6 +57,7 @@ class ModuleErrorPrefix:
     GAME = "GAM"
     QNA = "QNA"
     FACT = "FACT"
+    MEDIA = "MED"
 
 
 class UserRolesType(BaseIntEnum):
@@ -124,3 +128,8 @@ class LocationClientType(BaseIntEnum):
     ANDROID = 2
     IOS = 3
     TRACCAR = 4
+
+
+class AssetStatus(BaseIntEnum):
+    PENDING = 1
+    UPLOADED = 2
