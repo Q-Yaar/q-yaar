@@ -24,7 +24,9 @@ from qna.services.core import (
     svc_qna_get_questions,
     svc_qna_get_questions_for_category,
     svc_qna_get_rewards,
+    svc_qna_delete_question,
     svc_qna_update_asked_question,
+    svc_qna_update_question,
 )
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -96,6 +98,16 @@ class QuestionDetailView(generics.GenericAPIView):
     def get(self, request, category_id: uuid.UUID, question_id: uuid.UUID, **kwargs):
         error, response = svc_qna_get_question_by_id(category_id, question_id)
         return get_standard_response(error, response)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    def patch(self, request, category_id: uuid.UUID, question_id: uuid.UUID, **kwargs):
+        error, response = svc_qna_update_question(category_id, question_id, request.data)
+        return get_standard_response(error, response)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    def delete(self, request, category_id: uuid.UUID, question_id: uuid.UUID, **kwargs):
+        error, _ = svc_qna_delete_question(category_id, question_id)
+        return get_standard_response(error, None)
 
 
 class GameQuestionsListView(generics.GenericAPIView):

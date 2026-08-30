@@ -233,6 +233,29 @@ def svc_qna_helper_get_question_for_category_by_id(category: QuestionCategory, q
     return None, question
 
 
+def svc_qna_helper_update_question(question: QuestionTemplate, request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if "template" in request_data:
+        question.template = request_data["template"]
+
+    if request_data.get("answer_instruction_meta"):
+        question.set_answer_instruction_meta(request_data["answer_instruction_meta"])
+
+    question.save()
+
+    return question
+
+
+def svc_qna_helper_delete_question(question: QuestionTemplate):
+    logger.debug(f">> ARGS: {locals()}")
+
+    question.is_deleted = True
+    question.save()
+
+    return None
+
+
 def svc_qna_helper_get_question_by_id(question_id: uuid.UUID):
     logger.debug(f">> ARGS: {locals()}")
 
@@ -391,9 +414,7 @@ def svc_qna_helper_assign_question_to_game(game: Game, question_ids: list[str]):
     return None
 
 
-def svc_qna_helper_ask_question(
-    game_question: GameQuestion, target: Team, request_data: dict
-):
+def svc_qna_helper_ask_question(game_question: GameQuestion, target: Team, request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
     asked_question = AskedQuestion.create(
