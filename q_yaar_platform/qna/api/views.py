@@ -65,7 +65,7 @@ class QuestionDirectListView(generics.GenericAPIView):
     logger = logging.getLogger(__name__ + ".QuestionDirectListView")
     permission_classes = (IsAuthenticated,)
 
-    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER])
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
     def get(self, request, **kwargs):
         error, questions = svc_qna_get_questions(request.query_params)
         return get_paginated_response(self, error, questions, QuestionSerializer)
@@ -75,6 +75,7 @@ class QuestionListView(generics.GenericAPIView):
     logger = logging.getLogger(__name__ + ".QuestionListView")
     permission_classes = (IsAuthenticated,)
 
+    # TODO: Deprecated. Frontend no longer uses this.
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
     def get(self, request, category_id: uuid.UUID, **kwargs):
         role = kwargs["role"]
