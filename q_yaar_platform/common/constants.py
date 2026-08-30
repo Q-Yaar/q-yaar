@@ -43,6 +43,9 @@ class Length:
     QUESTION_CATEGORY = 100
     PLACEHOLDER_NAME = 100
     PLACEHOLDER_VALUE = 255
+    ATTACHMENT_OBJECT_KEY = 512
+    ATTACHMENT_CONTENT_TYPE = 128
+    ATTACHMENT_FILE_NAME = 255
 
 
 class ModuleErrorPrefix:
@@ -99,6 +102,12 @@ class QuestionRewardType(BaseIntEnum):
 
 class QuestionAnswerType(BaseIntEnum):
     IMAGE = 1
+
+
+class AttachmentStatus(BaseIntEnum):
+    PENDING = 1
+    UPLOADED = 2
+    FAILED = 3
 
 
 class FactType(BaseIntEnum):
