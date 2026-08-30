@@ -70,6 +70,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
     answer_meta = serializers.SerializerMethodField()
     fact_meta = serializers.SerializerMethodField()
     reward = serializers.SerializerMethodField()
+    attachments = serializers.SerializerMethodField()
 
     class Meta:
         model = AskedQuestion
@@ -86,6 +87,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
             "answered",
             "accepted",
             "reward",
+            "attachments",
             "created",
             "modified",
         )
@@ -119,3 +121,18 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
 
     def get_reward(self, obj: AskedQuestion) -> dict:
         return QuestionRewardSerializer(obj.game_question.question_template.category.reward).data
+
+    def get_attachments(self, obj: AskedQuestion) -> list[dict]:
+        # The frontend resolves presigned download URLs via the existing
+        # media API using these asset_ids; qna never presigns here.
+        from media.services.interfacer import svc_media_get_attachments_for_asked_question
+
+        assets = svc_media_get_attachments_for_asked_question(obj)
+        return [
+            {
+                "asset_id": str(asset.get_external_id()),
+                "asset_name": asset.asset_name,
+                "content_type": asset.content_type,
+            }
+            for asset in assets
+        ]

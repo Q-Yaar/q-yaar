@@ -3,7 +3,7 @@ import uuid
 
 from django.conf import settings
 
-from common.constants import UserRolesType
+from common.constants import AssetStatus, UserRolesType
 from common.storage import build_object_key
 from common.uuid import unique_uuid4
 from game.models import Game
@@ -42,6 +42,30 @@ def svc_media_helper_validate_and_get_asset(asset_id: uuid.UUID) -> tuple:
         return None, asset
     except Asset.DoesNotExist:
         return ErrorCode(ErrorCode.INVALID_ASSET_ID, asset_id=asset_id), None
+
+
+def svc_media_helper_get_assets_by_ids(asset_ids) -> list[Asset]:
+    logger.debug(f">> ARGS: {locals()}")
+
+    ids = [str(asset_id) for asset_id in asset_ids]
+    return list(Asset.objects.filter(external_id__in=ids).select_related("uploaded_by", "game"))
+
+
+def svc_media_helper_get_attachments_for_asked_question(asked_question) -> list[Asset]:
+    """Return assets bound to an asked question, oldest first."""
+    logger.debug(f">> ARGS: {locals()}")
+
+    return list(
+        asked_question.attachments.filter(status=AssetStatus.UPLOADED.value).order_by("created")
+    )
+
+
+def svc_media_helper_bind_assets(assets, asked_question) -> None:
+    """Attach assets to an asked question. Caller must have validated them."""
+    logger.debug(f">> ARGS: {locals()}")
+
+    asset_pks = [asset.pk for asset in assets]
+    Asset.objects.filter(pk__in=asset_pks).update(asked_question=asked_question)
 
 
 # Object key layout, see Asset docstring:

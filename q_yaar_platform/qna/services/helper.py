@@ -16,6 +16,10 @@ from game.services.interfacer import (
     svc_game_verify_player_belongs_to_game,
     svc_game_verify_player_belongs_to_team,
 )
+from media.services.interfacer import (
+    svc_media_bind_assets_to_asked_question,
+    svc_media_validate_assets_for_answer,
+)
 from notification.tasks import send_notification
 from profile_player.models import PlayerProfile
 from qna.api.serializers import (
@@ -481,11 +485,23 @@ def svc_qna_helper_get_asked_questions_for_game(game: Game, request_data: dict):
     return asked_questions
 
 
-def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, answer_meta: dict):
+def svc_qna_helper_answer_asked_question(
+    asked_question: AskedQuestion, answer_meta: dict, player: PlayerProfile, asset_ids: list[str]
+):
     logger.debug(f">> ARGS: {locals()}")
 
     if asked_question.accepted:
         return ErrorCode(ErrorCode.QUESTION_ANSWER_ALREADY_ACCEPTED), None
+
+    # Bind attachments before flipping answered, so a failed upload or
+    # ownership check leaves the question unanswered.
+    if asset_ids:
+        game = asked_question.game_question.game
+        error, assets = svc_media_validate_assets_for_answer(asset_ids, player, game)
+        if error:
+            return error, None
+
+        svc_media_bind_assets_to_asked_question(assets, asked_question)
 
     asked_question.answered = True
 
