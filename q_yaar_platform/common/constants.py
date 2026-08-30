@@ -41,8 +41,8 @@ class Length:
     CARD_IMAGE_URL = 200
     REWARD_NAME = 100
     QUESTION_CATEGORY = 100
-    PLACEHOLDER_NAME = 100
-    PLACEHOLDER_VALUE = 255
+    PLACEHOLDER_NAME = 100  # TODO: Remove. This is deprecated.
+    PLACEHOLDER_VALUE = 255  # TODO: Remove. This is deprecated.
 
 
 class ModuleErrorPrefix:
@@ -107,7 +107,7 @@ class FactType(BaseIntEnum):
     GEO = 3
 
 
-class AnswerInstructionType(BaseIntEnum):
+class AnswerInstructionType(BaseIntEnum):  # TODO: Remove. This is deprecated.
     DRAW_CIRCLE_POINT_RADIUS = 1
     DRAW_CIRCLE_2_POINTS = 2
     SPLIT_BY_DIRECTION = 3

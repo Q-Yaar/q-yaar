@@ -11,6 +11,7 @@ from qna.services.helper import (
     svc_qna_helper_create_category,
     svc_qna_helper_create_question,
     svc_qna_helper_create_reward,
+    svc_qna_helper_delete_question,
     svc_qna_helper_get_asked_questions_for_game,
     svc_qna_helper_get_categories,
     svc_qna_helper_get_category_by_id,
@@ -34,6 +35,7 @@ from qna.services.helper import (
     svc_qna_helper_run_validations_to_get_rewards,
     svc_qna_helper_run_validations_to_update_asked_question,
     svc_qna_helper_update_asked_question,
+    svc_qna_helper_update_question,
     svc_qna_helper_validate_and_get_asked_question,
     svc_qna_helper_validate_and_get_game,
     svc_qna_helper_validate_and_get_game_question,
@@ -167,10 +169,8 @@ def svc_qna_create_question(request_data: dict, category_id: uuid.UUID, serializ
 
     question = svc_qna_helper_create_question(
         request_data["template"],
-        request_data.get("placeholders", {}),
         category,
-        request_data.get("answer_instruction_type"),
-        request_data.get("geo", {}),
+        request_data.get("answer_instruction_meta"),
     )
 
     if serialized:
@@ -194,6 +194,43 @@ def svc_qna_get_question_by_id(category_id: uuid.UUID, question_id: uuid.UUID, s
         question = svc_qna_helper_get_serialized_questions(question, many=False)
 
     return ErrorCode(ErrorCode.SUCCESS), question
+
+
+def svc_qna_update_question(
+    category_id: uuid.UUID, question_id: uuid.UUID, request_data: dict, serialized: bool = True
+):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, category = svc_qna_helper_get_category_by_id(category_id)
+    if error:
+        return error, None
+
+    error, question = svc_qna_helper_get_question_for_category_by_id(category, question_id)
+    if error:
+        return error, None
+
+    question = svc_qna_helper_update_question(question, request_data)
+
+    if serialized:
+        question = svc_qna_helper_get_serialized_questions(question, many=False)
+
+    return ErrorCode(ErrorCode.SUCCESS), question
+
+
+def svc_qna_delete_question(category_id: uuid.UUID, question_id: uuid.UUID):
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, category = svc_qna_helper_get_category_by_id(category_id)
+    if error:
+        return error, None
+
+    error, question = svc_qna_helper_get_question_for_category_by_id(category, question_id)
+    if error:
+        return error, None
+
+    svc_qna_helper_delete_question(question)
+
+    return ErrorCode(ErrorCode.NO_CONTENT), None
 
 
 def svc_qna_assign_question_to_game(game_id: uuid.UUID, request_data: dict):
@@ -235,9 +272,7 @@ def svc_qna_ask_question(game_id: uuid.UUID, question_id: uuid.UUID, request_dat
     if error:
         return error, None
 
-    error, asked_question = svc_qna_helper_ask_question(
-        game_question, target, request_data["chosen_placeholders"], request_data
-    )
+    error, asked_question = svc_qna_helper_ask_question(game_question, target, request_data)
     if error:
         return error, None
 
@@ -306,7 +341,7 @@ def svc_qna_answer_asked_question(
     if error:
         return error, None
 
-    error, asked_question = svc_qna_helper_answer_asked_question(asked_question, request_data["answer_meta"])
+    error, asked_question = svc_qna_helper_answer_asked_question(asked_question, request_data.get("answer_meta", {}))
     if error:
         return error, None
 

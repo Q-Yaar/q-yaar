@@ -1,4 +1,4 @@
-from common.constants import AnswerInstructionType, QuestionRewardType
+from common.constants import QuestionRewardType
 from qna.models import AskedQuestion, QuestionCategory, QuestionReward, QuestionTemplate
 from rest_framework import serializers
 
@@ -40,12 +40,11 @@ class QuestionCategorySerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     question_id = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
-    answer_instruction_type = serializers.SerializerMethodField()
-    geo = serializers.SerializerMethodField()
+    answer_instruction_meta = serializers.SerializerMethodField()
 
     class Meta:
         model = QuestionTemplate
-        fields = ("question_id", "template", "category", "answer_instruction_type", "geo", "created", "modified")
+        fields = ("question_id", "template", "category", "answer_instruction_meta", "created", "modified")
 
     def get_question_id(self, obj: QuestionTemplate) -> str:
         return str(obj.get_external_id())
@@ -53,28 +52,11 @@ class QuestionSerializer(serializers.ModelSerializer):
     def get_category(self, obj: QuestionTemplate) -> dict:
         return QuestionCategorySerializer(obj.category).data
 
-    def get_answer_instruction_type(self, obj: QuestionTemplate) -> str:
-        return AnswerInstructionType.get_string_for_type(AnswerInstructionType(obj.answer_instruction_type))
-
-    def get_geo(self, obj: QuestionTemplate) -> dict:
-        return obj.get_geo().to_json()
+    def get_answer_instruction_meta(self, obj: QuestionTemplate) -> dict:
+        return obj.get_answer_instruction_meta()
 
 
-class QuestionDetailSerializer(QuestionSerializer):
-    placeholders = serializers.SerializerMethodField()
-
-    class Meta:
-        model = QuestionTemplate
-        fields = QuestionSerializer.Meta.fields + ("placeholders",)
-
-    def get_placeholders(self, obj: QuestionTemplate) -> dict:
-        placeholders_data = {}
-        for placeholder in obj.placeholders.all():
-            placeholders_data[placeholder.placeholder_name] = {
-                "required": placeholder.required,
-                "allowed_values": [allowed_value.value for allowed_value in placeholder.allowed_values.all()],
-            }
-        return placeholders_data
+QuestionDetailSerializer = QuestionSerializer
 
 
 class AskedQuestionDetailSerializer(serializers.ModelSerializer):
@@ -83,7 +65,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
     rendered_question = serializers.SerializerMethodField()
     template = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
-    geo = serializers.SerializerMethodField()
+    answer_instruction_meta = serializers.SerializerMethodField()
     question_meta = serializers.SerializerMethodField()
     answer_meta = serializers.SerializerMethodField()
     fact_meta = serializers.SerializerMethodField()
@@ -97,7 +79,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
             "rendered_question",
             "template",
             "category",
-            "geo",
+            "answer_instruction_meta",
             "question_meta",
             "answer_meta",
             "fact_meta",
@@ -123,17 +105,17 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
     def get_category(self, obj: AskedQuestion) -> dict:
         return QuestionCategorySerializer(obj.game_question.question_template.category).data
 
-    def get_geo(self, obj: AskedQuestion) -> dict:
-        return obj.game_question.question_template.get_geo().to_json()
+    def get_answer_instruction_meta(self, obj: AskedQuestion) -> dict:
+        return obj.game_question.question_template.get_answer_instruction_meta()
 
     def get_question_meta(self, obj: AskedQuestion) -> dict:
-        return obj.get_question_meta().to_json()
+        return obj.get_question_meta()
 
     def get_answer_meta(self, obj: AskedQuestion) -> dict:
-        return obj.get_answer_meta().to_json()
+        return obj.get_answer_meta()
 
     def get_fact_meta(self, obj: AskedQuestion) -> dict:
-        return obj.get_fact_meta().to_json()
+        return obj.get_fact_meta()
 
     def get_reward(self, obj: AskedQuestion) -> dict:
         return QuestionRewardSerializer(obj.game_question.question_template.category.reward).data

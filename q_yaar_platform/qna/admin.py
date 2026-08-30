@@ -3,8 +3,6 @@ from django.contrib import admin
 from .models import (
     AskedQuestion,
     GameQuestion,
-    Placeholder,
-    PlaceholderAllowedValue,
     QuestionCategory,
     QuestionReward,
     QuestionTemplate,
@@ -48,31 +46,6 @@ class QuestionTemplateAdmin(admin.ModelAdmin):
 
 
 admin.site.register(QuestionTemplate, QuestionTemplateAdmin)
-
-
-class PlaceholderAdmin(admin.ModelAdmin):
-    list_display = ("question", "placeholder_name", "required")
-    search_fields = ["question__external_id", "placeholder_name"]
-    list_filter = ("required",)
-
-    # Override to use the base manager to include soft-deleted items
-    def get_queryset(self, request):
-        return self.model._base_manager.get_queryset()
-
-
-admin.site.register(Placeholder, PlaceholderAdmin)
-
-
-class PlaceholderAllowedValueAdmin(admin.ModelAdmin):
-    list_display = ("placeholder", "value")
-    search_fields = ["placeholder__placeholder_name", "value"]
-
-    # Override to use the base manager to include soft-deleted items
-    def get_queryset(self, request):
-        return self.model._base_manager.get_queryset()
-
-
-admin.site.register(PlaceholderAllowedValue, PlaceholderAllowedValueAdmin)
 
 
 class GameQuestionAdmin(admin.ModelAdmin):

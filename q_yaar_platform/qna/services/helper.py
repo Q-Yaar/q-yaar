@@ -1,7 +1,7 @@
 import logging
 import uuid
 
-from common.constants import AnswerInstructionType, QuestionRewardType, UserRolesType
+from common.constants import QuestionRewardType, UserRolesType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import QuerySet
@@ -21,23 +21,16 @@ from profile_player.models import PlayerProfile
 from qna.api.serializers import (
     AskedQuestionDetailSerializer,
     QuestionCategorySerializer,
-    QuestionDetailSerializer,
     QuestionRewardSerializer,
     QuestionSerializer,
 )
 from qna.models import (
     AskedQuestion,
     GameQuestion,
-    Placeholder,
-    PlaceholderAllowedValue,
     QuestionCategory,
     QuestionReward,
     QuestionTemplate,
 )
-from qna.popo.answer_meta.answer import AnswerConfig
-from qna.popo.instruction_meta import AnswerInstructionMeta
-from qna.popo.question_meta.question import QuestionMetaConfig
-from qna.popo.question_meta_type.geo_count import GeoCountConfig
 from qna.popo.reward_meta.reward_types_map import REWARD_TYPE_MAP
 
 from .error_codes import ErrorCode
@@ -137,12 +130,6 @@ def svc_qna_helper_run_validations_to_create_question(request_data: dict):
     if not request_data.get("template"):
         return ErrorCode(ErrorCode.MISSING_TEMPLATE)
 
-    if not request_data.get("placeholders"):
-        return ErrorCode(ErrorCode.MISSING_PLACEHOLDERS)
-
-    if not request_data.get("answer_instruction_type"):
-        return ErrorCode(ErrorCode.MISSING_ANSWER_INSTRUCTION_TYPE)
-
     return None
 
 
@@ -170,21 +157,11 @@ def svc_qna_helper_run_validations_to_ask_question(request_data: dict):
     if not request_data.get("target_team_id"):
         return ErrorCode(ErrorCode.MISSING_TARGET_TEAM_ID)
 
-    if not request_data.get("chosen_placeholders"):
-        return ErrorCode(ErrorCode.MISSING_CHOSEN_PLACEHOLDERS)
-
-    if not request_data.get("question_meta"):
-        return ErrorCode(ErrorCode.MISSING_QUESTION_META)
-
     return None
 
 
 def svc_qna_helper_run_validations_to_update_asked_question(request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
-
-    if not request_data.get("question_meta"):
-        return ErrorCode(ErrorCode.MISSING_QUESTION_META)
-
     return None
 
 
@@ -199,10 +176,6 @@ def svc_qna_helper_run_validations_to_get_questions_for_category_player(request_
 
 def svc_qna_helper_run_validations_to_answer_asked_question(request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
-
-    if not request_data.get("answer_meta"):
-        return ErrorCode(ErrorCode.MISSING_ANSWER_META)
-
     return None
 
 
@@ -258,6 +231,29 @@ def svc_qna_helper_get_question_for_category_by_id(category: QuestionCategory, q
         return ErrorCode(ErrorCode.INVALID_QUESTION_ID, question_id=question_id), None
 
     return None, question
+
+
+def svc_qna_helper_update_question(question: QuestionTemplate, request_data: dict):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if "template" in request_data:
+        question.template = request_data["template"]
+
+    if request_data.get("answer_instruction_meta"):
+        question.set_answer_instruction_meta(request_data["answer_instruction_meta"])
+
+    question.save()
+
+    return question
+
+
+def svc_qna_helper_delete_question(question: QuestionTemplate):
+    logger.debug(f">> ARGS: {locals()}")
+
+    question.is_deleted = True
+    question.save()
+
+    return None
 
 
 def svc_qna_helper_get_question_by_id(question_id: uuid.UUID):
@@ -382,35 +378,16 @@ def svc_qna_helper_get_questions_for_category(
 
 def svc_qna_helper_create_question(
     template: str,
-    placeholders: dict[str, dict],
     category: QuestionCategory,
-    answer_instruction_type: str,
-    geo: dict,
+    answer_instruction_meta: dict = None,
 ) -> QuestionTemplate:
     logger.debug(f">> ARGS: {locals()}")
 
-    try:
-        geo = GeoCountConfig.from_json(geo)
-    except KeyError as e:
-        return ErrorCode(ErrorCode.INVALID_GEO_COUNT, error=repr(e)), None
-
-    try:
-        answer_instruction_type = AnswerInstructionType.tokentype_from_string(answer_instruction_type)
-    except KeyError as e:
-        return (
-            ErrorCode(ErrorCode.INVALID_ANSWER_INSTRUCTION_TYPE, answer_instruction_type=answer_instruction_type),
-            None,
-        )
-
     question_template = QuestionTemplate.create(
-        template=template, category=category, answer_instruction_type=answer_instruction_type, geo_count=geo
+        template=template,
+        category=category,
+        answer_instruction_meta=answer_instruction_meta,
     )
-
-    for key, value in placeholders.items():
-        placeholder = Placeholder.create(question=question_template, placeholder_name=key, required=value["required"])
-        if value.get("allowed_values"):
-            for allowed_value in value["allowed_values"]:
-                PlaceholderAllowedValue.create(placeholder=placeholder, value=allowed_value)
 
     return question_template
 
@@ -420,10 +397,7 @@ def svc_qna_helper_get_serialized_questions(
 ) -> dict | list[dict]:
     logger.debug(f">> ARGS: {locals()}")
 
-    if many:
-        return QuestionSerializer(questions, many=True).data
-
-    return QuestionDetailSerializer(questions, many=False).data
+    return QuestionSerializer(questions, many=many).data
 
 
 def svc_qna_helper_assign_question_to_game(game: Game, question_ids: list[str]):
@@ -440,31 +414,15 @@ def svc_qna_helper_assign_question_to_game(game: Game, question_ids: list[str]):
     return None
 
 
-def svc_qna_helper_ask_question(
-    game_question: GameQuestion, target: Team, chosen_placeholders: dict, request_data: dict
-):
+def svc_qna_helper_ask_question(game_question: GameQuestion, target: Team, request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
-    try:
-        question_meta = QuestionMetaConfig.from_json(request_data["question_meta"])
-    except KeyError as e:
-        return ErrorCode(ErrorCode.INVALID_QUESTION_META, error=repr(e)), None
-
-    try:
-        fact_meta = AnswerInstructionMeta.from_json(request_data.get("fact_meta", {}))
-    except KeyError as e:
-        return ErrorCode(ErrorCode.INVALID_FACT_META, error=repr(e)), None
-
-    try:
-        asked_question = AskedQuestion.create(
-            game_question=game_question,
-            target=target,
-            chosen_placeholders=chosen_placeholders,
-            question_meta=question_meta,
-            fact_meta=fact_meta,
-        )
-    except ValueError as e:
-        return ErrorCode(ErrorCode.INVALID_CHOSEN_PLACEHOLDERS, error=str(e)), None
+    asked_question = AskedQuestion.create(
+        game_question=game_question,
+        target=target,
+        question_meta=request_data.get("question_meta", {}),
+        fact_meta=request_data.get("fact_meta", {}),
+    )
 
     target_player_ids = svc_game_get_player_ids_for_team(team=target)
 
@@ -485,19 +443,11 @@ def svc_qna_helper_update_asked_question(asked_question: AskedQuestion, request_
     if asked_question.answered:
         return ErrorCode(ErrorCode.QUESTION_ALREADY_ANSWERED), None
 
-    try:
-        question_meta = QuestionMetaConfig.from_json(request_data["question_meta"])
-    except KeyError as e:
-        return ErrorCode(ErrorCode.INVALID_QUESTION_META, error=repr(e)), None
+    if "question_meta" in request_data:
+        asked_question.set_question_meta(request_data["question_meta"])
 
-    asked_question.set_question_meta(question_meta)
-
-    try:
-        fact_meta = AnswerInstructionMeta.from_json(request_data["fact_meta"])
-    except KeyError as e:
-        return ErrorCode(ErrorCode.INVALID_FACT_META, error=repr(e)), None
-
-    asked_question.set_fact_meta(fact_meta)
+    if "fact_meta" in request_data:
+        asked_question.set_fact_meta(request_data["fact_meta"])
 
     asked_question.save()
 
@@ -536,11 +486,6 @@ def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, answer_m
 
     if asked_question.accepted:
         return ErrorCode(ErrorCode.QUESTION_ANSWER_ALREADY_ACCEPTED), None
-
-    try:
-        answer_meta = AnswerConfig.from_json(answer_meta)
-    except KeyError as e:
-        return ErrorCode(ErrorCode.INVALID_ANSWER_META, error=repr(e)), None
 
     asked_question.answered = True
 
