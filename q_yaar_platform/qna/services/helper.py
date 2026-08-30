@@ -316,7 +316,7 @@ def svc_qna_helper_get_rewards(request_data: dict) -> list[QuestionReward]:
 
     rewards = QuestionReward.objects.all()
     rewards = _apply_filters_to_rewards(rewards=rewards, request_data=request_data)
-    rewards = rewards.order_by("created")
+    rewards = rewards.order_by("-created")
     return rewards
 
 
@@ -363,7 +363,7 @@ def svc_qna_helper_get_questions(request_data: dict):
 
     questions = _apply_filters_for_questions(questions, request_data)
 
-    return questions.order_by("created")
+    return questions.order_by("-created")
 
 
 def svc_qna_helper_get_questions_for_category(
@@ -375,9 +375,9 @@ def svc_qna_helper_get_questions_for_category(
         question_ids = game.questions.filter(question_template__category=category).values_list(
             "question_template", flat=True
         )
-        return QuestionTemplate.objects.filter(pk__in=question_ids).order_by("created")
+        return QuestionTemplate.objects.filter(pk__in=question_ids).order_by("-created")
     else:
-        return QuestionTemplate.objects.filter(category=category).order_by("created")
+        return QuestionTemplate.objects.filter(category=category).order_by("-created")
 
 
 def svc_qna_helper_create_question(

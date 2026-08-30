@@ -126,7 +126,7 @@ def svc_fact_helper_get_facts(game: Game, request_data: dict):
     if error:
         return error, None
 
-    facts = facts.order_by("created")
+    facts = facts.order_by("-created")
 
     return None, facts
 
