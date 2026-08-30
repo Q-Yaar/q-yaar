@@ -16,10 +16,16 @@ def get_standard_response(error: BaseErrorCode, response: dict) -> Response:
 
 
 def get_paginated_response(
-    instance, error: BaseErrorCode, queryset: QuerySet, serializer_class: serializers.ModelSerializer
+    instance,
+    error: BaseErrorCode,
+    queryset: QuerySet,
+    serializer_class: serializers.ModelSerializer,
+    context: dict | None = None,
 ) -> Response:
     if error.code not in [BaseErrorCode.SUCCESS, BaseErrorCode.CREATED, BaseErrorCode.NO_CONTENT]:
         return Response(error.to_json(), error.http_status_code)
     else:
         paginated_queryset = instance.paginate_queryset(queryset)
-        return instance.get_paginated_response(serializer_class(paginated_queryset, many=True).data)
+        return instance.get_paginated_response(
+            serializer_class(paginated_queryset, many=True, context=context or {}).data
+        )

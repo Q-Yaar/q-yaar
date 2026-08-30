@@ -39,4 +39,5 @@ urlpatterns = [
     path("api/v1/live-location/", include("live_location.api.urls")),
     path("api/v1/wh/live-location/", include("live_location.webhook.urls")),
     path("api/v1/notifications/", include("notification.api.urls")),
+    path("api/v1/media/", include("media.api.urls")),
 ]

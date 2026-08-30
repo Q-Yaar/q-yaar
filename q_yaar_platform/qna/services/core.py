@@ -341,7 +341,11 @@ def svc_qna_answer_asked_question(
     if error:
         return error, None
 
-    error, asked_question = svc_qna_helper_answer_asked_question(asked_question, request_data.get("answer_meta", {}))
+    asset_ids = request_data.get("asset_ids") or []
+    error, asked_question = svc_qna_helper_answer_asked_question(
+        asked_question, request_data.get("answer_meta"), player, asset_ids
+    )
+
     if error:
         return error, None
 
