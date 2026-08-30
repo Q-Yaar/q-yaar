@@ -37,8 +37,6 @@ class Asset(AbstractExternalFacing, AbstractTimeStamped):
 
     status = models.PositiveIntegerField(choices=AssetStatus.get_choices(), default=AssetStatus.PENDING.value)
 
-    objects = models.Manager()
-
     class Meta:
         indexes = [
             models.Index(fields=["game"]),

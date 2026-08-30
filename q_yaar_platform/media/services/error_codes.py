@@ -13,27 +13,29 @@ class ErrorCode(BaseErrorCode):
     MISSING_GAME_ID = "001"
     MISSING_ASSET_NAME = "002"
 
+    # Permission/State Errors - 1 Series
+    ASSET_NOT_OWNED = "101"
+    ASSET_NOT_UPLOADED = "102"
+    ASSET_ALREADY_UPLOADED = "103"
+    ASSET_ALREADY_ATTACHED = "104"
+
     # Key Errors - 2 Series
     INVALID_GAME_ID = "201"
     INVALID_ASSET_ID = "202"
 
-    # State Errors - 3 Series
-    ASSET_NOT_UPLOADED = "301"
-    ASSET_ALREADY_UPLOADED = "302"
-    ASSET_NOT_OWNED = "303"
-    ASSET_NOT_IN_GAME = "304"
-    ASSET_ALREADY_ATTACHED = "305"
+    # Object Does Not Exist Errors - 3 Series
+    ASSET_NOT_IN_GAME = "301"
 
     ERROR_CODE_HTTP_MAP = {
         MISSING_GAME_ID: status.HTTP_400_BAD_REQUEST,
         MISSING_ASSET_NAME: status.HTTP_400_BAD_REQUEST,
-        INVALID_GAME_ID: status.HTTP_400_BAD_REQUEST,
-        INVALID_ASSET_ID: status.HTTP_400_BAD_REQUEST,
+        ASSET_NOT_OWNED: status.HTTP_403_FORBIDDEN,
         ASSET_NOT_UPLOADED: status.HTTP_409_CONFLICT,
         ASSET_ALREADY_UPLOADED: status.HTTP_409_CONFLICT,
-        ASSET_NOT_OWNED: status.HTTP_403_FORBIDDEN,
-        ASSET_NOT_IN_GAME: status.HTTP_400_BAD_REQUEST,
         ASSET_ALREADY_ATTACHED: status.HTTP_409_CONFLICT,
+        INVALID_GAME_ID: status.HTTP_400_BAD_REQUEST,
+        INVALID_ASSET_ID: status.HTTP_400_BAD_REQUEST,
+        ASSET_NOT_IN_GAME: status.HTTP_400_BAD_REQUEST,
     }
 
     def get_string_for_missing_game_id(kwargs: dict):
@@ -42,11 +44,8 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_missing_asset_name(kwargs: dict):
         return "Missing asset_name"
 
-    def get_string_for_invalid_game_id(kwargs: dict):
-        return f"Invalid game_id: {kwargs.get('game_id')}"
-
-    def get_string_for_invalid_asset_id(kwargs: dict):
-        return f"Invalid asset_id: {kwargs.get('asset_id')}"
+    def get_string_for_asset_not_owned(kwargs: dict):
+        return f"Asset not owned by player: {kwargs.get('asset_id')}"
 
     def get_string_for_asset_not_uploaded(kwargs: dict):
         return f"Asset not uploaded yet: {kwargs.get('asset_id')}"
@@ -54,25 +53,28 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_asset_already_uploaded(kwargs: dict):
         return f"Asset already uploaded: {kwargs.get('asset_id')}"
 
-    def get_string_for_asset_not_owned(kwargs: dict):
-        return f"Asset not owned by player: {kwargs.get('asset_id')}"
+    def get_string_for_asset_already_attached(kwargs: dict):
+        return f"Asset already attached to a question: {kwargs.get('asset_id')}"
+
+    def get_string_for_invalid_game_id(kwargs: dict):
+        return f"Invalid game_id: {kwargs.get('game_id')}"
+
+    def get_string_for_invalid_asset_id(kwargs: dict):
+        return f"Invalid asset_id: {kwargs.get('asset_id')}"
 
     def get_string_for_asset_not_in_game(kwargs: dict):
         return f"Asset not in game: {kwargs.get('asset_id')}"
 
-    def get_string_for_asset_already_attached(kwargs: dict):
-        return f"Asset already attached to a question: {kwargs.get('asset_id')}"
-
     CODE_MESSAGE_MAP = {
         MISSING_GAME_ID: get_string_for_missing_game_id,
         MISSING_ASSET_NAME: get_string_for_missing_asset_name,
-        INVALID_GAME_ID: get_string_for_invalid_game_id,
-        INVALID_ASSET_ID: get_string_for_invalid_asset_id,
+        ASSET_NOT_OWNED: get_string_for_asset_not_owned,
         ASSET_NOT_UPLOADED: get_string_for_asset_not_uploaded,
         ASSET_ALREADY_UPLOADED: get_string_for_asset_already_uploaded,
-        ASSET_NOT_OWNED: get_string_for_asset_not_owned,
-        ASSET_NOT_IN_GAME: get_string_for_asset_not_in_game,
         ASSET_ALREADY_ATTACHED: get_string_for_asset_already_attached,
+        INVALID_GAME_ID: get_string_for_invalid_game_id,
+        INVALID_ASSET_ID: get_string_for_invalid_asset_id,
+        ASSET_NOT_IN_GAME: get_string_for_asset_not_in_game,
     }
 
     def __init__(self, code, **kwargs) -> None:

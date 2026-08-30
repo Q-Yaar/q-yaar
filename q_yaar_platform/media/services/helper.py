@@ -4,7 +4,7 @@ import uuid
 from django.conf import settings
 
 from common.constants import AssetStatus, UserRolesType
-from common.storage import build_object_key
+from common.storage import build_object_key, presign_get_url, presign_put_url
 from common.uuid import unique_uuid4
 from game.models import Game
 from game.services.interfacer import svc_game_get_game_by_id
@@ -99,13 +99,13 @@ def svc_media_helper_create_asset(
 
 
 def svc_media_helper_get_serialized_assets(assets, many: bool = False):
+    logger.debug(f">> ARGS: {locals()}")
+
     return AssetSerializer(assets, many=many).data
 
 
 def svc_media_helper_presign_put_url(object_key: str) -> tuple:
     logger.debug(f">> ARGS: {locals()}")
-
-    from common.storage import presign_put_url
 
     upload_url = presign_put_url(object_key)
     return upload_url, settings.S3_PRESIGN_PUT_EXPIRY
@@ -113,8 +113,6 @@ def svc_media_helper_presign_put_url(object_key: str) -> tuple:
 
 def svc_media_helper_presign_get_url(object_key: str) -> tuple:
     logger.debug(f">> ARGS: {locals()}")
-
-    from common.storage import presign_get_url
 
     download_url = presign_get_url(object_key)
     return download_url, settings.S3_PRESIGN_GET_EXPIRY

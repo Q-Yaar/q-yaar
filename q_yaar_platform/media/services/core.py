@@ -19,7 +19,7 @@ from .helper import (
 logger = logging.getLogger(__name__)
 
 
-def svc_media_request_upload(request_data: dict, uploaded_by, role: UserRolesType, serialized: bool = True):
+def svc_media_request_upload(request_data: dict, uploaded_by, role: UserRolesType):
     """
     Create a PENDING asset row and return a short-lived presigned PUT URL.
 
