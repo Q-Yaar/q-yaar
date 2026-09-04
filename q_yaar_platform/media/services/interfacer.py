@@ -24,9 +24,7 @@ from .helper import (
 logger = logging.getLogger(__name__)
 
 
-def svc_media_validate_assets_for_answer(
-    asset_ids: list[uuid.UUID | str], player: PlayerProfile, game: Game
-):
+def svc_media_validate_assets_for_answer(asset_ids: list[uuid.UUID | str], player: PlayerProfile, game: Game):
     """
     Fetch assets by external_id and validate they may be attached to an
     answer in `game` by `player`.

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("media", "0002_asset_asked_question"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

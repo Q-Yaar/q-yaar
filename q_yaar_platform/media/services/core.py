@@ -121,3 +121,20 @@ def svc_media_get_assets(request_data: dict, serialized: bool = True):
         assets = svc_media_helper_get_serialized_assets(assets, many=True)
 
     return ErrorCode(ErrorCode.SUCCESS), assets
+
+
+def svc_media_delete_asset(asset_id: uuid.UUID, uploaded_by):
+    """Delete an asset owned by `uploaded_by`. S3 cleanup is handled by the
+    post_delete signal."""
+    logger.debug(f">> ARGS: {locals()}")
+
+    error, asset = svc_media_helper_validate_and_get_asset(asset_id)
+    if error:
+        return error, None
+
+    if asset.uploaded_by_id != uploaded_by.pk:
+        return ErrorCode(ErrorCode.ASSET_NOT_OWNED, asset_id=asset_id), None
+
+    asset.delete()
+
+    return ErrorCode(ErrorCode.NO_CONTENT), None

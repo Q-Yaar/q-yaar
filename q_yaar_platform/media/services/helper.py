@@ -5,7 +5,7 @@ from django.conf import settings
 from minio import Minio
 
 from common.constants import AssetStatus, UserRolesType
-from common.storage import build_object_key, build_s3_client, presign_get_url, presign_put_url
+from common.storage import build_object_key, build_s3_client, delete_object, presign_get_url, presign_put_url
 from common.uuid import unique_uuid4
 from game.models import Game
 from game.services.interfacer import svc_game_get_game_by_id
@@ -156,3 +156,10 @@ def svc_media_helper_presign_get_url(object_key: str) -> tuple:
 
     download_url = presign_get_url(_get_s3_client(), object_key)
     return download_url, settings.S3_PRESIGN_GET_EXPIRY
+
+
+def svc_media_helper_delete_object(object_key: str) -> None:
+    """Delete the backing S3 object for an asset."""
+    logger.debug(f">> ARGS: {locals()}")
+
+    delete_object(_get_s3_client(), object_key)

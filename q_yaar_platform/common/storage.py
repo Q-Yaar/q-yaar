@@ -82,3 +82,11 @@ def object_exists(client: Minio, object_key: str) -> bool:
         # NoSuchKey / 404
         logger.debug(f"object_exists miss for {object_key}: {e}")
         return False
+
+
+def delete_object(client: Minio, object_key: str) -> None:
+    """Delete `object_key` from the bucket. No-op if the object is already gone."""
+    try:
+        client.remove_object(settings.S3_BUCKET_NAME, object_key)
+    except S3Error as e:
+        logger.warning(f"delete_object failed for {object_key}: {e}")

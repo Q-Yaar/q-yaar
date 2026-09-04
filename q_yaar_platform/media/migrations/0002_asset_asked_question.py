@@ -6,22 +6,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('game', '0008_team_unique_spectator_team_per_game'),
-        ('media', '0001_initial'),
-        ('qna', '0007_questiontemplate_answer_instruction_type'),
+        ("game", "0008_team_unique_spectator_team_per_game"),
+        ("media", "0001_initial"),
+        ("qna", "0007_questiontemplate_answer_instruction_type"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='asset',
-            name='asked_question',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='attachments', to='qna.askedquestion'),
+            model_name="asset",
+            name="asked_question",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="attachments",
+                to="qna.askedquestion",
+            ),
         ),
         migrations.AddIndex(
-            model_name='asset',
-            index=models.Index(fields=['asked_question'], name='media_asset_asked_q_e03445_idx'),
+            model_name="asset",
+            index=models.Index(fields=["asked_question"], name="media_asset_asked_q_e03445_idx"),
         ),
     ]

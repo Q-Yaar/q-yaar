@@ -10,6 +10,7 @@ from common.response import get_paginated_response, get_standard_response
 from media.api.serializers import AssetSerializer
 from media.services.core import (
     svc_media_confirm_upload,
+    svc_media_delete_asset,
     svc_media_get_assets,
     svc_media_get_download_url,
     svc_media_request_upload,
@@ -40,6 +41,11 @@ class AssetDetailView(generics.GenericAPIView):
     @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
     def get(self, request, asset_id: uuid.UUID, **kwargs):
         error, response = svc_media_get_download_url(asset_id)
+        return get_standard_response(error, response)
+
+    @validate_profile(logger=logger, allowed_roles=[UserRolesType.GAME_MASTER, UserRolesType.PLAYER])
+    def delete(self, request, asset_id: uuid.UUID, **kwargs):
+        error, response = svc_media_delete_asset(asset_id, request.user)
         return get_standard_response(error, response)
 
 
