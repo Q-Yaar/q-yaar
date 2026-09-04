@@ -4,8 +4,11 @@ S3-compatible object storage driver (Deuxfleurs/Garage, MinIO, AWS S3, ...).
 Thin, synchronous wrapper over the minio client. This is the lowest layer:
 the media service talks to it, the API layer never does.
 
-All access goes through `get_s3_client()`, lazily configured from Django
-settings. Object keys are built from parts joined by "/":
+This module is stateless: `build_s3_client()` constructs a fresh client from
+explicit config and caches nothing — the driver never reads Django settings,
+so any caller passes its full S3 config. Callers own the returned client and
+reuse it across operations to keep the underlying connection pool warm.
+Object keys are built from parts joined by "/":
 
     games/{game_external_id}/{role}/{user_external_id}/{file_id}
 
@@ -22,27 +25,35 @@ from minio.error import S3Error
 
 logger = logging.getLogger(__name__)
 
-_client: Minio | None = None
 
+def build_s3_client(
+    *,
+    endpoint: str,
+    access_key: str,
+    secret_key: str,
+    secure: bool,
+    region: str,
+) -> Minio:
+    """Build and return a new Minio client from explicit S3 config.
 
-def get_s3_client() -> Minio:
-    """Return a process-wide Minio client configured from settings."""
-    global _client
-    if _client is not None:
-        return _client
-
-    # minio expects a bare host:port (no scheme); strip it from the endpoint URL.
-    parsed = urlparse(settings.S3_ENDPOINT_URL)
-    endpoint = parsed.netloc or settings.S3_ENDPOINT_URL
-
-    _client = Minio(
-        endpoint,
-        access_key=settings.S3_ACCESS_KEY_ID,
-        secret_key=settings.S3_SECRET_ACCESS_KEY,
-        secure=settings.S3_SECURE,
-        region=settings.S3_REGION,
+    All args are required: the driver reads no settings itself, so any
+    consumer must pass its full config. Pure factory; no caching is done
+    here. Callers should hold onto the returned client and reuse it to keep
+    the underlying connection pool warm.
+    """
+    return Minio(
+        _bare_endpoint(endpoint),
+        access_key=access_key,
+        secret_key=secret_key,
+        secure=secure,
+        region=region,
     )
-    return _client
+
+
+def _bare_endpoint(endpoint: str) -> str:
+    """minio expects a bare host:port (no scheme); strip it if present."""
+    parsed = urlparse(endpoint)
+    return parsed.netloc or endpoint
 
 
 def build_object_key(*parts: str) -> str:
@@ -50,23 +61,20 @@ def build_object_key(*parts: str) -> str:
     return "/".join(part.strip("/") for part in parts)
 
 
-def presign_put_url(object_key: str, expires: int | None = None) -> str:
+def presign_put_url(client: Minio, object_key: str, expires: int | None = None) -> str:
     """Return a short-lived presigned PUT URL for `object_key`."""
-    client = get_s3_client()
     expiry = timedelta(seconds=expires if expires is not None else settings.S3_PRESIGN_PUT_EXPIRY)
     return client.presigned_put_object(settings.S3_BUCKET_NAME, object_key, expires=expiry)
 
 
-def presign_get_url(object_key: str, expires: int | None = None) -> str:
+def presign_get_url(client: Minio, object_key: str, expires: int | None = None) -> str:
     """Return a short-lived presigned GET URL for `object_key`."""
-    client = get_s3_client()
     expiry = timedelta(seconds=expires if expires is not None else settings.S3_PRESIGN_GET_EXPIRY)
     return client.presigned_get_object(settings.S3_BUCKET_NAME, object_key, expires=expiry)
 
 
-def object_exists(object_key: str) -> bool:
+def object_exists(client: Minio, object_key: str) -> bool:
     """Return True if `object_key` exists in the bucket."""
-    client = get_s3_client()
     try:
         client.stat_object(settings.S3_BUCKET_NAME, object_key)
         return True

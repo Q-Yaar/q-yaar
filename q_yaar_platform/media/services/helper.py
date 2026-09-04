@@ -2,9 +2,10 @@ import logging
 import uuid
 
 from django.conf import settings
+from minio import Minio
 
 from common.constants import AssetStatus, UserRolesType
-from common.storage import build_object_key, presign_get_url, presign_put_url
+from common.storage import build_object_key, build_s3_client, presign_get_url, presign_put_url
 from common.uuid import unique_uuid4
 from game.models import Game
 from game.services.interfacer import svc_game_get_game_by_id
@@ -14,6 +15,24 @@ from media.models import Asset
 from .error_codes import ErrorCode
 
 logger = logging.getLogger(__name__)
+
+# The storage driver is stateless; this layer owns the one client for the
+# process and reuses it so the underlying connection pool stays warm.
+_s3_client: Minio | None = None
+
+
+def _get_s3_client() -> Minio:
+    """Return the process-wide S3 client, built once and reused."""
+    global _s3_client
+    if _s3_client is None:
+        _s3_client = build_s3_client(
+            endpoint=settings.S3_ENDPOINT_URL,
+            access_key=settings.S3_ACCESS_KEY_ID,
+            secret_key=settings.S3_SECRET_ACCESS_KEY,
+            secure=settings.S3_SECURE,
+            region=settings.S3_REGION,
+        )
+    return _s3_client
 
 
 def svc_media_helper_run_validations_to_request_upload(request_data: dict):
@@ -55,9 +74,7 @@ def svc_media_helper_get_attachments_for_asked_question(asked_question) -> list[
     """Return assets bound to an asked question, oldest first."""
     logger.debug(f">> ARGS: {locals()}")
 
-    return list(
-        asked_question.attachments.filter(status=AssetStatus.UPLOADED.value).order_by("created")
-    )
+    return list(asked_question.attachments.filter(status=AssetStatus.UPLOADED.value).order_by("created"))
 
 
 def svc_media_helper_bind_assets(assets, asked_question) -> None:
@@ -107,12 +124,12 @@ def svc_media_helper_get_serialized_assets(assets, many: bool = False):
 def svc_media_helper_presign_put_url(object_key: str) -> tuple:
     logger.debug(f">> ARGS: {locals()}")
 
-    upload_url = presign_put_url(object_key)
+    upload_url = presign_put_url(_get_s3_client(), object_key)
     return upload_url, settings.S3_PRESIGN_PUT_EXPIRY
 
 
 def svc_media_helper_presign_get_url(object_key: str) -> tuple:
     logger.debug(f">> ARGS: {locals()}")
 
-    download_url = presign_get_url(object_key)
+    download_url = presign_get_url(_get_s3_client(), object_key)
     return download_url, settings.S3_PRESIGN_GET_EXPIRY
