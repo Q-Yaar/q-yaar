@@ -385,6 +385,15 @@ def svc_game_helper_verify_player_belongs_to_game(player: PlayerProfile, game: G
     return None
 
 
+def svc_game_helper_verify_game_master_belongs_to_game(game_master: GameMasterProfile, game: Game):
+    logger.debug(f">> ARGS: {locals()}")
+
+    if game.created_by_id != game_master.pk:
+        return ErrorCode(ErrorCode.NOT_GAME_CREATOR, profile_name=game_master.profile_name)
+
+    return None
+
+
 def svc_game_helper_update_team(team: Team, request_data: dict):
     logger.debug(f">> ARGS: {locals()}")
 
