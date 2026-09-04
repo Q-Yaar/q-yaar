@@ -20,7 +20,6 @@ class ErrorCode(BaseErrorCode):
     ASSET_ALREADY_ATTACHED = "104"
 
     # Key Errors - 2 Series
-    INVALID_GAME_ID = "201"
     INVALID_ASSET_ID = "202"
 
     # Object Does Not Exist Errors - 3 Series
@@ -33,7 +32,6 @@ class ErrorCode(BaseErrorCode):
         ASSET_NOT_UPLOADED: status.HTTP_409_CONFLICT,
         ASSET_ALREADY_UPLOADED: status.HTTP_409_CONFLICT,
         ASSET_ALREADY_ATTACHED: status.HTTP_409_CONFLICT,
-        INVALID_GAME_ID: status.HTTP_400_BAD_REQUEST,
         INVALID_ASSET_ID: status.HTTP_400_BAD_REQUEST,
         ASSET_NOT_IN_GAME: status.HTTP_400_BAD_REQUEST,
     }
@@ -56,9 +54,6 @@ class ErrorCode(BaseErrorCode):
     def get_string_for_asset_already_attached(kwargs: dict):
         return f"Asset already attached to a question: {kwargs.get('asset_id')}"
 
-    def get_string_for_invalid_game_id(kwargs: dict):
-        return f"Invalid game_id: {kwargs.get('game_id')}"
-
     def get_string_for_invalid_asset_id(kwargs: dict):
         return f"Invalid asset_id: {kwargs.get('asset_id')}"
 
@@ -72,7 +67,6 @@ class ErrorCode(BaseErrorCode):
         ASSET_NOT_UPLOADED: get_string_for_asset_not_uploaded,
         ASSET_ALREADY_UPLOADED: get_string_for_asset_already_uploaded,
         ASSET_ALREADY_ATTACHED: get_string_for_asset_already_attached,
-        INVALID_GAME_ID: get_string_for_invalid_game_id,
         INVALID_ASSET_ID: get_string_for_invalid_asset_id,
         ASSET_NOT_IN_GAME: get_string_for_asset_not_in_game,
     }
