@@ -8,7 +8,11 @@ from common.constants import AssetStatus, UserRolesType
 from common.storage import build_object_key, build_s3_client, delete_object, presign_get_url, presign_put_url
 from common.uuid import unique_uuid4
 from game.models import Game
-from game.services.interfacer import svc_game_get_game_by_id
+from game.services.interfacer import (
+    svc_game_get_game_by_id,
+    svc_game_verify_game_master_belongs_to_game,
+    svc_game_verify_player_belongs_to_game,
+)
 from media.api.serializers import AssetSerializer
 from media.models import Asset
 from profile_game_master.services.interfacer import svc_game_master_get_game_master_for_platform_user
@@ -55,11 +59,25 @@ def svc_media_helper_validate_and_get_game(game_id) -> tuple:
     return svc_game_get_game_by_id(game_id)
 
 
+# Role -> game membership verifier. Returns the game module's error code
+# (e.g. PLAYER_DOES_NOT_BELONG_TO_GAME) if the profile is not in the game.
+_GAME_VERIFIERS = {
+    UserRolesType.PLAYER: svc_game_verify_player_belongs_to_game,
+    UserRolesType.GAME_MASTER: svc_game_verify_game_master_belongs_to_game,
+}
+
+
+def svc_media_helper_verify_profile_belongs_to_game(profile, game: Game, role: UserRolesType):
+    logger.debug(f">> ARGS: {locals()}")
+
+    return _GAME_VERIFIERS[role](profile, game)
+
+
 def svc_media_helper_validate_and_get_asset(asset_id: uuid.UUID) -> tuple:
     logger.debug(f">> ARGS: {locals()}")
 
     try:
-        asset = Asset.objects.get(external_id=asset_id)
+        asset = Asset.objects.select_related("game", "uploaded_by").get(external_id=asset_id)
         return None, asset
     except Asset.DoesNotExist:
         return ErrorCode(ErrorCode.INVALID_ASSET_ID, asset_id=asset_id), None

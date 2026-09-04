@@ -19,11 +19,9 @@ class ErrorCode(BaseErrorCode):
     ASSET_ALREADY_UPLOADED = "103"
     ASSET_ALREADY_ATTACHED = "104"
 
-    # Key Errors - 2 Series
-    INVALID_ASSET_ID = "202"
-
     # Object Does Not Exist Errors - 3 Series
     ASSET_NOT_IN_GAME = "301"
+    INVALID_ASSET_ID = "302"
 
     ERROR_CODE_HTTP_MAP = {
         MISSING_GAME_ID: status.HTTP_400_BAD_REQUEST,
@@ -32,8 +30,8 @@ class ErrorCode(BaseErrorCode):
         ASSET_NOT_UPLOADED: status.HTTP_409_CONFLICT,
         ASSET_ALREADY_UPLOADED: status.HTTP_409_CONFLICT,
         ASSET_ALREADY_ATTACHED: status.HTTP_409_CONFLICT,
-        INVALID_ASSET_ID: status.HTTP_400_BAD_REQUEST,
         ASSET_NOT_IN_GAME: status.HTTP_400_BAD_REQUEST,
+        INVALID_ASSET_ID: status.HTTP_400_BAD_REQUEST,
     }
 
     def get_string_for_missing_game_id(kwargs: dict):
@@ -67,8 +65,8 @@ class ErrorCode(BaseErrorCode):
         ASSET_NOT_UPLOADED: get_string_for_asset_not_uploaded,
         ASSET_ALREADY_UPLOADED: get_string_for_asset_already_uploaded,
         ASSET_ALREADY_ATTACHED: get_string_for_asset_already_attached,
-        INVALID_ASSET_ID: get_string_for_invalid_asset_id,
         ASSET_NOT_IN_GAME: get_string_for_asset_not_in_game,
+        INVALID_ASSET_ID: get_string_for_invalid_asset_id,
     }
 
     def __init__(self, code, **kwargs) -> None:
