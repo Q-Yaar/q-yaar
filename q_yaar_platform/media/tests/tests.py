@@ -31,9 +31,9 @@ def _make_user(email: str = "user@test.invalid") -> PlatformUser:
 
 
 # Storage is an external system; the driver calls are stubbed so no S3 is
-# needed. The presign helpers import lazily, so patch the module attribute.
-PRESIGN_PUT = "common.storage.presign_put_url"
-PRESIGN_GET = "common.storage.presign_get_url"
+# needed. helper imports these names, so patch where it looks them up.
+PRESIGN_PUT = "media.services.helper.presign_put_url"
+PRESIGN_GET = "media.services.helper.presign_get_url"
 
 
 class RequestUploadTest(TestCase):

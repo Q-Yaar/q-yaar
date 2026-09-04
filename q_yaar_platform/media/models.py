@@ -14,8 +14,7 @@ class Asset(AbstractExternalFacing, AbstractTimeStamped):
 
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.CASCADE,
         related_name="media_assets",
     )
     role = models.PositiveIntegerField(choices=UserRolesType.get_choices())

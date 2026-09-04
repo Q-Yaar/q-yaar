@@ -11,6 +11,8 @@ from game.models import Game
 from game.services.interfacer import svc_game_get_game_by_id
 from media.api.serializers import AssetSerializer
 from media.models import Asset
+from profile_game_master.services.interfacer import svc_game_master_get_game_master_for_platform_user
+from profile_player.services.interfacer import svc_player_get_player_for_platform_user
 
 from .error_codes import ErrorCode
 
@@ -115,8 +117,29 @@ def svc_media_helper_create_asset(
     )
 
 
+# Role -> profile service lookup. Resolves the uploader's profile so the
+# serializer can return it instead of a bare role string.
+_PROFILE_GETTERS = {
+    UserRolesType.PLAYER: svc_player_get_player_for_platform_user,
+    UserRolesType.GAME_MASTER: svc_game_master_get_game_master_for_platform_user,
+}
+
+
+def _resolve_uploader_profile(asset: Asset) -> None:
+    """Fetch the uploader's profile and stash it on the asset for the serializer."""
+    getter = _PROFILE_GETTERS[UserRolesType(asset.role)]
+    _, profile = getter(asset.uploaded_by)
+    asset._uploader_profile = profile
+
+
 def svc_media_helper_get_serialized_assets(assets, many: bool = False):
     logger.debug(f">> ARGS: {locals()}")
+
+    if many:
+        for asset in assets:
+            _resolve_uploader_profile(asset)
+    else:
+        _resolve_uploader_profile(assets)
 
     return AssetSerializer(assets, many=many).data
 
