@@ -9,7 +9,7 @@ from profile_player.api.serializers import PlayerProfileSerializer
 class AssetSerializer(serializers.ModelSerializer):
     asset_id = serializers.SerializerMethodField()
     game_id = serializers.SerializerMethodField()
-    role = serializers.SerializerMethodField()
+    profile = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
     class Meta:
@@ -17,7 +17,7 @@ class AssetSerializer(serializers.ModelSerializer):
         fields = (
             "asset_id",
             "game_id",
-            "role",
+            "profile",
             "object_key",
             "asset_name",
             "content_type",
@@ -32,7 +32,7 @@ class AssetSerializer(serializers.ModelSerializer):
     def get_game_id(self, obj: Asset) -> str:
         return str(obj.game.external_id)
 
-    def get_role(self, obj: Asset) -> dict:
+    def get_profile(self, obj: Asset) -> dict:
         # The profile is resolved by the service layer and stashed on the
         # asset as _uploader_profile. Returns the full profile data (which
         # nests user_profile.user_id) instead of a bare role string.
