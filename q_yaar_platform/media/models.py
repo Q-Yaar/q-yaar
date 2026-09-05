@@ -20,16 +20,6 @@ class Asset(AbstractExternalFacing, AbstractTimeStamped):
     role = models.PositiveIntegerField(choices=UserRolesType.get_choices())
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="media_assets")
 
-    # When non-null, this asset is attached as evidence to a specific answer.
-    # Exclusive binding: one asset belongs to at most one asked question.
-    asked_question = models.ForeignKey(
-        "qna.AskedQuestion",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="attachments",
-    )
-
     object_key = models.CharField(max_length=Length.ASSET_OBJECT_KEY)
     asset_name = models.CharField(max_length=Length.ASSET_NAME)
     content_type = models.CharField(max_length=Length.ASSET_CONTENT_TYPE, blank=True, default="")
@@ -40,7 +30,6 @@ class Asset(AbstractExternalFacing, AbstractTimeStamped):
         indexes = [
             models.Index(fields=["game"]),
             models.Index(fields=["status"]),
-            models.Index(fields=["asked_question"]),
         ]
 
     def __str__(self):
@@ -70,3 +59,23 @@ class Asset(AbstractExternalFacing, AbstractTimeStamped):
         )
         asset.save()
         return asset
+
+
+class AssetAskedQuestionRelation(AbstractTimeStamped):
+    # Links an asset to the asked question it serves as evidence for.
+    # Exclusive binding: one asset belongs to at most one asked question,
+    # enforced by unique_together on (asset,). New attachment targets get
+    # their own relation class instead of overloading Asset.
+
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name="asked_question_links")
+    asked_question = models.ForeignKey("qna.AskedQuestion", on_delete=models.CASCADE, related_name="asset_links")
+
+    class Meta:
+        indexes = [models.Index(fields=["asked_question"])]
+        unique_together = (("asset",),)
+
+    @classmethod
+    def create(cls, *, asset: Asset, asked_question) -> "AssetAskedQuestionRelation":
+        relation = cls(asset=asset, asked_question=asked_question)
+        relation.save()
+        return relation

@@ -11,7 +11,7 @@ import uuid
 
 from common.constants import AssetStatus
 from game.models import Game
-from media.models import Asset
+from media.models import Asset, AssetAskedQuestionRelation
 from profile_player.models import PlayerProfile
 
 from .error_codes import ErrorCode
@@ -51,6 +51,8 @@ def svc_media_validate_assets_for_answer(asset_ids: list[uuid.UUID | str], playe
 
     player_user_external_id = str(player.get_external_id())
 
+    attached_ids = set(AssetAskedQuestionRelation.objects.filter(asset__in=assets).values_list("asset_id", flat=True))
+
     for asset in assets:
         if asset.status != AssetStatus.UPLOADED.value:
             return ErrorCode(ErrorCode.ASSET_NOT_UPLOADED, asset_id=asset.external_id), None
@@ -61,7 +63,7 @@ def svc_media_validate_assets_for_answer(asset_ids: list[uuid.UUID | str], playe
         if asset.game_id != game.pk:
             return ErrorCode(ErrorCode.ASSET_NOT_IN_GAME, asset_id=asset.external_id), None
 
-        if asset.asked_question_id is not None:
+        if asset.pk in attached_ids:
             return ErrorCode(ErrorCode.ASSET_ALREADY_ATTACHED, asset_id=asset.external_id), None
 
     return None, assets

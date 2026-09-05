@@ -14,7 +14,7 @@ from game.services.interfacer import (
     svc_game_verify_player_belongs_to_game,
 )
 from media.api.serializers import AssetSerializer
-from media.models import Asset
+from media.models import Asset, AssetAskedQuestionRelation
 from profile_game_master.services.interfacer import svc_game_master_get_game_master_for_platform_user
 from profile_player.services.interfacer import svc_player_get_player_for_platform_user
 
@@ -94,15 +94,17 @@ def svc_media_helper_get_attachments_for_asked_question(asked_question) -> list[
     """Return assets bound to an asked question, oldest first."""
     logger.debug(f">> ARGS: {locals()}")
 
-    return list(asked_question.attachments.filter(status=AssetStatus.UPLOADED.value).order_by("created"))
+    asset_ids = asked_question.asset_links.values_list("asset_id", flat=True)
+
+    return list(Asset.objects.filter(pk__in=asset_ids, status=AssetStatus.UPLOADED.value).order_by("created"))
 
 
 def svc_media_helper_bind_assets(assets, asked_question) -> None:
     """Attach assets to an asked question. Caller must have validated them."""
     logger.debug(f">> ARGS: {locals()}")
 
-    asset_pks = [asset.pk for asset in assets]
-    Asset.objects.filter(pk__in=asset_pks).update(asked_question=asked_question)
+    for asset in assets:
+        AssetAskedQuestionRelation.create(asset=asset, asked_question=asked_question)
 
 
 # Object key layout, see Asset docstring:
