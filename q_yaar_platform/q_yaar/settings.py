@@ -84,6 +84,7 @@ PROJECT_APPS = [
     "fact.apps.FactConfig",
     "live_location.apps.LiveLocationConfig",
     "notification.apps.NotificationConfig",
+    "media.apps.MediaConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
@@ -382,3 +383,19 @@ WEBPUSH_SETTINGS = {
     "VAPID_PRIVATE_KEY": VAPID_PRIVATE_KEY,
     "VAPID_ADMIN_EMAIL": VAPID_ADMIN_EMAIL,
 }
+
+#######################################################################################################################
+
+# Object storage (S3-compatible, e.g. Deuxfleurs/Garage, MinIO, AWS S3)
+# Used by the media module to presign PUT/GET URLs for client uploads.
+
+S3_ENDPOINT_URL = config("S3_ENDPOINT_URL", default="")
+S3_REGION = config("S3_REGION", default="us-east-1")
+S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID", default="")
+S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY", default="")
+S3_BUCKET_NAME = config("S3_BUCKET_NAME", default="q-yaar")
+S3_SECURE = config("S3_SECURE", default=True, cast=bool)
+
+# Presigned URL lifetimes, in seconds.
+S3_PRESIGN_GET_EXPIRY = config("S3_PRESIGN_GET_EXPIRY", default=7 * 24 * 60 * 60, cast=int)  # 7 days
+S3_PRESIGN_PUT_EXPIRY = config("S3_PRESIGN_PUT_EXPIRY", default=15 * 60, cast=int)  # 15 minutes

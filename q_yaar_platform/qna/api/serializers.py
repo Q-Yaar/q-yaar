@@ -1,4 +1,4 @@
-from common.constants import QuestionRewardType
+from common.constants import AssetStatus, QuestionRewardType
 from qna.models import AskedQuestion, QuestionCategory, QuestionReward, QuestionTemplate
 from rest_framework import serializers
 
@@ -70,6 +70,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
     answer_meta = serializers.SerializerMethodField()
     fact_meta = serializers.SerializerMethodField()
     reward = serializers.SerializerMethodField()
+    attachments = serializers.SerializerMethodField()
 
     class Meta:
         model = AskedQuestion
@@ -86,6 +87,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
             "answered",
             "accepted",
             "reward",
+            "attachments",
             "created",
             "modified",
         )
@@ -119,3 +121,15 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
 
     def get_reward(self, obj: AskedQuestion) -> dict:
         return QuestionRewardSerializer(obj.game_question.question_template.category.reward).data
+
+    def get_attachments(self, obj: AskedQuestion) -> list[dict]:
+        # Frontend resolves presigned URLs via media API; qna never presigns.
+        return [
+            {
+                "asset_id": str(link.asset.get_external_id()),
+                "asset_name": link.asset.asset_name,
+                "content_type": link.asset.content_type,
+            }
+            for link in obj.asset_links.select_related("asset").order_by("asset__created")
+            if link.asset.status == AssetStatus.UPLOADED.value
+        ]
