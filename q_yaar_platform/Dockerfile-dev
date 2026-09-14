@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye
+FROM python:3.11-slim-trixie
 
 ENV PYTHONBUFFERED 1
 
@@ -8,7 +8,7 @@ RUN apt-get --allow-releaseinfo-change update && \
     apt-get -qq -y install binutils libproj-dev gdal-bin postgresql-client libexpat1-dev && \
     apt-get -qq -y install git && \
     apt-get -y install build-essential && \
-    apt-get -y install python3-cffi python3-brotli libcairo2-dev libpango-1.0-0 libharfbuzz0b libpangoft2-1.0-0 libgdk-pixbuf2.0-dev libpangocairo-1.0-0 && \
+    apt-get -y install python3-cffi python3-brotli libcairo2-dev libpango-1.0-0 libharfbuzz0b libpangoft2-1.0-0 libgdk-pixbuf-2.0-dev libpangocairo-1.0-0 && \
     apt-get -y upgrade
 
 RUN python -m pip install --upgrade pip
