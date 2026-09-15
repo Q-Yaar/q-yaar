@@ -9,5 +9,9 @@ class AssetAdmin(admin.ModelAdmin):
     list_filter = ("status",)
     readonly_fields = ("external_id", "object_key", "uploaded_by", "created", "modified")
 
+    # Override to use the base manager to include soft-deleted items
+    def get_queryset(self, request):
+        return self.model._base_manager.get_queryset()
+
 
 admin.site.register(Asset, AssetAdmin)

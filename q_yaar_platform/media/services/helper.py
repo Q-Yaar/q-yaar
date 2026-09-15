@@ -57,7 +57,7 @@ def svc_media_helper_validate_and_get_asset(asset_id: uuid.UUID) -> tuple:
     logger.debug(f">> ARGS: {locals()}")
 
     try:
-        asset = Asset.objects.select_related("uploaded_by").get(external_id=asset_id, is_deleted=False)
+        asset = Asset.objects.select_related("uploaded_by").get(external_id=asset_id)
         return None, asset
     except Asset.DoesNotExist:
         return ErrorCode(ErrorCode.INVALID_ASSET_ID, asset_id=asset_id), None
@@ -67,7 +67,7 @@ def svc_media_helper_get_assets_by_ids(asset_ids: list[str]) -> list[Asset]:
     logger.debug(f">> ARGS: {locals()}")
 
     ids = [str(asset_id) for asset_id in asset_ids]
-    return list(Asset.objects.filter(external_id__in=ids, is_deleted=False).select_related("uploaded_by"))
+    return list(Asset.objects.filter(external_id__in=ids).select_related("uploaded_by"))
 
 
 def svc_media_helper_get_attachments_for_asked_question(asked_question) -> list[Asset]:
@@ -76,9 +76,7 @@ def svc_media_helper_get_attachments_for_asked_question(asked_question) -> list[
 
     asset_ids = asked_question.asset_links.values_list("asset_id", flat=True)
 
-    return list(
-        Asset.objects.filter(pk__in=asset_ids, status=AssetStatus.UPLOADED.value, is_deleted=False).order_by("created")
-    )
+    return list(Asset.objects.filter(pk__in=asset_ids, status=AssetStatus.UPLOADED.value).order_by("created"))
 
 
 def svc_media_helper_get_game_for_asset(asset: Asset):
@@ -141,9 +139,7 @@ def svc_media_helper_get_serialized_assets(assets, profile, many: bool = False):
     # The caller's profile is the uploader for every asset (owner-scoped
     # queries upstream), so pass it via context instead of re-querying
     # per asset.
-    return AssetSerializer(
-        assets, many=many, context={PROFILE_CONTEXT_KEY: profile}
-    ).data
+    return AssetSerializer(assets, many=many, context={PROFILE_CONTEXT_KEY: profile}).data
 
 
 def svc_media_helper_presign_put_url(object_key: str) -> tuple:
