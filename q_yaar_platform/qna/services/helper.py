@@ -16,6 +16,10 @@ from game.services.interfacer import (
     svc_game_verify_player_belongs_to_game,
     svc_game_verify_player_belongs_to_team,
 )
+from media.services.interfacer import (
+    svc_media_bind_assets_to_asked_question,
+    svc_media_validate_assets_for_answer,
+)
 from notification.tasks import send_notification
 from profile_player.models import PlayerProfile
 from qna.api.serializers import (
@@ -437,11 +441,23 @@ def svc_qna_helper_ask_question(game_question: GameQuestion, target: Team, reque
     return None, asked_question
 
 
-def svc_qna_helper_update_asked_question(asked_question: AskedQuestion, request_data: dict):
+def svc_qna_helper_update_asked_question(
+    asked_question: AskedQuestion, request_data: dict, player: PlayerProfile, assets: list[dict[str, uuid.UUID | str]]
+):
     logger.debug(f">> ARGS: {locals()}")
 
     if asked_question.answered:
         return ErrorCode(ErrorCode.QUESTION_ALREADY_ANSWERED), None
+
+    # Bind attachments before applying meta updates, so a failed upload
+    # or ownership check leaves meta untouched.
+    if assets:
+        assets_requested = [asset["asset_id"] for asset in assets]
+        error, validated_assets = svc_media_validate_assets_for_answer(assets_requested, player)
+        if error:
+            return error, None
+
+        svc_media_bind_assets_to_asked_question(validated_assets, asked_question)
 
     if "question_meta" in request_data:
         asked_question.set_question_meta(request_data["question_meta"])
@@ -481,7 +497,9 @@ def svc_qna_helper_get_asked_questions_for_game(game: Game, request_data: dict):
     return asked_questions
 
 
-def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, answer_meta: dict):
+def svc_qna_helper_answer_asked_question(
+    asked_question: AskedQuestion, answer_meta: dict
+):
     logger.debug(f">> ARGS: {locals()}")
 
     if asked_question.accepted:

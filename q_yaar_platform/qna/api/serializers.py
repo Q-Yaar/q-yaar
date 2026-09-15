@@ -1,4 +1,5 @@
 from common.constants import QuestionRewardType
+from media.services.interfacer import svc_media_get_attachment_urls_for_asked_question
 from qna.models import AskedQuestion, QuestionCategory, QuestionReward, QuestionTemplate
 from rest_framework import serializers
 
@@ -70,6 +71,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
     answer_meta = serializers.SerializerMethodField()
     fact_meta = serializers.SerializerMethodField()
     reward = serializers.SerializerMethodField()
+    attachments = serializers.SerializerMethodField()
 
     class Meta:
         model = AskedQuestion
@@ -86,6 +88,7 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
             "answered",
             "accepted",
             "reward",
+            "attachments",
             "created",
             "modified",
         )
@@ -119,3 +122,6 @@ class AskedQuestionDetailSerializer(serializers.ModelSerializer):
 
     def get_reward(self, obj: AskedQuestion) -> dict:
         return QuestionRewardSerializer(obj.game_question.question_template.category.reward).data
+
+    def get_attachments(self, obj: AskedQuestion) -> list[dict]:
+        return svc_media_get_attachment_urls_for_asked_question(obj)

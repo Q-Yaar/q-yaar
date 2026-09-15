@@ -36,6 +36,7 @@ gunicorn==24.1.1
 http_ece==1.2.1
 idna==3.18
 kombu==5.3.7
+minio==7.2.20
 multidict==6.7.1
 mypy-extensions==1.0.0
 packaging==24.1
