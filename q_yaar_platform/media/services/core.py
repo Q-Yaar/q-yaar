@@ -144,7 +144,7 @@ def svc_media_get_assets(profile, serialized: bool = True):
     """List the caller's own assets."""
     logger.debug(f">> ARGS: {locals()}")
 
-    assets = Asset.objects.filter(uploaded_by__external_id=profile.platform_user_id, is_deleted=False)
+    assets = Asset.objects.filter(uploaded_by__external_id=profile.platform_user_id)
 
     if serialized:
         assets = svc_media_helper_get_serialized_assets(assets, profile, many=True)

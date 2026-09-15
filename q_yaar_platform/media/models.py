@@ -3,6 +3,7 @@ from django.db import models
 from account.models import PlatformUser
 from common.abstract_models import AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned
 from common.constants import AssetStatus, Length
+from common.models import FilteredModelManager
 
 
 class Asset(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
@@ -23,6 +24,8 @@ class Asset(AbstractExternalFacing, AbstractTimeStamped, AbstractVersioned):
     content_type = models.CharField(max_length=Length.ASSET_CONTENT_TYPE, blank=True, default="")
 
     status = models.PositiveIntegerField(choices=AssetStatus.get_choices(), default=AssetStatus.PENDING.value)
+
+    objects = FilteredModelManager()
 
     class Meta:
         indexes = [
