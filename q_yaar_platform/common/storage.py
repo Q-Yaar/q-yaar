@@ -25,6 +25,9 @@ from minio.error import S3Error
 
 logger = logging.getLogger(__name__)
 
+# Placeholder returned by presign calls when S3 is disabled.
+SKIPPED_PRESIGN_URL = ""
+
 
 def build_s3_client(
     *,
@@ -63,18 +66,30 @@ def build_object_key(*parts: str) -> str:
 
 def presign_put_url(client: Minio, object_key: str, expires: int | None = None) -> str:
     """Return a short-lived presigned PUT URL for `object_key`."""
+    if settings.SKIP_S3:
+        logger.debug("S3 is disabled")
+        return SKIPPED_PRESIGN_URL
+
     expiry = timedelta(seconds=expires if expires is not None else settings.S3_PRESIGN_PUT_EXPIRY)
     return client.presigned_put_object(settings.S3_BUCKET_NAME, object_key, expires=expiry)
 
 
 def presign_get_url(client: Minio, object_key: str, expires: int | None = None) -> str:
     """Return a short-lived presigned GET URL for `object_key`."""
+    if settings.SKIP_S3:
+        logger.debug("S3 is disabled")
+        return SKIPPED_PRESIGN_URL
+
     expiry = timedelta(seconds=expires if expires is not None else settings.S3_PRESIGN_GET_EXPIRY)
     return client.presigned_get_object(settings.S3_BUCKET_NAME, object_key, expires=expiry)
 
 
 def object_exists(client: Minio, object_key: str) -> bool:
     """Return True if `object_key` exists in the bucket."""
+    if settings.SKIP_S3:
+        logger.debug("S3 is disabled")
+        return False
+
     try:
         client.stat_object(settings.S3_BUCKET_NAME, object_key)
         return True
@@ -86,6 +101,10 @@ def object_exists(client: Minio, object_key: str) -> bool:
 
 def delete_object(client: Minio, object_key: str) -> None:
     """Delete `object_key` from the bucket. No-op if the object is already gone."""
+    if settings.SKIP_S3:
+        logger.debug("S3 is disabled")
+        return
+
     try:
         client.remove_object(settings.S3_BUCKET_NAME, object_key)
     except S3Error as e:
