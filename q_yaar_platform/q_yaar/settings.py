@@ -45,6 +45,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://game.moneydew.in",
     "https://test-game.moneydew.in",
     "http://test-game.moneydew.in",
+    "https://game.siruknown.net"
 ]
 
 
@@ -369,6 +370,7 @@ LOGGING = {
 # Env Based Configs
 
 SKIP_NOTIFICATIONS = config("SKIP_NOTIFICATIONS", default=False, cast=bool)
+SKIP_S3 = config("SKIP_S3", default=False, cast=bool)
 
 #######################################################################################################################
 
