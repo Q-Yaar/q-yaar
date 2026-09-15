@@ -156,32 +156,6 @@ def svc_media_helper_presign_get_url(object_key: str) -> tuple:
     return download_url, settings.S3_PRESIGN_GET_EXPIRY
 
 
-def svc_media_helper_presign_get_urls(assets) -> list[dict]:
-    """Presign download URLs for a batch of assets.
-
-    Presigning is local signing only (no S3 round trip), so the cost of
-    N assets is N cheap crypto operations, not N network calls.
-    """
-    logger.debug(f">> ARGS: {locals()}")
-
-    urls = []
-
-    for asset in assets:
-        download_url, expires_in = svc_media_helper_presign_get_url(asset.object_key)
-
-        urls.append(
-            {
-                "asset_id": str(asset.external_id),
-                "asset_name": asset.asset_name,
-                "content_type": asset.content_type,
-                "download_url": download_url,
-                "expires_in": expires_in,
-            }
-        )
-
-    return urls
-
-
 def svc_media_helper_soft_delete(asset: Asset) -> None:
     """Mark an asset deleted without dropping the row."""
     logger.debug(f">> ARGS: {locals()}")

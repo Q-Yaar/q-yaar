@@ -18,7 +18,6 @@ from .helper import (
     svc_media_helper_bind_assets,
     svc_media_helper_get_assets_by_ids,
     svc_media_helper_get_attachments_for_asked_question,
-    svc_media_helper_presign_get_urls,
 )
 
 logger = logging.getLogger(__name__)
@@ -74,18 +73,15 @@ def svc_media_bind_assets_to_asked_question(assets: list[Asset], asked_question)
     svc_media_helper_bind_assets(assets, asked_question)
 
 
-def svc_media_get_attachments_for_asked_question(asked_question) -> list[Asset]:
-    """Return UPLOADED assets bound to an asked question, oldest first."""
-    logger.debug(f">> ARGS: {locals()}")
+def svc_media_get_assets_for_asked_question(asked_question) -> list[dict]:
+    """Return UPLOADED assets bound to an asked question as
+    {"asset_id": ...} dicts, oldest first.
 
-    return svc_media_helper_get_attachments_for_asked_question(asked_question)
-
-
-def svc_media_get_attachment_urls_for_asked_question(asked_question) -> list[dict]:
-    """Return UPLOADED assets bound to an asked question with presigned
-    download URLs, oldest first."""
+    Mirrors the PATCH request shape; presigned download URLs stay
+    available via the dedicated media/{asset_id} endpoint.
+    """
     logger.debug(f">> ARGS: {locals()}")
 
     assets = svc_media_helper_get_attachments_for_asked_question(asked_question)
 
-    return svc_media_helper_presign_get_urls(assets)
+    return [{"asset_id": str(a.external_id)} for a in assets]
