@@ -497,9 +497,7 @@ def svc_qna_helper_get_asked_questions_for_game(game: Game, request_data: dict):
     return asked_questions
 
 
-def svc_qna_helper_answer_asked_question(
-    asked_question: AskedQuestion, answer_meta: dict
-):
+def svc_qna_helper_answer_asked_question(asked_question: AskedQuestion, request_data: dict, player: PlayerProfile):
     logger.debug(f">> ARGS: {locals()}")
 
     if asked_question.accepted:
@@ -507,7 +505,16 @@ def svc_qna_helper_answer_asked_question(
 
     asked_question.answered = True
 
-    asked_question.set_answer_meta(answer_meta, save=True)
+    asked_question.set_answer_meta(request_data.get("answer_meta"), save=True)
+
+    if request_data.get("assets"):
+        assets = request_data.get("assets") or []
+        assets_requested = [asset["asset_id"] for asset in assets]
+        error, validated_assets = svc_media_validate_assets_for_answer(assets_requested, player)
+        if error:
+            return error, None
+
+        svc_media_bind_assets_to_asked_question(validated_assets, asked_question)
 
     teams = svc_game_get_player_teams_for_game(game=asked_question.game_question.game)
 
