@@ -299,10 +299,8 @@ def svc_qna_update_asked_question(
     if not error:
         return ErrorCode(ErrorCode.ASSIGNEE_CANNOT_UPDATE_QUESTION), None
 
-    asset_ids = request_data.get("assets") or []
-    error, asked_question = svc_qna_helper_update_asked_question(
-        asked_question, request_data, player, asset_ids
-    )
+    assets = request_data.get("assets") or []
+    error, asked_question = svc_qna_helper_update_asked_question(asked_question, request_data, player, assets)
     if error:
         return error, None
 
@@ -344,9 +342,7 @@ def svc_qna_answer_asked_question(
     if error:
         return error, None
 
-    error, asked_question = svc_qna_helper_answer_asked_question(
-        asked_question, request_data.get("answer_meta")
-    )
+    error, asked_question = svc_qna_helper_answer_asked_question(asked_question, request_data, player)
 
     if error:
         return error, None
