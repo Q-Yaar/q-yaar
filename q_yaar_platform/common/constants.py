@@ -107,7 +107,7 @@ class QuestionAnswerType(BaseIntEnum):
 
 class FactType(BaseIntEnum):
     TEXT = 1
-    IMAGE = 2
+    MEDIA = 2
     GEO = 3
 
 
