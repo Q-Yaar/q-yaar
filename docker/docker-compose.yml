@@ -1,0 +1,75 @@
+#   ENV          container name prefix (dev, staging, prod)
+#   PORT         host port for the Django container
+#   DB_PORT      host port for the db container (profile "db" only)
+#   COMPOSE_PROFILES  set to "db" in dev/staging; absent in prod
+#   CORE_COMMAND startup command (runserver in dev, gunicorn otherwise)
+#
+# Both --env-file and the services' env_file point at the same per-env file,
+# which also carries the app secrets.
+
+services:
+  q_yaar_core:
+    container_name: ${ENV}-django
+    restart: always
+    build:
+      context: ./../q_yaar_platform
+    extra_hosts:
+      # For ubuntu docker to access host machine services
+      - "host.docker.internal:host-gateway"
+    env_file: ./../build_meta/.env_${ENV}
+    ports:
+      - "${PORT}:8000"
+    networks:
+      - backend
+    depends_on:
+      - redis
+    command: ${CORE_COMMAND}
+
+  fast_worker:
+    container_name: ${ENV}-celery-fast
+    restart: always
+    build:
+      context: ./../q_yaar_platform
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: celery -A q_yaar worker -E -l info --concurrency=8 --pool=prefork -n fast_worker@qyaar.com -Q notification
+    env_file: ./../build_meta/.env_${ENV}
+    networks:
+      - backend
+
+  # Started only when COMPOSE_PROFILES=db (dev, staging).
+  # Prod has no db container; it uses staging's db over the network.
+  # Note: not listed in depends_on — compose auto-enables a profiled
+  # service's profile when another service depends on it.
+  db:
+    profiles:
+      - db
+    container_name: ${ENV}-db
+    image: postgis/postgis:latest
+    platform: linux/amd64
+    restart: always
+    env_file: ./../build_meta/.env_${ENV}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  redis:
+    container_name: ${ENV}-redis
+    image: redis:7.4-alpine
+    restart: always
+    volumes:
+      - redis:/data
+    command: >
+      redis-server --save 20 1 --loglevel warning
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  redis:
+  dbdata:
