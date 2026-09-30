@@ -1,6 +1,4 @@
 #   ENV          container name prefix (dev, staging, prod)
-#   PORT         host port for the Django container
-#   DB_PORT      host port for the db container (profile "db" only)
 #   COMPOSE_PROFILES  set to "db" in dev/staging; absent in prod
 #   CORE_COMMAND startup command (runserver in dev, gunicorn otherwise)
 #
@@ -17,8 +15,6 @@ services:
       # For ubuntu docker to access host machine services
       - "host.docker.internal:host-gateway"
     env_file: ./../build_meta/.env_${ENV}
-    ports:
-      - "${PORT}:8000"
     networks:
       - backend
     depends_on:
@@ -50,7 +46,7 @@ services:
     restart: always
     env_file: ./../build_meta/.env_${ENV}
     ports:
-      - "${DB_PORT}:5432"
+      - "5436:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data
     networks:
