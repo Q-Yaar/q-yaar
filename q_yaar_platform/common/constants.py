@@ -46,6 +46,11 @@ class Length:
     ASSET_OBJECT_KEY = 512
     ASSET_NAME = 255
     ASSET_CONTENT_TYPE = 100
+    GEO_FEATURE_NAME = 255
+    GEO_FEATURE_CLASS = 32
+    GEO_FEATURE_SOURCE = 8
+    GEO_IMPORT_SOURCE = 255
+    GEO_IMPORT_STATUS = 16
 
 
 class ModuleErrorPrefix:
@@ -58,6 +63,53 @@ class ModuleErrorPrefix:
     QNA = "QNA"
     FACT = "FACT"
     MEDIA = "MED"
+    GEO = "GEO"
+
+
+class GeoFeatureClass(enum.Enum):
+    """
+    Curated OSM tag -> feature class mapping (single source of truth: docker/geo/flex.lua).
+    Values are stored verbatim in the geo_feature.fclass column.
+    """
+
+    PARK = "park"
+    PLAYGROUND = "playground"
+    LANDMARK = "landmark"
+    WATER = "water"
+    ADMIN_AREA = "admin_area"
+
+    @classmethod
+    def from_string(cls, value: str) -> "GeoFeatureClass":
+        """throws: ValueError for invalid fclass"""
+        return cls(value)
+
+    @classmethod
+    def get_choices(cls) -> list[tuple]:
+        return [(member.value, member.name) for member in cls]
+
+
+class GeoFeatureSource(enum.Enum):
+    """Where a geo_feature row came from. Import-created rows are
+    replaced wholesale on each run; API-uploaded rows survive the swap
+    (docker/geo/import.sh)."""
+
+    OSM = "osm"
+    DATAMEET = "datameet"
+    USER = "user"
+
+    @classmethod
+    def get_choices(cls) -> list[tuple]:
+        return [(member.value, member.name) for member in cls]
+
+
+class GeoImportStatus(enum.Enum):
+    RUNNING = "RUNNING"
+    SUCCESS = "SUCCESS"
+    FAILED = "FAILED"
+
+    @classmethod
+    def get_choices(cls) -> list[tuple]:
+        return [(member.value, member.name) for member in cls]
 
 
 class UserRolesType(BaseIntEnum):
