@@ -19,7 +19,7 @@ services:
       - backend
     depends_on:
       - redis
-    command: ["python", "manage.py", "migrate", "&&", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
   fast_worker:
     container_name: ${ENV}-celery-fast
