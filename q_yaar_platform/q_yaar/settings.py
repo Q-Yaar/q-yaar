@@ -86,6 +86,7 @@ PROJECT_APPS = [
     "live_location.apps.LiveLocationConfig",
     "notification.apps.NotificationConfig",
     "media.apps.MediaConfig",
+    "geo.apps.GeoConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
