@@ -16,7 +16,10 @@ services:
       - "host.docker.internal:host-gateway"
     env_file: ./../build_meta/.env_${ENV}
     networks:
-      - backend
+      backend:
+      proxy:
+        aliases:
+          - ${ENV}
     depends_on:
       - redis
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
@@ -65,6 +68,10 @@ services:
 
 networks:
   backend:
+  # Reverse-proxy network shared with nginx in q-yaar-hosting
+  proxy:
+    external: true
+    name: q-yaar-proxy
 
 volumes:
   redis:
