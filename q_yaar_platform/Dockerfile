@@ -13,7 +13,7 @@ RUN apt-get --allow-releaseinfo-change update && \
 
 RUN python -m pip install --upgrade pip
 
-COPY requirements-dev.txt /q_yaar_platform/
-RUN pip install -r requirements-dev.txt
+COPY requirements.txt /q_yaar_platform/
+RUN pip install -r requirements.txt
 
 COPY . /q_yaar_platform/

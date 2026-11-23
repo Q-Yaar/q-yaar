@@ -29,3 +29,10 @@ SKIP_S3=True
 VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY
 VAPID_PRIVATE_KEY=VAPID_PRIVATE_KEY
 VAPID_ADMIN_EMAIL=VAPID_ADMIN_EMAIL
+
+ENV=dev # | staging | prod
+PORT=8000 # (dev, staging) | 8001 (prod)
+DB_PORT=5436 (dev) # | 5432 (staging); unused in prod (no db container)
+COMPOSE_PROFILES=db # (dev, staging); unset in prod
+CORE_COMMAND=bash -c "python manage.py migrate && gunicorn q_yaar.wsgi:application --bind 0.0.0.0:8000 --workers 5"
+# (dev: replace gunicorn with "python manage.py runserver 0.0.0.0:8000")

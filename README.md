@@ -37,7 +37,7 @@ Make sure you're in the directory - q-yaar
 $ python3 -m venv .venv  # This will create a virtual environment
 $ source .venv/bin/activate  # You can see the virtual environment is active
 $ cd q_yaar_platform
-$ pip install -r requirements-dev.txt # This will install all the requirements
+$ pip install -r requirements.txt # This will install all the requirements
 ```
 
 ### Setup .env File
@@ -49,14 +49,15 @@ Now copy and paste the contents available in the file - env_example <br />
 Ask someone for the actual env values
 
 ### Setup Docker and Start Redis Server
-Make sure you're in the directory - docker
+Start a Redis container:
 ```bash
-$ sudo docker-compose -f docker-compose-dev.yml up -d q_yaar_redisearch
+$ docker run -d --name redis -p 6379:6379 redis:7.4-alpine
 ```
+*(Make sure the port matches your `REDIS_URL` in `.env`)*
 
-If you want to stop the Redis server
+If you want to stop the Redis server:
 ```bash
-$ sudo docker-compose -f docker-compose-dev.yml down
+$ docker stop redis
 ```
 
 ### Run the Django Server
@@ -115,33 +116,46 @@ Make sure the line length arg is set to 119 (it defaults to 80 if nothing is set
 ```
 
 ### Running dev server with Docker
-From the project root run the follwing command
+Ensure environment configuration is present in `build_meta/.env_dev` (refer to `q_yaar_platform/env_example`).
+
+From the project root, run the deployment script:
 ```bash
-$ sudo docker-compose -f docker/docker-compose-dev.yml up -d
+$ sh docker/deploy.sh dev
 ```
-To create superuser get inside the docker container
+*(Or navigate to `docker/` and run `sh deploy.sh dev`)*
+
+To create a superuser inside the container:
 ```bash
-$ docker exec -it docker-q_yaar_core-1 /bin/bash
+$ docker exec -it dev-django python manage.py createsuperuser
 ```
-Now create a super user
-```bash
-$ python manage.py createsuperuser
-```
+*(Or get a shell inside the container using `docker exec -it dev-django /bin/bash`)*
 
 ## ***Running the Staging/Production Server***
 
 1. SSH into the instance using the provided creds.
-2. cd into the docker directory and run the deployment file.
+2. cd into the docker directory and run the unified deployment script with the desired target environment (`staging` or `prod`):
 ```bash
 $ cd q_yaar_backend/q-yaar/docker
-$ sh deploy-staging.sh
+$ sh deploy.sh staging
+# or for production:
+$ sh deploy.sh prod
 ```
-3. [OPTIONAL] If you get KeyError: 'ContainerConfig', delete that container and re run the deployment script.
+
+Available script options:
+* `--no-pull` : Do not pull latest changes from git
+* `--collectstatic` : Run `python manage.py collectstatic --noinput` inside the container
+
+For example, to deploy staging and collect static assets:
+```bash
+$ sh deploy.sh staging --collectstatic
+```
+
+3. [OPTIONAL] If you get KeyError: 'ContainerConfig', delete that container and re-run the deployment script:
 ```bash
 $ sudo docker ps -a
 $ sudo docker stop <container_id>
 $ sudo docker rm <container_id>
-$ sh deploy-staging.sh
+$ sh deploy.sh staging
 ```
 
 NOTE: Option 3 needs to be fixed on the server by updating docker. #TODO.
